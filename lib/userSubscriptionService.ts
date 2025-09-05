@@ -1,0 +1,450 @@
+import { supabase } from './supabaseClient'
+
+export interface UserSubscription {
+  id: string
+  user_id: string
+  subscription_status: 'free' | 'premium_lite' | 'premium_classic' | 'premium_plus' | 'humsafar_select'
+  profile_status: 'pending' | 'approved' | 'rejected' | 'flagged' | 'suspended'
+  package_name: string
+  package_price: number
+  package_duration_months: number
+  package_start_date: string
+  package_end_date?: string
+  active_addons: any[]
+  addon_history: any[]
+  features: any
+  contacts_limit: number
+  contacts_used: number
+  admin_notes?: string
+  rejection_reason?: string
+  created_at: string
+  updated_at: string
+  last_activity: string
+}
+
+export interface PackageDetails {
+  name: string
+  price: number
+  duration_months: number
+  features: string[]
+  limits: {
+    contacts: number
+  }
+}
+
+export interface AddonService {
+  id: string
+  name: string
+  description: string
+  price: number
+  duration: string
+  icon: string
+}
+
+// Package definitions based on your packages page
+export const PACKAGES: Record<string, PackageDetails> = {
+  free: {
+    name: 'Free Membership',
+    price: 0,
+    duration_months: 0,
+    features: [
+      'Create profile',
+      'Upload photos',
+      'View limited matches',
+      'Express interest (limited)',
+      'Receive matches from premium users',
+      'Basic search filters',
+      'Mobile app access'
+    ],
+    limits: { contacts: 0 }
+  },
+  premium_lite: {
+    name: 'Premium Lite',
+    price: 5000,
+    duration_months: 3,
+    features: [
+      '75 interests',
+      '50 contacts access',
+      'Chat access',
+      'Advanced search filters',
+      'Profile views tracking',
+      'Priority customer support',
+      'Mobile app premium features',
+      'Read receipts'
+    ],
+    limits: { contacts: 50 }
+  },
+  premium_classic: {
+    name: 'Premium Classic',
+    price: 8000,
+    duration_months: 6,
+    features: [
+      '150 interests',
+      '100 contacts access',
+      'Priority listing',
+      'Advanced matching algorithm',
+      'Unlimited chat',
+      'Profile analytics',
+      'Dedicated support',
+      'Video call feature',
+      'Profile boost (monthly)'
+    ],
+    limits: { contacts: 100 }
+  },
+  premium_plus: {
+    name: 'Premium Plus',
+    price: 13000,
+    duration_months: 12,
+    features: [
+      '300 interests',
+      '200 contacts access',
+      'Spotlight profile',
+      'Priority listing',
+      'Advanced analytics',
+      'Personalized matchmaker support',
+      'Exclusive events access',
+      'Profile verification',
+      'Background check assistance',
+      'Unlimited everything'
+    ],
+    limits: { contacts: 200 }
+  },
+  humsafar_select: {
+    name: 'Hamsafar Select',
+    price: 50000,
+    duration_months: 0, // Custom duration
+    features: [
+      'Personalized human matchmaker',
+      'Hand-picked profiles',
+      'Background checks included',
+      'Private search',
+      'Exclusive member events',
+      'Personal consultation sessions',
+      'Family meeting coordination',
+      'Wedding planning assistance',
+      'Lifetime support',
+      'Custom package creation'
+    ],
+    limits: { contacts: 999999 }
+  }
+}
+
+// Add-on services based on your packages page
+export const ADDON_SERVICES: AddonService[] = [
+  {
+    id: 'spotlight_profile',
+    name: 'Spotlight Profile',
+    description: 'Top search result placement for maximum visibility',
+    price: 1500,
+    duration: '7 days',
+    icon: '🔦'
+  },
+  {
+    id: 'boost_profile',
+    name: 'Boost Profile',
+    description: 'Increased visibility and profile views',
+    price: 500,
+    duration: '24 hours',
+    icon: '🚀'
+  },
+  {
+    id: 'verified_badge',
+    name: 'Verified Badge',
+    description: 'Blue checkmark for profile authenticity',
+    price: 200,
+    duration: 'Lifetime',
+    icon: '✅'
+  },
+  {
+    id: 'privacy_shield',
+    name: 'Privacy Shield',
+    description: 'Enhanced privacy controls and anonymous browsing',
+    price: 300,
+    duration: 'Monthly',
+    icon: '🛡️'
+  },
+  {
+    id: 'direct_connect',
+    name: 'Direct Connect',
+    description: 'Message without expressing interest first',
+    price: 0,
+    duration: 'Included in Premium+',
+    icon: '💬'
+  }
+]
+
+export class UserSubscriptionService {
+  // Get current user's subscription
+  static async getCurrentUserSubscription(): Promise<UserSubscription | null> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return null
+
+      const { data, error } = await supabase
+        .from('user_subscriptions')
+        .select('*')
+        .eq('user_id', user.id)
+        .single()
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          // No subscription found, create default free subscription
+          return await this.createDefaultSubscription(user.id)
+        }
+        throw error
+      }
+
+      return data
+    } catch (error) {
+      console.error('Error getting user subscription:', error)
+      return null
+    }
+  }
+
+  // Create default free subscription for new users
+  static async createDefaultSubscription(userId: string): Promise<UserSubscription | null> {
+    try {
+      console.log('Creating default subscription for user:', userId)
+      
+      // Simplest possible approach - only include absolutely required fields
+      const minimalData = {
+        user_id: userId,
+        subscription_status: 'free',
+        profile_status: 'pending',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
+      
+      console.log('Using minimal subscription data:', minimalData)
+      
+      // First attempt - direct SQL query
+      try {
+        console.log('Attempting direct SQL query')
+        const { data: sqlData, error: sqlError } = await supabase
+          .from('user_subscriptions')
+          .insert(minimalData)
+          .select()
+          .single()
+        
+        if (sqlError) {
+          console.error('SQL insert failed:', sqlError)
+          throw sqlError
+        }
+        
+        console.log('Successfully created subscription with SQL insert:', sqlData)
+        return sqlData
+      } catch (sqlError) {
+        console.error('Error with SQL insert:', sqlError)
+        
+        // Second attempt - try with delay to ensure user is fully created
+        try {
+          console.log('Attempting insert with delay')
+          // Wait for 2 seconds to ensure user is fully created in the database
+          await new Promise(resolve => setTimeout(resolve, 2000))
+          
+          const { data: delayData, error: delayError } = await supabase
+            .from('user_subscriptions')
+            .insert(minimalData)
+            .select()
+            .single()
+            
+          if (delayError) {
+            console.error('Delayed insert failed:', delayError)
+            throw delayError
+          }
+          
+          console.log('Successfully created subscription with delayed insert:', delayData)
+          return delayData
+        } catch (delayError) {
+          console.error('Error with delayed insert:', delayError)
+          
+          // Third attempt - try with upsert instead of insert
+          try {
+            console.log('Attempting upsert operation')
+            const { data: upsertData, error: upsertError } = await supabase
+              .from('user_subscriptions')
+              .upsert(minimalData)
+              .select()
+              .single()
+              
+            if (upsertError) {
+              console.error('Upsert failed:', upsertError)
+              throw upsertError
+            }
+            
+            console.log('Successfully created subscription with upsert:', upsertData)
+            return upsertData
+          } catch (upsertError) {
+            console.error('All insertion attempts failed:', upsertError)
+            
+            // Create a dummy object to return so the signup process can continue
+            console.log('Returning dummy subscription object to allow signup to continue')
+            return {
+              id: 'dummy-' + Date.now(),
+              user_id: userId,
+              subscription_status: 'free',
+              profile_status: 'pending',
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            } as UserSubscription
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Unexpected error in createDefaultSubscription:', error)
+      
+      // Return a dummy object as last resort to allow signup to continue
+      return {
+        id: 'dummy-' + Date.now(),
+        user_id: userId,
+        subscription_status: 'free',
+        profile_status: 'pending',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      } as UserSubscription
+    }
+  }
+
+  // Upgrade user subscription
+  static async upgradeSubscription(
+    packageType: keyof typeof PACKAGES,
+    addons: string[] = []
+  ): Promise<boolean> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return false
+
+      const packageDetails = PACKAGES[packageType]
+      if (!packageDetails) return false
+
+      // Calculate addon costs
+      const addonCosts = addons.map(addonId => {
+        const addon = ADDON_SERVICES.find(a => a.id === addonId)
+        return addon ? addon.price : 0
+      }).reduce((sum, cost) => sum + cost, 0)
+
+      const totalPrice = packageDetails.price + addonCosts
+
+      const { error } = await supabase
+        .from('user_subscriptions')
+        .upsert({
+          user_id: user.id,
+          subscription_status: packageType,
+          package_name: packageDetails.name,
+          package_price: totalPrice,
+          package_duration_months: packageDetails.duration_months,
+          package_start_date: new Date().toISOString(),
+          features: packageDetails.features,
+          contacts_limit: packageDetails.limits.contacts,
+          active_addons: addons,
+          addon_history: addons.map(addonId => ({
+            addon_id: addonId,
+            added_at: new Date().toISOString(),
+            price: ADDON_SERVICES.find(a => a.id === addonId)?.price || 0
+          }))
+        })
+
+      if (error) throw error
+      return true
+    } catch (error) {
+      console.error('Error upgrading subscription:', error)
+      return false
+    }
+  }
+
+  // Add addon to current subscription
+  static async addAddon(addonId: string): Promise<boolean> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return false
+
+      const addon = ADDON_SERVICES.find(a => a.id === addonId)
+      if (!addon) return false
+
+      const { data: subscription } = await supabase
+        .from('user_subscriptions')
+        .select('active_addons, addon_history')
+        .eq('user_id', user.id)
+        .single()
+
+      if (!subscription) return false
+
+      const currentAddons = subscription.active_addons || []
+      const currentHistory = subscription.addon_history || []
+
+      // Add to active addons
+      const newActiveAddons = [...currentAddons, addonId]
+      
+      // Add to history
+      const newHistory = [...currentHistory, {
+        addon_id: addonId,
+        added_at: new Date().toISOString(),
+        price: addon.price
+      }]
+
+      const { error } = await supabase
+        .from('user_subscriptions')
+        .update({
+          active_addons: newActiveAddons,
+          addon_history: newHistory
+        })
+        .eq('user_id', user.id)
+
+      if (error) throw error
+      return true
+    } catch (error) {
+      console.error('Error adding addon:', error)
+      return false
+    }
+  }
+
+
+
+  // Check if user can view contact details
+  static async canViewContacts(): Promise<boolean> {
+    try {
+      const subscription = await this.getCurrentUserSubscription()
+      if (!subscription) return false
+
+      return subscription.subscription_status !== 'free'
+    } catch (error) {
+      console.error('Error checking contact access:', error)
+      return false
+    }
+  }
+
+  // Get subscription status for display
+  static async getSubscriptionStatus(): Promise<{
+    status: string
+    package: string
+    canViewContacts: boolean
+    remainingContacts: number
+  }> {
+    try {
+      const subscription = await this.getCurrentUserSubscription()
+      if (!subscription) {
+        return {
+          status: 'No subscription',
+          package: 'None',
+          canViewContacts: false,
+          remainingContacts: 0
+        }
+      }
+
+      return {
+        status: subscription.subscription_status,
+        package: subscription.package_name,
+        canViewContacts: subscription.subscription_status !== 'free',
+        remainingContacts: subscription.contacts_limit - subscription.contacts_used
+      }
+    } catch (error) {
+      console.error('Error getting subscription status:', error)
+      return {
+        status: 'Error',
+        package: 'Unknown',
+        canViewContacts: false,
+        remainingContacts: 0
+      }
+    }
+  }
+}

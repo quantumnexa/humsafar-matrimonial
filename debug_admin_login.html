@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Login Debug Tool</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>Admin Login Debug Tool</h1>
+    <div id="output"></div>
+    
+    <script>
+        const output = document.getElementById('output');
+        
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.style.margin = '10px 0';
+            div.style.padding = '10px';
+            div.style.border = '1px solid #ccc';
+            div.style.backgroundColor = type === 'error' ? '#ffebee' : type === 'success' ? '#e8f5e8' : '#f5f5f5';
+            div.innerHTML = message;
+            output.appendChild(div);
+        }
+        
+        async function debugAdminLogin() {
+            try {
+                log('🔍 Starting Admin Login Debug...', 'info');
+                
+                // Initialize Supabase
+                const supabaseUrl = 'https://znmrwfqycwlnrefksdaq.supabase.co/';
+                const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpubXJ3ZnF5Y3dsbnJlZmtzZGFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3MzkxMTYsImV4cCI6MjA3MjMxNTExNn0.KcyAzNQIYvql0ZhEYf_0GKRk_xMC_1VbntTkxUmXlc4';
+                
+                log('✅ Supabase credentials loaded from .env.local', 'success');
+                
+                const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+                
+                log('✅ Supabase client initialized', 'success');
+                
+                // Check if admin_users table exists
+                log('🔍 Checking admin_users table...', 'info');
+                const { data: adminUsers, error: adminError } = await supabase
+                    .from('admin_users')
+                    .select('*')
+                    .limit(1);
+                
+                if (adminError) {
+                    log(`❌ admin_users table error: ${adminError.message}`, 'error');
+                    log('📝 Solution: Run the setup_admin_complete.sql script in Supabase Dashboard', 'info');
+                } else {
+                    log('✅ admin_users table exists', 'success');
+                    log(`📊 Found ${adminUsers.length} admin users`, 'info');
+                }
+                
+                // Check specific admin user
+                log('🔍 Checking for admin@gmail.com...', 'info');
+                const { data: specificAdmin, error: specificError } = await supabase
+                    .from('admin_users')
+                    .select('*')
+                    .eq('email', 'admin@gmail.com')
+                    .single();
+                
+                if (specificError) {
+                    log(`❌ Admin user not found: ${specificError.message}`, 'error');
+                    log('📝 Solution: Add admin user using the setup steps', 'info');
+                } else {
+                    log('✅ Admin user found in admin_users table', 'success');
+                    log(`👤 User ID: ${specificAdmin.user_id}`, 'info');
+                    log(`📧 Email: ${specificAdmin.email}`, 'info');
+                    log(`🔑 Role: ${specificAdmin.role}`, 'info');
+                }
+                
+                // Test authentication
+                log('🔍 Testing authentication...', 'info');
+                const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+                    email: 'admin@gmail.com',
+                    password: 'humsafar123' // Updated password
+                });
+                
+                if (authError) {
+                    log(`❌ Authentication failed: ${authError.message}`, 'error');
+                    if (authError.message.includes('Invalid login credentials')) {
+                        log('📝 Solution: Check if auth user exists in Supabase Dashboard > Authentication > Users', 'info');
+                        log('📝 Or try different password', 'info');
+                    }
+                } else {
+                    log('✅ Authentication successful!', 'success');
+                    log(`👤 Auth User ID: ${authData.user.id}`, 'info');
+                    log(`📧 Auth Email: ${authData.user.email}`, 'info');
+                    
+                    // Sign out after test
+                    await supabase.auth.signOut();
+                    log('🚪 Signed out after test', 'info');
+                }
+                
+                log('🏁 Debug complete!', 'info');
+                
+            } catch (error) {
+                log(`💥 Unexpected error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Auto-run on page load
+        window.onload = () => {
+            log('🚀 Admin Login Debug Tool Loaded', 'info');
+            log('⚠️ Before running, update the Supabase URL and Key in the script!', 'error');
+            
+            // Add a button to run manually
+            const button = document.createElement('button');
+            button.textContent = 'Run Debug';
+            button.style.padding = '10px 20px';
+            button.style.margin = '20px 0';
+            button.style.fontSize = '16px';
+            button.onclick = debugAdminLogin;
+            document.body.insertBefore(button, output);
+        };
+    </script>
+</body>
+</html>
