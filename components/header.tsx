@@ -48,7 +48,6 @@ export default function Header() {
             .find(row => row.startsWith('humsafar_admin_auth='))
           
           if (adminCookie && adminCookie.split('=')[1] === 'true') {
-            console.log('🔄 Admin cookie detected, setting admin mode')
             setIsAdminUser(true)
             setUser(null)
             setUserProfile(null)
@@ -110,7 +109,6 @@ export default function Header() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("🔄 Auth state change:", event, session?.user?.id)
       
       if (session?.user) {
         // Check if user is an admin - if so, don't show them as logged in user
@@ -164,7 +162,6 @@ export default function Header() {
       // Refresh the page to reset all auth states
       window.location.href = '/'
     } catch (error) {
-      console.error('Error switching to regular user mode:', error)
       // Fallback: just refresh the page
       window.location.href = '/'
     }
@@ -336,11 +333,10 @@ export default function Header() {
               </SheetTrigger>
               <SheetContent side="right" className="w-[300px] sm:w-[400px]">
                 <div className="flex flex-col space-y-4 mt-8">
-                  <Link href="/" className="flex items-center space-x-2 mb-6" legacyBehavior>
-                    <div className="w-8 h-8 bg-gradient-to-r from-humsafar-500 to-humsafar-600 rounded-lg flex items-center justify-center">
-                      <Heart className="h-5 w-5" />
-                    </div>
-                    <span className="text-xl font-bold text-gray-900">Hamsafar</span>
+                  <Link href="/" className="flex items-center mb-6" legacyBehavior>
+                    <a className="flex items-center">
+                      <img src="/humsafar-logo.png" alt="Humsafar Logo" className="w-40" />
+                    </a>
                   </Link>
 
                   {navigationItems.map((item) => (
@@ -349,8 +345,9 @@ export default function Header() {
                       href={item.href}
                       className="text-lg font-medium text-gray-900 hover:text-humsafar-500 transition-colors"
                       onClick={() => setMobileMenuOpen(false)}
-                      legacyBehavior>
-                      {item.title}
+                      legacyBehavior
+                    >
+                      <a className="block py-2">{item.title}</a>
                     </Link>
                   ))}
 
@@ -362,9 +359,12 @@ export default function Header() {
                           href="/dashboard"
                           className="flex items-center space-x-2 text-gray-900 hover:text-humsafar-500"
                           onClick={() => setMobileMenuOpen(false)}
-                          legacyBehavior>
-                          <User className="h-5 w-5" />
-                          <span>Dashboard</span>
+                          legacyBehavior
+                        >
+                          <a className="flex items-center space-x-2">
+                            <User className="h-5 w-5" />
+                            <span>Dashboard</span>
+                          </a>
                         </Link>
                         <Button
                           variant="ghost"
@@ -385,9 +385,12 @@ export default function Header() {
                           href="/admin/dashboard"
                           className="flex items-center space-x-2 text-gray-900 hover:text-humsafar-500"
                           onClick={() => setMobileMenuOpen(false)}
-                          legacyBehavior>
-                          <User className="h-5 w-5" />
-                          <span>Admin Dashboard</span>
+                          legacyBehavior
+                        >
+                          <a className="flex items-center space-x-2">
+                            <User className="h-5 w-5" />
+                            <span>Admin Dashboard</span>
+                          </a>
                         </Link>
                         <Button
                           variant="ghost"
@@ -404,9 +407,11 @@ export default function Header() {
                     ) : (
                       <div className="space-y-4">
                         <Link href="/auth" onClick={() => setMobileMenuOpen(false)} legacyBehavior>
-                          <Button className="w-full bg-humsafar-500 hover:bg-humsafar-600 text-white">
-                            Login / Register
-                          </Button>
+                          <a>
+                            <Button className="w-full bg-humsafar-500 hover:bg-humsafar-600 text-white">
+                              Login / Register
+                            </Button>
+                          </a>
                         </Link>
                       </div>
                     )}

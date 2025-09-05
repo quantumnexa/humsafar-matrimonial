@@ -63,7 +63,7 @@ export default function HomePage() {
       localStorage.removeItem("supabase.auth.token")
       
       // Optional: Show a toast or redirect
-      console.log("Admin session cleared - redirected to homepage")
+      // Admin session cleared - redirected to homepage
     }
     
     // Check user authentication
@@ -80,7 +80,7 @@ export default function HomePage() {
         fetchViewedProfiles()
       }
     } catch (error) {
-      console.error('Error checking authentication:', error)
+      // Error checking authentication
     }
   }
 
@@ -92,7 +92,7 @@ export default function HomePage() {
         setViewedProfileIds(viewedIds)
       }
     } catch (error) {
-      console.error('Error fetching viewed profiles:', error)
+      // Error fetching viewed profiles
     }
   }
 
@@ -270,7 +270,7 @@ export default function HomePage() {
 
   const fetchFeatured = useCallback(async () => {
     try {
-      console.log('🏠 HOMEPAGE: Starting to fetch featured profiles...')
+      // Starting to fetch featured profiles
       
       // Use the new ProfileFilterService to get filtered profiles
       const result = await ProfileFilterService.getFilteredProfiles({
@@ -280,11 +280,11 @@ export default function HomePage() {
         isFeaturedSection: true
       })
       
-      console.log(`🏠 HOMEPAGE: ProfileFilterService returned ${result.profiles.length} profiles`)
-      console.log('🏠 HOMEPAGE: Total available approved profiles:', result.totalAvailable)
+      // ProfileFilterService returned profiles
+      // Total available approved profiles
       
       if (result.profiles.length > 0) {
-        console.log('🏠 HOMEPAGE: Completion percentages:', result.profiles.map(p => `${p.first_name}: ${p.completionPercentage}%`))
+        // Completion percentages
       }
       
       setFeaturedProfiles(result.profiles)
@@ -295,10 +295,10 @@ export default function HomePage() {
         .eq('profile_status', 'approved')
       
       if (subscriptionError) {
-        console.error('🏠 HOMEPAGE: Error fetching approved subscriptions:', subscriptionError)
+        // Error fetching approved subscriptions
         
         // Fallback: Try to get some profiles if subscription query fails
-        console.log('🏠 HOMEPAGE: Trying fallback due to subscription error...')
+        // Trying fallback due to subscription error
         let query = supabase
           .from('user_profiles')
           .select(`
@@ -333,14 +333,14 @@ export default function HomePage() {
           .limit(4)
         
         if (fallbackError) {
-          console.error('🏠 HOMEPAGE: Fallback also failed:', fallbackError)
+          // Fallback also failed
           
           setLoadingFeatured(false)
           return
         }
         
         if (fallbackProfiles && fallbackProfiles.length > 0) {
-          console.log(`🏠 HOMEPAGE: Fallback successful! Found ${fallbackProfiles.length} profiles`)
+          // Fallback successful! Found profiles
           const fallbackFinalProfiles = await Promise.all(
             fallbackProfiles.map(async (profile) => {
               let mainImage = '/placeholder.jpg'
@@ -356,7 +356,7 @@ export default function HomePage() {
                   mainImage = images[0].image_url
                 }
               } catch (error) {
-                console.log(`🏠 HOMEPAGE: No images found for fallback user ${profile.user_id}`)
+                // No images found for fallback user
               }
               
               return {
@@ -377,8 +377,8 @@ export default function HomePage() {
           // Sort by completion percentage (highest first)
           fallbackWithCompletion.sort((a, b) => b.completionPercentage - a.completionPercentage)
           
-          console.log(`🏠 HOMEPAGE: Fallback profiles sorted by completion`)
-          console.log('🏠 HOMEPAGE: Completion percentages:', fallbackWithCompletion.map(p => `${p.first_name}: ${p.completionPercentage}%`))
+          // Fallback profiles sorted by completion
+          // Completion percentages
           
           setFeaturedProfiles(fallbackWithCompletion)
           setLoadingFeatured(false)
@@ -391,10 +391,10 @@ export default function HomePage() {
       }
       
       if (!approvedSubscriptions || approvedSubscriptions.length === 0) {
-        console.log('🏠 HOMEPAGE: No approved subscriptions found')
+        // No approved subscriptions found
         
         // Fallback: Try to get some profiles if no approved subscriptions
-        console.log('🏠 HOMEPAGE: Trying fallback due to no approved subscriptions...')
+        // Trying fallback due to no approved subscriptions
         const { data: fallbackProfiles, error: fallbackError } = await supabase
           .from('user_profiles')
           .select(`
@@ -422,14 +422,14 @@ export default function HomePage() {
           .limit(4)
         
         if (fallbackError) {
-          console.error('🏠 HOMEPAGE: Fallback also failed:', fallbackError)
+          // Fallback also failed
           setFeaturedProfiles([])
           setLoadingFeatured(false)
           return
         }
         
         if (fallbackProfiles && fallbackProfiles.length > 0) {
-          console.log(`🏠 HOMEPAGE: Fallback successful! Found ${fallbackProfiles.length} profiles`)
+          // Fallback successful! Found profiles
           const fallbackFinalProfiles = await Promise.all(
             fallbackProfiles.map(async (profile) => {
               let mainImage = '/placeholder.jpg'
@@ -445,7 +445,7 @@ export default function HomePage() {
                   mainImage = images[0].image_url
                 }
               } catch (error) {
-                console.log(`🏠 HOMEPAGE: No images found for fallback user ${profile.user_id}`)
+                // No images found for fallback user
               }
               
               return {
@@ -466,8 +466,8 @@ export default function HomePage() {
           // Sort by completion percentage (highest first)
           fallbackWithCompletion.sort((a, b) => b.completionPercentage - a.completionPercentage)
           
-          console.log(`🏠 HOMEPAGE: Fallback profiles sorted by completion`)
-          console.log('🏠 HOMEPAGE: Completion percentages:', fallbackWithCompletion.map(p => `${p.first_name}: ${p.completionPercentage}%`))
+          // Fallback profiles sorted by completion
+          // Completion percentages
           
           setFeaturedProfiles(fallbackWithCompletion)
           setLoadingFeatured(false)
@@ -480,7 +480,7 @@ export default function HomePage() {
       }
       
       const approvedUserIds = approvedSubscriptions.map(sub => sub.user_id)
-      console.log(`🏠 HOMEPAGE: Found ${approvedUserIds.length} approved user IDs:`, approvedUserIds)
+      // Found approved user IDs
       
       // Step 2: Fetch profiles for approved users from user_profiles table
       const { data: profilesData, error: profilesError } = await supabase
@@ -510,19 +510,19 @@ export default function HomePage() {
         .order('created_at', { ascending: false })
       
       if (profilesError) {
-        console.error('🏠 HOMEPAGE: Error fetching profiles:', profilesError)
+        // Error fetching profiles
         setLoadingFeatured(false)
         return
       }
       
       if (!profilesData || profilesData.length === 0) {
-        console.log('🏠 HOMEPAGE: No profiles found for approved users')
+        // No profiles found for approved users
         setFeaturedProfiles([])
         setLoadingFeatured(false)
         return
       }
       
-      console.log(`🏠 HOMEPAGE: Found ${profilesData.length} approved profiles`)
+      // Found approved profiles
       
       // Step 3: Process profiles and add images
       const finalProfiles = await Promise.all(
@@ -551,7 +551,7 @@ export default function HomePage() {
               }
             }
           } catch (error) {
-            console.log(`🏠 HOMEPAGE: No images found for user ${profile.user_id}`)
+            // No images found for user
           }
           
           return {
@@ -572,14 +572,14 @@ export default function HomePage() {
       // Sort by completion percentage (highest first)
       profilesWithCompletion.sort((a, b) => b.completionPercentage - a.completionPercentage)
       
-      console.log(`🏠 HOMEPAGE: Final result: ${profilesWithCompletion.length} approved profiles sorted by completion`)
-      console.log('🏠 HOMEPAGE: Completion percentages:', profilesWithCompletion.map(p => `${p.first_name}: ${p.completionPercentage}%`))
+      // Final result: approved profiles sorted by completion
+      // Completion percentages
       
       setFeaturedProfiles(profilesWithCompletion.slice(0, 4)) // Show max 4 on homepage
       setLoadingFeatured(false)
       
     } catch (error: any) {
-      console.error('🏠 HOMEPAGE: Error in fetchFeatured:', error)
+      // Error in fetchFeatured
       setFeaturedProfiles([])
       setLoadingFeatured(false)
     }

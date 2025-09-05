@@ -16,13 +16,11 @@ export default function ProfileViewTracker({ profileUserId }: ProfileViewTracker
         const { data: { user } } = await supabase.auth.getUser()
         
         if (!user) {
-          console.log('No authenticated user, skipping view tracking')
           return
         }
 
         // Don't track if user is viewing their own profile
         if (user.id === profileUserId) {
-          console.log('User viewing own profile, skipping view tracking')
           return
         }
 
@@ -30,12 +28,12 @@ export default function ProfileViewTracker({ profileUserId }: ProfileViewTracker
         const result = await ProfileViewService.recordProfileView(profileUserId)
         
         if (result.success) {
-          console.log('Profile view recorded successfully')
+          // Profile view recorded successfully
         } else {
-          console.log('Failed to record profile view:', result.message)
+          // Failed to record profile view
         }
       } catch (error) {
-        console.error('Error recording profile view:', error)
+        // Error recording profile view
       }
     }
 

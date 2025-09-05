@@ -79,7 +79,7 @@ export class ProfileViewService {
         .single();
 
       if (error) {
-        console.error('Error recording profile view:', error);
+        // Error recording profile view
         return {
           success: false,
           message: 'Failed to record profile view'
@@ -92,7 +92,7 @@ export class ProfileViewService {
         data
       };
     } catch (error) {
-      console.error('Error in recordProfileView:', error);
+      // Error in recordProfileView
       return {
         success: false,
         message: 'An unexpected error occurred'
@@ -136,7 +136,7 @@ export class ProfileViewService {
         .single();
 
       if (subError || !subscriptionData) {
-        console.error('Error getting user subscription:', subError);
+        // Error getting user subscription
         return {
           success: false,
           canView: false,
@@ -152,7 +152,7 @@ export class ProfileViewService {
         .eq('viewer_user_id', targetUserId);
 
       if (viewsError) {
-        console.error('Error counting user views:', viewsError);
+        // Error counting user views
         return {
           success: false,
           canView: false,
@@ -170,7 +170,7 @@ export class ProfileViewService {
         message: remainingViews > 0 ? `${remainingViews} views remaining` : 'View limit reached'
       };
     } catch (error) {
-      console.error('Error in canUserViewMoreProfiles:', error);
+      // Error in canUserViewMoreProfiles
       return {
         success: false,
         canView: false,
@@ -212,7 +212,7 @@ export class ProfileViewService {
         .single();
 
       if (subError || !subscription) {
-        console.error('Error fetching user subscription:', subError);
+        // Error fetching user subscription
         return {
           success: false,
           message: 'No subscription found for user'
@@ -234,7 +234,7 @@ export class ProfileViewService {
         .eq('viewer_user_id', targetUserId);
 
       if (viewsError) {
-        console.error('Error counting profile views:', viewsError);
+        // Error counting profile views
         return {
           success: false,
           message: 'Failed to count profile views'
@@ -255,7 +255,7 @@ export class ProfileViewService {
         }
       };
     } catch (error) {
-      console.error('Error in getUserViewStats:', error);
+      // Error in getUserViewStats
       return {
         success: false,
         message: 'An unexpected error occurred'
@@ -294,7 +294,7 @@ export class ProfileViewService {
         .order('viewed_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching viewed profiles:', error);
+        // Error fetching viewed profiles
         return {
           success: false,
           message: 'Failed to fetch viewed profiles'
@@ -306,7 +306,7 @@ export class ProfileViewService {
         data: data || []
       };
     } catch (error) {
-      console.error('Error in getViewedProfilesThisMonth:', error);
+      // Error in getViewedProfilesThisMonth
       return {
         success: false,
         message: 'An unexpected error occurred'
@@ -349,7 +349,7 @@ export class ProfileViewService {
         .single();
 
       if (error && error.code !== 'PGRST116') { // PGRST116 is "not found" error
-        console.error('Error checking if profile was viewed:', error);
+        // Error checking if profile was viewed
         return {
           success: false,
           hasViewed: false,
@@ -363,7 +363,7 @@ export class ProfileViewService {
         viewedAt: data?.viewed_at
       };
     } catch (error) {
-      console.error('Error in hasUserViewedProfile:', error);
+      // Error in hasUserViewedProfile
       return {
         success: false,
         hasViewed: false,

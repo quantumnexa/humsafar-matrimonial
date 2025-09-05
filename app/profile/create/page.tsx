@@ -75,15 +75,15 @@ export default function CreateProfilePage() {
       }
       
       // Create default free subscription for the new user
-      console.log('Creating subscription for user ID:', user.id)
+      // Creating subscription for user ID
       try {
         const subscription = await UserSubscriptionService.createDefaultSubscription(user.id)
         
         if (!subscription) {
-          console.error('Warning: Failed to create default subscription')
+          // Warning: Failed to create default subscription
           // Continue anyway as the profile was created successfully
         } else {
-          console.log('Subscription created successfully:', subscription.id)
+          // Subscription created successfully
           
           // Verify subscription was actually created
           const { data: checkData, error: checkError } = await supabase
@@ -93,15 +93,15 @@ export default function CreateProfilePage() {
             .single()
             
           if (checkError) {
-            console.error('Error verifying subscription:', checkError)
+            // Error verifying subscription
           } else if (checkData) {
-            console.log('Verified subscription exists in database:', checkData.id)
+            // Verified subscription exists in database
           } else {
-            console.error('Subscription verification failed: No record found')
+            // Subscription verification failed: No record found
           }
         }
       } catch (subscriptionError) {
-        console.error('Error creating subscription:', subscriptionError)
+        // Error creating subscription
         // Continue anyway as the profile was created successfully
       }
 

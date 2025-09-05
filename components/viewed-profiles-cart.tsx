@@ -54,7 +54,6 @@ export default function ViewedProfilesCart() {
     try {
       // Check current user first
       const { data: { user }, error: userError } = await supabase.auth.getUser()
-      console.log('Current user:', user?.id, 'Error:', userError)
       
       // Check user_profiles table
       const { data: profiles, error: profilesError } = await supabase
@@ -62,17 +61,11 @@ export default function ViewedProfilesCart() {
         .select('user_id, first_name, last_name, city, education')
         .limit(5)
       
-      console.log('Sample user_profiles data:', profiles)
-      if (profilesError) console.error('Profiles error:', profilesError)
-      
       // Check profile_views table
       const { data: views, error: viewsError } = await supabase
         .from('profile_views')
         .select('*')
         .limit(5)
-      
-      console.log('Sample profile_views data:', views)
-      if (viewsError) console.error('Views error:', viewsError)
       
       // Check user_subscriptions table
       const { data: subscriptions, error: subsError } = await supabase
@@ -80,11 +73,8 @@ export default function ViewedProfilesCart() {
         .select('user_id, subscription_status, views_limit')
         .limit(5)
       
-      console.log('Sample user_subscriptions data:', subscriptions)
-      if (subsError) console.error('Subscriptions error:', subsError)
-      
     } catch (error) {
-      console.error('Error checking database data:', error)
+      // Error checking database data
     }
   }
 
@@ -93,7 +83,7 @@ export default function ViewedProfilesCart() {
       const { data: { user } } = await supabase.auth.getUser()
       setCurrentUser(user)
     } catch (error) {
-      console.error('Error getting current user:', error)
+      // Error getting current user
     }
   }
 
@@ -105,7 +95,7 @@ export default function ViewedProfilesCart() {
       
       // Get viewed profiles from our service
       const result = await ProfileViewService.getViewedProfilesThisMonth()
-      console.log('Viewed profiles result:', result)
+      // Viewed profiles result
       
       if (result.success && result.data) {
         setViewedProfiles(result.data)
@@ -145,10 +135,7 @@ export default function ViewedProfilesCart() {
            `)
            .in('user_id', viewedUserIds)
         
-        console.log('Profiles data fetch result:', { profilesData, profilesError })
-        
         if (profilesError) {
-          console.error('Error fetching profiles data:', profilesError)
           setProfilesWithDetails([])
           return
         }
@@ -178,7 +165,6 @@ export default function ViewedProfilesCart() {
                 }
               }
             } catch (error) {
-              console.error('Error fetching image for profile:', profile.user_id, error)
               const viewRecord = result.data?.find(view => view.viewed_profile_user_id === profile.user_id)
               return {
                 ...viewRecord,
@@ -191,11 +177,10 @@ export default function ViewedProfilesCart() {
           })
         )
         
-        console.log('Enhanced profiles:', enhancedProfiles)
         setProfilesWithDetails(enhancedProfiles.filter(p => p.profile))
       }
     } catch (error) {
-      console.error('Error fetching viewed profiles:', error)
+      // Error fetching viewed profiles
     } finally {
       setLoading(false)
     }

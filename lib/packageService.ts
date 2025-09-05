@@ -47,7 +47,7 @@ export class PackageService {
       if (error) throw error
       return data || []
     } catch (error) {
-      console.error('Error fetching packages:', error)
+      // Error fetching packages
       return []
     }
   }
@@ -65,7 +65,7 @@ export class PackageService {
       if (error) throw error
       return data
     } catch (error) {
-      console.error('Error fetching package:', error)
+      // Error fetching package
       return null
     }
   }
@@ -83,7 +83,7 @@ export class PackageService {
       if (error) throw error
       return data || []
     } catch (error) {
-      console.error('Error fetching popular packages:', error)
+      // Error fetching popular packages
       return []
     }
   }
@@ -101,7 +101,7 @@ export class PackageService {
       if (error) throw error
       return data || []
     } catch (error) {
-      console.error('Error fetching add-ons:', error)
+      // Error fetching add-ons
       return []
     }
   }
@@ -119,7 +119,7 @@ export class PackageService {
       if (error) throw error
       return data
     } catch (error) {
-      console.error('Error fetching add-on:', error)
+      // Error fetching add-on
       return null
     }
   }
@@ -137,7 +137,7 @@ export class PackageService {
       if (error) throw error
       return data || []
     } catch (error) {
-      console.error('Error fetching package add-ons:', error)
+      // Error fetching package add-ons
       return []
     }
   }
@@ -155,7 +155,7 @@ export class PackageService {
       if (error) throw error
       return data || []
     } catch (error) {
-      console.error('Error fetching available add-ons:', error)
+      // Error fetching available add-ons
       return []
     }
   }
@@ -172,7 +172,7 @@ export class PackageService {
       if (error) throw error
       return data || []
     } catch (error) {
-      console.error('Error fetching package comparison:', error)
+      // Error fetching package comparison
       return []
     }
   }
@@ -201,7 +201,7 @@ export class PackageService {
         addonsByDuration
       }
     } catch (error) {
-      console.error('Error calculating addon pricing:', error)
+      // Error calculating addon pricing
       return {
         totalAddons: 0,
         totalPrice: 0,
@@ -238,7 +238,7 @@ export class PackageService {
       if (error) throw error
       return data || []
     } catch (error) {
-      console.error('Error getting package recommendations:', error)
+      // Error getting package recommendations
       return []
     }
   }
@@ -257,7 +257,7 @@ export class PackageService {
       if (error) throw error
       return data || []
     } catch (error) {
-      console.error('Error fetching featured packages:', error)
+      // Error fetching featured packages
       return []
     }
   }
@@ -309,7 +309,7 @@ export class PackageService {
         }
       })
     } catch (error) {
-      console.error('Error creating addon bundles:', error)
+      // Error creating addon bundles
       return []
     }
   }

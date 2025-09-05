@@ -71,7 +71,7 @@ export default function ProfilesListingPage() {
       const { data: { user } } = await supabase.auth.getUser()
       setCurrentUser(user)
     } catch (error) {
-      console.error('Error getting current user:', error)
+      // Error getting current user
     }
   }
 
@@ -82,7 +82,7 @@ export default function ProfilesListingPage() {
         setUserViewStats(stats.data)
       }
     } catch (error) {
-      console.error('Error fetching user view stats:', error)
+      // Error fetching user view stats
     }
   }
 
@@ -94,7 +94,7 @@ export default function ProfilesListingPage() {
         setViewedProfileIds(viewedIds)
       }
     } catch (error) {
-      console.error('Error fetching viewed profiles:', error)
+      // Error fetching viewed profiles
     }
   }
 
@@ -169,7 +169,7 @@ export default function ProfilesListingPage() {
               mainImage
             }
           } catch (error) {
-            console.error('Error fetching image for profile:', profile.id, error)
+            // Error fetching image for profile
             return {
               ...profile,
               mainImage: '/placeholder.jpg'
@@ -180,7 +180,7 @@ export default function ProfilesListingPage() {
       
       setProfiles(enhancedProfiles)
     } catch (error) {
-      console.error('Error fetching profiles:', error)
+      // Error fetching profiles
     } finally {
       setLoading(false)
     }

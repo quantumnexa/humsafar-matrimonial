@@ -140,7 +140,7 @@ export default function PaymentPage() {
         })
 
       if (subscriptionError) {
-        console.error('Error creating subscription:', subscriptionError)
+        // Error creating subscription
         throw subscriptionError
       }
 
@@ -157,7 +157,7 @@ export default function PaymentPage() {
         })
 
       if (paymentError) {
-        console.error('Error creating payment record:', paymentError)
+        // Error creating payment record
         // Don't throw here as subscription was created successfully
       }
 
@@ -165,7 +165,7 @@ export default function PaymentPage() {
       router.push('/dashboard?package=success')
       
     } catch (error) {
-      console.error('Payment error:', error)
+      // Payment error
       alert('There was an error processing your payment. Please try again.')
     } finally {
       setLoading(false)

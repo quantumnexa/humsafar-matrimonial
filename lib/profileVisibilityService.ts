@@ -25,7 +25,7 @@ export class ProfileVisibilityService {
         return await this.getFeaturedProfiles()
       }
     } catch (error) {
-      console.error('Error in getProfilesForUser:', error)
+      // Error in getProfilesForUser
       // Fallback to featured profiles only
       return await this.getFeaturedProfiles()
     }
@@ -44,7 +44,7 @@ export class ProfileVisibilityService {
       
       return result.profiles || []
     } catch (error) {
-      console.error('Error getting featured profiles:', error)
+      // Error getting featured profiles
       return await this.getFallbackProfiles(5)
     }
   }
@@ -62,7 +62,7 @@ export class ProfileVisibilityService {
       
       return result.profiles || []
     } catch (error) {
-      console.error('Error getting fallback profiles:', error)
+      // Error getting fallback profiles
       return []
     }
   }
@@ -109,7 +109,7 @@ export class ProfileVisibilityService {
         userPackage
       }
     } catch (error) {
-      console.error('Error getting profile visibility info:', error)
+      // Error getting profile visibility info
       return {
         totalProfiles: 0,
         featuredProfiles: 0,
@@ -127,13 +127,13 @@ export class ProfileVisibilityService {
         .eq('id', profileId)
       
       if (error) {
-        console.error('Error marking profile as featured:', error)
+        // Error marking profile as featured
         return false
       }
       
       return true
     } catch (error) {
-      console.error('Error marking profile as featured:', error)
+      // Error marking profile as featured
       return false
     }
   }
@@ -150,7 +150,7 @@ export class ProfileVisibilityService {
       
       return result.profiles || []
     } catch (error) {
-      console.error('Error getting all featured profiles:', error)
+      // Error getting all featured profiles
       return []
     }
   }
@@ -169,7 +169,7 @@ export class ProfileVisibilityService {
           .in('user_id', approvedUserIds)
         
         if (unmarkError) {
-          console.error('Error unmarking profiles:', unmarkError)
+          // Error unmarking profiles
           return false
         }
       }
@@ -185,7 +185,7 @@ export class ProfileVisibilityService {
             .in('user_id', validProfileIds)
           
           if (markError) {
-            console.error('Error marking profiles as featured:', markError)
+            // Error marking profiles as featured
             return false
           }
         }
@@ -193,7 +193,7 @@ export class ProfileVisibilityService {
       
       return true
     } catch (error) {
-      console.error('Error setting featured profiles:', error)
+      // Error setting featured profiles
       return false
     }
   }

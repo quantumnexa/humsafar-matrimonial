@@ -35,7 +35,7 @@ export async function isUserAdmin(userId: string): Promise<boolean> {
     
     return !!adminUser
   } catch (error) {
-    console.error('Error checking admin status:', error)
+    // Error checking admin status
     return false
   }
 }
@@ -53,7 +53,7 @@ export async function isCurrentUserAdmin(): Promise<boolean> {
     
     return await isUserAdmin(user.id)
   } catch (error) {
-    console.error('Error checking current user admin status:', error)
+    // Error checking current user admin status
     return false
   }
 }

@@ -460,13 +460,7 @@ function FamilyDisplay({ data }: { data: any }) {
 function PartnerDisplay({ data, profile }: { data: any; profile: any }) {
   
   // Debug: Log the data being passed
-  console.log('🔍 PartnerDisplay Debug:', {
-    data,
-    profile,
-    gender: profile?.gender,
-    wearHijab: data?.wear_hijab,
-    polygamy: data?.polygamy
-  })
+  // PartnerDisplay Debug data
 
   // Get partner information with range handling
   const partnerInfo = [
@@ -591,7 +585,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
       const { data: { user } } = await supabase.auth.getUser()
       setCurrentUser(user)
     } catch (error) {
-      console.error('Error checking authentication:', error)
+      // Error checking authentication
     } finally {
       setAuthChecked(true)
     }
@@ -605,11 +599,11 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
       if (result.data) {
         setProfile(result.data)
         setError(result.error)
-        console.log(`🔍 PROFILE: Found profile using user_id: ${id}`)
+        // Found profile using user_id
         
         // If we found a profile, fetch images and details
         const userIdForImages = result.data.user_id
-        console.log(`🔍 PROFILE: Using userIdForImages: ${userIdForImages}`)
+        // Using userIdForImages
         
         const [imagesResult, profileResult, subscriptionResult] = await Promise.all([
           supabase.from("user_images").select("id,image_url,is_main").eq("user_id", userIdForImages).order("uploaded_at", { ascending: true }),
@@ -643,7 +637,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
          setError(imagesResult.error || profileResult.error || subscriptionResult.error)
        }
      } catch (e) {
-       console.error('🔍 PROFILE: Error in profile fetching:', e)
+       // Error in profile fetching
        setError(e)
      } finally {
        setLoading(false)
@@ -824,26 +818,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
        
           <div className="grid lg:grid-cols-3 gap-8 items-stretch">
             <div className="lg:col-span-1">
-{(() => {
-  console.log('🔍 PROFILE: Images data being passed to ProfileGallery:', {
-    images,
-    imagesLength: images?.length || 0,
-    imagesType: typeof images,
-    isArray: Array.isArray(images),
-    sampleImage: images?.[0]
-  });
-  return null;
-})()}
-               {(() => {
-                 console.log('🔍 PROFILE: Images data being passed to ProfileGallery:', {
-                   images,
-                   imagesLength: images?.length || 0,
-                   imagesType: typeof images,
-                   isArray: Array.isArray(images),
-                   sampleImage: images?.[0]
-                 });
-                 return null;
-               })()}
+
                
               <ProfileGallery
                 images={images as any}

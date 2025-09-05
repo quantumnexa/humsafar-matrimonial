@@ -227,7 +227,6 @@ export default function DashboardPage() {
     if (userId && Object.keys(profileData).length > 0) {
       const timeoutId = setTimeout(() => {
         saveDraftToStorage()
-        console.log("💾 Auto-saved to local storage")
       }, 1000) // Auto-save after 1 second of no typing
 
       return () => clearTimeout(timeoutId)
@@ -348,12 +347,11 @@ export default function DashboardPage() {
         .single()
 
       if (profileError && profileError.code !== "PGRST116") {
-        console.error("Error fetching profile from DB:", profileError)
+        // Error fetching profile from DB
       }
 
       // If no profile exists, create one for Google OAuth users
       if (profileError && profileError.code === "PGRST116") {
-        console.log("No profile found, creating one for user:", uid)
         
         // Get user data from Supabase Auth
         const { data: { user } } = await supabase.auth.getUser()
@@ -379,17 +377,14 @@ export default function DashboardPage() {
             ])
           
           if (createError) {
-             console.error("Error creating profile:", createError)
+             // Error creating profile
            } else {
-             console.log("Profile created successfully for Google OAuth user")
-             
              // Try to create default subscription
              try {
                const { UserSubscriptionService } = await import('@/lib/userSubscriptionService')
                await UserSubscriptionService.createDefaultSubscription(uid)
-               console.log("Default subscription created")
              } catch (subscriptionError) {
-               console.error("Error creating default subscription:", subscriptionError)
+               // Error creating default subscription
              }
              
              // Reload profile data after creation
@@ -401,7 +396,6 @@ export default function DashboardPage() {
              
              if (newProfile) {
                const profile = newProfile
-               console.log("Profile data reloaded after creation")
              }
            }
          }
@@ -511,7 +505,7 @@ export default function DashboardPage() {
         .single()
 
       if (basicProfileError && basicProfileError.code !== "PGRST116") {
-        console.error("Error fetching basic profile from DB:", basicProfileError)
+        // Error fetching basic profile from DB
       }
 
       if (basicProfile) {
@@ -536,12 +530,10 @@ export default function DashboardPage() {
         .order("uploaded_at", { ascending: true })
 
       if (photosError) {
-        console.error("❌ Error fetching photos:", photosError)
         // Don't show error to user, just log it
       }
 
       if (existingPhotos && existingPhotos.length > 0) {
-        console.log("📸 Found", existingPhotos.length, "photos for user")
 
         try {
           const withDisplay = await Promise.all(
@@ -553,7 +545,6 @@ export default function DashboardPage() {
                   display_url: displayUrl,
                 }
               } catch (imgError) {
-                console.warn("⚠️ Failed to get display URL for image:", p.id, imgError)
                 // Fallback to original URL if display URL fails
                 return {
                   ...p,
@@ -563,14 +554,11 @@ export default function DashboardPage() {
             })
           )
           setPhotos(withDisplay)
-          console.log("✅ Photos loaded successfully:", withDisplay.length)
         } catch (photoError) {
-          console.error("❌ Error processing photos:", photoError)
           // Fallback: set photos with original URLs
           setPhotos(existingPhotos.map(p => ({ ...p, display_url: p.image_url })))
         }
       } else {
-        console.log("📸 No photos found for user")
         setPhotos([])
       }
     }
@@ -613,15 +601,12 @@ export default function DashboardPage() {
         .limit(1)
 
       if (error) {
-        console.error("Table structure check error:", error)
         return null
       }
 
       // Get column information by trying to insert a test row
-      console.log("Table structure check successful")
       return true
     } catch (err) {
-      console.error("Table structure check failed:", err)
       return null
     }
   }
@@ -634,7 +619,6 @@ export default function DashboardPage() {
       // Check authentication
       const { data: userData, error: authError } = await supabase.auth.getUser()
       if (authError) {
-        console.error("❌ Authentication error:", authError)
         alert(`Authentication error: ${authError.message}`)
         return
       }
@@ -653,11 +637,7 @@ export default function DashboardPage() {
         return
       }
 
-      console.log("🚀 Starting profile save for user:", uid)
-      console.log("📊 Profile data to save:", profileData)
-
       // Save profile data directly to user_profiles table
-      console.log("🔍 Saving profile data to user_profiles table...")
       
       // Show saving message to user
       setPhotoSuccessMessage("💾 Saving profile... Please wait.")
@@ -752,15 +732,12 @@ export default function DashboardPage() {
         additional_info: profileData.additionalInfo || null,
       }
 
-      console.log("💾 Saving profile data:", profilePayload)
-
       try {
         const { data, error: profileSaveError } = await supabase
           .from("user_profiles")
           .upsert(profilePayload, { onConflict: "user_id" })
 
         if (profileSaveError) {
-          console.error("❌ Profile save error:", profileSaveError)
           
           // Show more specific error messages
           let errorMessage = "Failed to save profile"
@@ -778,18 +755,13 @@ export default function DashboardPage() {
           return
         }
 
-        console.log("✅ Supabase response:", data)
       } catch (upsertError) {
-        console.error("❌ Upsert operation failed:", upsertError)
         alert(`Database operation failed: ${upsertError}`)
         return
       }
 
-      console.log("✅ Profile saved successfully!")
-
       // Insert user subscription record only if it doesn't exist
       try {
-        console.log("🔍 Checking user subscription data...")
         
         // Check if subscription record already exists
         const { data: existingSubscription, error: subscriptionCheckError } = await supabase
@@ -799,13 +771,11 @@ export default function DashboardPage() {
           .single()
         
         if (subscriptionCheckError && subscriptionCheckError.code !== 'PGRST116') {
-          console.error("❌ Error checking subscription:", subscriptionCheckError)
-          console.log("⚠️ Profile saved but subscription check failed")
+          // Profile saved but subscription check failed
         } else if (existingSubscription) {
-          console.log("ℹ️ User subscription data already exists, skipping subscription update")
+          // User subscription data already exists, skipping subscription update
         } else {
           // Only create subscription if it doesn't exist
-          console.log("🔍 Creating new user subscription data...")
           const currentTime = new Date().toISOString()
           const subscriptionPayload = {
             user_id: uid,
@@ -822,20 +792,17 @@ export default function DashboardPage() {
             .insert(subscriptionPayload)
 
           if (subscriptionError) {
-            console.error("❌ Subscription save error:", subscriptionError)
-            console.log("⚠️ Profile saved but subscription creation failed")
+            // Profile saved but subscription creation failed
           } else {
-            console.log("✅ Subscription data created:", subscriptionData)
+            // Subscription data created
           }
         }
       } catch (subscriptionUpsertError) {
-        console.error("❌ Subscription operation failed:", subscriptionUpsertError)
-        console.log("⚠️ Profile saved but subscription operation failed")
+        // Profile saved but subscription operation failed
       }
 
       clearDraft()
       setPhotoSuccessMessage("🎉 Profile saved successfully!")
-      console.log("🎉 Profile saved successfully for user:", uid)
 
       // Refresh the page to show updated data
       setTimeout(() => {
@@ -843,7 +810,6 @@ export default function DashboardPage() {
       }, 1000)
 
     } catch (error) {
-      console.error("❌ Unexpected error during save:", error)
       alert(`An unexpected error occurred: ${error}`)
     } finally {
       setIsSavingAll(false)
@@ -904,7 +870,7 @@ export default function DashboardPage() {
         const file = validFiles[i]
         const isFirstPhoto = currentPhotosCount === 0 && i === 0
 
-        console.log(`Processing photo ${i + 1}/${validFiles.length}, isFirstPhoto: ${isFirstPhoto}`)
+        // Processing photo upload
 
         const sanitizedName = file.name.replace(/[^a-zA-Z0-9_.-]/g, "-")
         const path = `${uid}/${Date.now()}-${sanitizedName}`
@@ -913,7 +879,6 @@ export default function DashboardPage() {
           .from(PROFILE_PHOTOS_BUCKET)
           .upload(path, file, { cacheControl: "3600", upsert: false })
         if (uploadError) {
-          console.error("Storage upload error:", uploadError)
           setUploadError(uploadError.message)
           continue
         }
@@ -933,12 +898,10 @@ export default function DashboardPage() {
           .single()
 
         if (!insertError && inserted) {
-          console.log(`Photo ${i + 1} inserted with is_main: ${inserted.is_main}`)
           const displayUrl = await getDisplayUrlFromImageUrl(publicUrl)
           const newPhoto = { ...(inserted as UserImage), display_url: displayUrl }
           uploadedPhotos.push(newPhoto)
         } else if (insertError) {
-          console.error("DB insert error:", insertError)
           setUploadError(insertError.message)
         }
       }
@@ -1000,7 +963,6 @@ export default function DashboardPage() {
   // Test Supabase connection
   const testSupabaseConnection = async () => {
     try {
-      console.log("🔍 Testing Supabase connection...")
       // Use a simpler, faster connection test
       const { data, error } = await supabase
         .from("user_profiles")
@@ -1008,14 +970,11 @@ export default function DashboardPage() {
         .limit(1)
 
       if (error) {
-        console.error("❌ Supabase connection test failed:", error)
         return false
       }
 
-      console.log("✅ Supabase connection test successful")
       return true
     } catch (err) {
-      console.error("💥 Supabase connection test error:", err)
       return false
     }
   }
@@ -1024,11 +983,9 @@ export default function DashboardPage() {
   const refreshPhotos = async () => {
     try {
       setIsRefreshingPhotos(true)
-      console.log("🔄 Refreshing photos from database...")
 
       const { data: { user } } = await supabase.auth.getUser()
       if (!user?.id) {
-        console.error("❌ No user ID found for photo refresh")
         setIsRefreshingPhotos(false)
         return
       }
@@ -1040,13 +997,11 @@ export default function DashboardPage() {
         .order("uploaded_at", { ascending: true })
 
       if (photosError) {
-        console.error("❌ Error refreshing photos:", photosError)
         setIsRefreshingPhotos(false)
         return
       }
 
       if (existingPhotos && existingPhotos.length > 0) {
-        console.log("📸 Refreshed", existingPhotos.length, "photos")
 
         try {
           const withDisplay = await Promise.all(
@@ -1058,7 +1013,6 @@ export default function DashboardPage() {
                   display_url: displayUrl,
                 }
               } catch (imgError) {
-                console.warn("⚠️ Failed to get display URL for image:", p.id, imgError)
                 return {
                   ...p,
                   display_url: p.image_url,
@@ -1067,21 +1021,18 @@ export default function DashboardPage() {
             })
           )
           setPhotos(withDisplay)
-          console.log("✅ Photos refreshed successfully")
 
           // Show success message
           setPhotoSuccessMessage("Photos refreshed successfully!")
           setTimeout(() => setPhotoSuccessMessage(null), 3000)
         } catch (photoError) {
-          console.error("❌ Error processing refreshed photos:", photoError)
           setPhotos(existingPhotos.map(p => ({ ...p, display_url: p.image_url })))
         }
       } else {
-        console.log("📸 No photos found during refresh")
         setPhotos([])
       }
     } catch (err) {
-      console.error("💥 Error during photo refresh:", err)
+      // Error during photo refresh
     } finally {
       setIsRefreshingPhotos(false)
     }
@@ -1159,7 +1110,6 @@ export default function DashboardPage() {
 
       setPhotoSuccessMessage("Photo removed successfully!")
     } catch (error) {
-      console.error("Error removing photo:", error)
       setUploadError("Failed to remove photo. Please try again.")
     } finally {
       setIsPhotoOperation(false)
@@ -1185,7 +1135,6 @@ export default function DashboardPage() {
 
       setPhotoSuccessMessage("Main photo updated successfully!")
     } catch (error) {
-      console.error("Error making photo main:", error)
       setUploadError("Failed to update main photo. Please try again.")
     } finally {
       setIsPhotoOperation(false)
@@ -1269,11 +1218,9 @@ export default function DashboardPage() {
 
       if (userPhotos && userPhotos.length > 0) {
         const mainPhotos = userPhotos.filter(p => p.is_main)
-        console.log(`Found ${userPhotos.length} photos, ${mainPhotos.length} marked as main`)
 
         // If multiple photos are marked as main, fix it
         if (mainPhotos.length > 1) {
-          console.log(`Multiple main photos detected, fixing...`)
           // Keep only the first one as main
           const firstMainPhoto = mainPhotos[0]
           const otherMainPhotoIds = mainPhotos.slice(1).map(p => p.id)
@@ -1284,12 +1231,10 @@ export default function DashboardPage() {
               .from("user_images")
               .update({ is_main: false })
               .in("id", otherMainPhotoIds)
-            console.log(`Fixed ${otherMainPhotoIds.length} photos that were incorrectly marked as main`)
           }
         }
         // If no photos are marked as main, mark the first one
         else if (mainPhotos.length === 0) {
-          console.log(`No main photo found, marking first photo as main`)
           const firstPhoto = userPhotos[0]
           await supabase
             .from("user_images")
@@ -1298,7 +1243,7 @@ export default function DashboardPage() {
         }
       }
     } catch (error) {
-      console.error("Error ensuring single main photo:", error)
+      // Error ensuring single main photo
     }
   }
 

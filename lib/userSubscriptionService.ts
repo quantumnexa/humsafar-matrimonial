@@ -196,7 +196,7 @@ export class UserSubscriptionService {
 
       return data
     } catch (error) {
-      console.error('Error getting user subscription:', error)
+      // Error getting user subscription
       return null
     }
   }
@@ -204,7 +204,7 @@ export class UserSubscriptionService {
   // Create default free subscription for new users
   static async createDefaultSubscription(userId: string): Promise<UserSubscription | null> {
     try {
-      console.log('Creating default subscription for user:', userId)
+      // Creating default subscription for user
       
       // Simplest possible approach - only include absolutely required fields
       const minimalData = {
@@ -215,11 +215,11 @@ export class UserSubscriptionService {
         updated_at: new Date().toISOString()
       }
       
-      console.log('Using minimal subscription data:', minimalData)
+      // Using minimal subscription data
       
       // First attempt - direct SQL query
       try {
-        console.log('Attempting direct SQL query')
+        // Attempting direct SQL query
         const { data: sqlData, error: sqlError } = await supabase
           .from('user_subscriptions')
           .insert(minimalData)
@@ -227,18 +227,18 @@ export class UserSubscriptionService {
           .single()
         
         if (sqlError) {
-          console.error('SQL insert failed:', sqlError)
+          // SQL insert failed
           throw sqlError
         }
         
-        console.log('Successfully created subscription with SQL insert:', sqlData)
+        // Successfully created subscription with SQL insert
         return sqlData
       } catch (sqlError) {
-        console.error('Error with SQL insert:', sqlError)
+        // Error with SQL insert
         
         // Second attempt - try with delay to ensure user is fully created
         try {
-          console.log('Attempting insert with delay')
+          // Attempting insert with delay
           // Wait for 2 seconds to ensure user is fully created in the database
           await new Promise(resolve => setTimeout(resolve, 2000))
           
@@ -249,18 +249,18 @@ export class UserSubscriptionService {
             .single()
             
           if (delayError) {
-            console.error('Delayed insert failed:', delayError)
+            // Delayed insert failed
             throw delayError
           }
           
-          console.log('Successfully created subscription with delayed insert:', delayData)
+          // Successfully created subscription with delayed insert
           return delayData
         } catch (delayError) {
-          console.error('Error with delayed insert:', delayError)
+          // Error with delayed insert
           
           // Third attempt - try with upsert instead of insert
           try {
-            console.log('Attempting upsert operation')
+            // Attempting upsert operation
             const { data: upsertData, error: upsertError } = await supabase
               .from('user_subscriptions')
               .upsert(minimalData)
@@ -268,17 +268,17 @@ export class UserSubscriptionService {
               .single()
               
             if (upsertError) {
-              console.error('Upsert failed:', upsertError)
+              // Upsert failed
               throw upsertError
             }
             
-            console.log('Successfully created subscription with upsert:', upsertData)
+            // Successfully created subscription with upsert
             return upsertData
           } catch (upsertError) {
-            console.error('All insertion attempts failed:', upsertError)
+            // All insertion attempts failed
             
             // Create a dummy object to return so the signup process can continue
-            console.log('Returning dummy subscription object to allow signup to continue')
+            // Returning dummy subscription object to allow signup to continue
             return {
               id: 'dummy-' + Date.now(),
               user_id: userId,
@@ -291,7 +291,7 @@ export class UserSubscriptionService {
         }
       }
     } catch (error) {
-      console.error('Unexpected error in createDefaultSubscription:', error)
+      // Unexpected error in createDefaultSubscription
       
       // Return a dummy object as last resort to allow signup to continue
       return {
@@ -347,8 +347,8 @@ export class UserSubscriptionService {
       if (error) throw error
       return true
     } catch (error) {
-      console.error('Error upgrading subscription:', error)
-      return false
+      // Error upgrading subscription
+      throw error
     }
   }
 
@@ -393,8 +393,8 @@ export class UserSubscriptionService {
       if (error) throw error
       return true
     } catch (error) {
-      console.error('Error adding addon:', error)
-      return false
+      // Error adding addon
+      throw error
     }
   }
 
@@ -408,7 +408,7 @@ export class UserSubscriptionService {
 
       return subscription.subscription_status !== 'free'
     } catch (error) {
-      console.error('Error checking contact access:', error)
+      // Error checking contact access
       return false
     }
   }
@@ -438,7 +438,7 @@ export class UserSubscriptionService {
         remainingContacts: subscription.contacts_limit - subscription.contacts_used
       }
     } catch (error) {
-      console.error('Error getting subscription status:', error)
+      // Error getting subscription status
       return {
         status: 'Error',
         package: 'Unknown',

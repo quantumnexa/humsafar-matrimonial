@@ -49,22 +49,18 @@ export default function AuthPage() {
           if (expiresAt && expiresAt > now) {
             // Check if email is verified
             if (session.user.email_confirmed_at) {
-              console.log("✅ Valid verified session found, redirecting to homepage")
               router.push("/")
             } else {
-              console.log("⚠️ Session found but email not verified")
               // Show email confirmation modal for unverified users
               setSignupEmail(session.user.email || "")
               setShowEmailConfirmation(true)
             }
           } else {
-            console.log("⚠️ Session expired, allowing access to auth page")
             // Clear expired session
             await supabase.auth.signOut()
           }
         }
       } catch (error) {
-        console.error("Error checking auth:", error)
         // If there's an error checking auth, allow access to the page
       }
     }
@@ -77,8 +73,6 @@ export default function AuthPage() {
     setError("")
     
     try {
-      console.log("🔐 Attempting Google sign-in...")
-      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -87,17 +81,14 @@ export default function AuthPage() {
       })
       
       if (error) {
-        console.error("❌ Google sign-in error:", error)
         setError(error.message)
         setLoading(false)
         return
       }
       
-      console.log("✅ Google sign-in initiated successfully")
       // The redirect will happen automatically
       
     } catch (error) {
-      console.error("💥 Google sign-in error:", error)
       setError("Failed to sign in with Google. Please try again.")
       setLoading(false)
     }
@@ -106,30 +97,22 @@ export default function AuthPage() {
   // Test Supabase connection
   const testSupabaseConnection = async () => {
     try {
-      console.log("🔍 Testing Supabase connection...")
-      
       // Check if environment variables are set
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
       const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
       
       if (!supabaseUrl || !supabaseKey) {
-        console.error("❌ Supabase environment variables missing")
         return false
       }
-      
-      console.log("✅ Environment variables found")
       
       const { data, error } = await supabase.from("user_profiles").select("count").limit(1)
       
       if (error) {
-        console.error("❌ Supabase connection test failed:", error)
         return false
       }
       
-      console.log("✅ Supabase connection test successful")
       return true
     } catch (err) {
-      console.error("💥 Supabase connection test error:", err)
       return false
     }
   }
@@ -142,7 +125,6 @@ export default function AuthPage() {
     
     // Add timeout protection to prevent infinite loading
     const timeoutId = setTimeout(() => {
-      console.error("⏰ Login timeout - taking too long")
       setLoading(false)
       setError("Login is taking too long. Please try again.")
     }, 30000) // 30 seconds timeout

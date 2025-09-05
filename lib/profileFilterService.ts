@@ -34,7 +34,7 @@ export class ProfileFilterService {
         .eq('profile_status', 'approved')
 
       if (subscriptionError) {
-        console.error('ProfileFilterService: Error fetching approved subscriptions:', subscriptionError)
+        // Error fetching approved subscriptions
         return {
           profiles: [],
           totalAvailable: 0
@@ -42,7 +42,7 @@ export class ProfileFilterService {
       }
 
       if (!approvedSubscriptions || approvedSubscriptions.length === 0) {
-        console.log('ProfileFilterService: No approved subscriptions found')
+        // No approved subscriptions found
         return {
           profiles: [],
           totalAvailable: 0
@@ -54,7 +54,7 @@ export class ProfileFilterService {
       // Step 2: Exclude current user if required (especially for featured section)
       if (excludeCurrentUser && currentUserId && (isFeaturedSection || true)) {
         approvedUserIds = approvedUserIds.filter(id => id !== currentUserId)
-        console.log(`ProfileFilterService: Excluded current user ${currentUserId} from results`)
+        // Excluded current user from results
       }
 
       if (approvedUserIds.length === 0) {
@@ -100,7 +100,7 @@ export class ProfileFilterService {
         .limit(profilesToFetch)
 
       if (profilesError) {
-        console.error('ProfileFilterService: Error fetching profiles:', profilesError)
+        // Error fetching profiles
         return {
           profiles: [],
           totalAvailable: 0
@@ -132,7 +132,7 @@ export class ProfileFilterService {
       }
 
     } catch (error) {
-      console.error('ProfileFilterService: Error in getFilteredProfiles:', error)
+      // Error in getFilteredProfiles
       return {
         profiles: [],
         totalAvailable: 0
@@ -175,7 +175,7 @@ export class ProfileFilterService {
             verified_badge = subscription.active_addons.includes('verified_badge')
           }
         } catch (error) {
-          console.log(`ProfileFilterService: Error enhancing profile ${profile.user_id}:`, error)
+          // Error enhancing profile
         }
 
         return {
@@ -222,7 +222,7 @@ export class ProfileFilterService {
         .eq('profile_status', 'approved')
 
       if (error || !approvedSubscriptions) {
-        console.error('ProfileFilterService: Error fetching approved user IDs:', error)
+        // ProfileFilterService: Error fetching approved user IDs
         return []
       }
 
@@ -234,7 +234,7 @@ export class ProfileFilterService {
 
       return userIds
     } catch (error) {
-      console.error('ProfileFilterService: Error in getApprovedUserIds:', error)
+      // ProfileFilterService: Error in getApprovedUserIds
       return []
     }
   }

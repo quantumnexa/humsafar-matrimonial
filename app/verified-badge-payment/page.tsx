@@ -40,7 +40,7 @@ export default function VerifiedBadgePaymentPage() {
         setPaymentSuccess(true)
       }
     } catch (error) {
-      console.error('Error checking auth:', error)
+      // Error checking auth
       router.push('/auth')
     }
   }
@@ -64,7 +64,7 @@ export default function VerifiedBadgePaymentPage() {
         alert('Failed to add verified badge. Please try again.')
       }
     } catch (error) {
-      console.error('Payment error:', error)
+      // Payment error
       alert('Payment failed. Please try again.')
     } finally {
       setLoading(false)
