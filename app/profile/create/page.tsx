@@ -118,12 +118,11 @@ export default function CreateProfilePage() {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
           <div className="mb-6">
-            <Link
-              href="/"
-              className="inline-flex items-center text-humsafar-500 hover:text-humsafar-600"
-              legacyBehavior>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Home
+            <Link href="/" legacyBehavior>
+              <a className="inline-flex items-center text-humsafar-500 hover:text-humsafar-600">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Home
+              </a>
             </Link>
           </div>
 
