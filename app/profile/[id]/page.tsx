@@ -556,7 +556,7 @@ function PartnerDisplay({ data, profile }: { data: any; profile: any }) {
   )
 }
 
-export default function ProfilePage({ params }: { params: { id: string } }) {
+export default function ProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const [currentUser, setCurrentUser] = useState<any>(null)
   const [profile, setProfile] = useState<any>(null)
   const [images, setImages] = useState<any>(null)
@@ -564,22 +564,27 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
   const [error, setError] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [authChecked, setAuthChecked] = useState(false)
+  const [id, setId] = useState<string | null>(null)
   
-  const id = params.id
+  useEffect(() => {
+    params.then(resolvedParams => {
+      setId(resolvedParams.id)
+    })
+  }, [params])
 
   useEffect(() => {
     checkAuthentication()
   }, [])
 
   useEffect(() => {
-    if (authChecked) {
+    if (authChecked && id) {
       if (currentUser) {
         fetchProfileData()
       } else {
         setLoading(false)
       }
     }
-  }, [authChecked, currentUser])
+  }, [authChecked, currentUser, id])
 
   const checkAuthentication = async () => {
     try {
@@ -783,6 +788,21 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
     { label: "Polygamy Support", key: "polygamy" },
     { label: "Wear Hijab", key: "wear_hijab" },
   ]
+
+  // Show loading while waiting for params to resolve
+  if (!id) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white">
+        <Header />
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-lg">Loading...</div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white">
