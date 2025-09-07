@@ -1,3 +1,5 @@
+"use client"
+
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -14,215 +16,281 @@ import {
   MapPin,
   Clock,
   MessageCircle,
+  ArrowRight,
+  HeadphonesIcon,
+  Users,
+  Globe,
 } from "lucide-react"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
 
 export default function ContactPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-humsafar50 to-white">
+    <div className="min-h-screen bg-gradient-to-br from-humsafar-50 via-white to-humsafar-100">
       <Header />
 
       {/* Hero Section */}
-      <section className="py-16 bg-humsafar-600 text-white">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Contact Us</h1>
-          <p className="text-xl opacity-90 mb-8">We're here to help you find your perfect life partner</p>
+      <main className="container mx-auto px-4 py-8">
+        <div className="relative overflow-hidden bg-humsafar-500 rounded-3xl mb-16 py-20 px-8">
+          <div className="absolute inset-0 bg-black/10"></div>
+          <div className="relative z-10 text-center max-w-4xl mx-auto">
+            <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-6 py-2 mb-6">
+              <HeadphonesIcon className="w-5 h-5 text-white" />
+              <span className="text-white font-medium">24/7 Customer Support</span>
+            </div>
+            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
+              Get in Touch
+              <span className="block text-white/60">
+                We're Here to Help
+              </span>
+            </h1>
+            <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto mb-8 leading-relaxed">
+              Have questions about finding your perfect life partner? Our dedicated support team is ready to assist you on your matrimonial journey.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button 
+                size="lg" 
+                className="bg-white text-humsafar-600 hover:bg-white/90 font-semibold px-8 py-3 rounded-full shadow-lg"
+                onClick={() => document.getElementById('contact-form')?.scrollIntoView({ behavior: 'smooth' })}
+              >
+                Send Message
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="border-white bg-transparent text-white hover:bg-white hover:text-humsafar-600 font-semibold px-8 py-3 rounded-full backdrop-blur-sm"
+                onClick={() => document.getElementById('contact-info')?.scrollIntoView({ behavior: 'smooth' })}
+              >
+                Contact Info
+              </Button>
+            </div>
+          </div>
+          {/* Decorative elements */}
+          <div className="absolute top-10 left-10 w-20 h-20 bg-white/10 rounded-full blur-xl"></div>
+          <div className="absolute bottom-10 right-10 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
+          <div className="absolute top-1/2 left-1/4 w-16 h-16 bg-yellow-300/20 rounded-full blur-lg"></div>
         </div>
-      </section>
+      </main>
 
-      {/* Contact Section */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-3 gap-12">
-            {/* Contact Form */}
-            <Card className="border-humsafar-100 lg:col-span-2">
-              <CardHeader>
-                <CardTitle className="text-2xl text-gray-800">Send us a Message</CardTitle>
-                <p className="text-gray-600">Fill out the form below and we'll get back to you within 24 hours</p>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
-                    <Input placeholder="Enter your first name" className="border-humsafar-200 focus:border-humsafar400" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
-                    <Input placeholder="Enter your last name" className="border-humsafar-200 focus:border-humsafar400" />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                  <Input
-                    type="email"
-                    placeholder="Enter your email"
-                    className="border-humsafar-200 focus:border-humsafar400"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
-                  <Input placeholder="Enter your phone number" className="border-humsafar-200 focus:border-humsafar400" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Subject</label>
-                  <Input placeholder="What is this regarding?" className="border-humsafar-200 focus:border-humsafar400" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Message</label>
-                  <Textarea
-                    placeholder="Tell us how we can help you..."
-                    rows={5}
-                    className="border-humsafar-200 focus:border-humsafar400"
-                  />
-                </div>
-                <Button className="w-full bg-humsafar-600 hover:bg-humsafar700 text-white">Send Message</Button>
-              </CardContent>
-            </Card>
+      {/* About Humsafar Forever Love Contact Section */}
+      <section className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 bg-humsafar-100 rounded-full px-6 py-2 mb-6">
+                <HeadphonesIcon className="w-5 h-5 text-humsafar-600" />
+                <span className="text-humsafar-600 font-medium">Trusted Matrimonial Service</span>
+              </div>
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                Get in Touch with
+                <span className="block bg-gradient-to-r from-humsafar-600 to-humsafar-400 bg-clip-text text-transparent">
+                  Humsafar Forever Love
+                </span>
+              </h2>
+              <p className="text-xl text-gray-600 leading-relaxed">
+                At Humsafar Forever Love, we value open communication and believe in building trust with our members. Our reputation for dedicated customer service comes from our commitment to listening, understanding, and responding promptly.
+              </p>
+            </div>
 
-            {/* Contact Information */}
-            <div className="space-y-8">
-              <Card className="border-humsafar-100">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="bg-humsafar-100 p-3 rounded-full">
-                      <Phone className="w-6 h-6 text-humsafar-600" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-800">Phone</h3>
-                      <p className="text-gray-600">Call us anytime</p>
-                    </div>
-                  </div>
-                  <p className="text-humsafar-600 font-semibold text-lg">+92 332 7355 681</p>
-                </CardContent>
-              </Card>
-
-              <Card className="border-humsafar-100">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="bg-humsafar-100 p-3 rounded-full">
-                      <Mail className="w-6 h-6 text-humsafar-600" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-800">Email</h3>
-                      <p className="text-gray-600">Send us an email</p>
-                    </div>
-                  </div>
-                  <p className="text-humsafar-600 font-semibold">info@humsafarforeverlove.com</p>
-                </CardContent>
-              </Card>
-
-              <Card className="border-humsafar-100">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="bg-humsafar-100 p-3 rounded-full">
-                      <MapPin className="w-6 h-6 text-humsafar-600" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-800">Office</h3>
-                      <p className="text-gray-600">Visit our office</p>
-                    </div>
-                  </div>
-                  <p className="text-gray-700">
-                  R-552, block 16, Water Pump, FB Area, Gulberg Town,Karachi,Pakistan
+            <div className="grid lg:grid-cols-2 gap-8 mb-12">
+              <div className="bg-gradient-to-br from-humsafar-50 to-white rounded-3xl p-8 md:p-12 shadow-xl">
+                <div className="text-center">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4">Immediate Response Guarantee</h3>
+                  <p className="text-lg text-gray-600 mb-6">
+                    As soon as you contact us, one of our customer relations representatives will address your query at the earliest.
                   </p>
-                </CardContent>
-              </Card>
-
-              <Card className="border-humsafar-100">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="bg-humsafar-100 p-3 rounded-full">
-                      <Clock className="w-6 h-6 text-humsafar-600" />
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-center gap-3 bg-humsafar-50 rounded-xl p-3">
+                      <Phone className="w-5 h-5 text-humsafar-600" />
+                      <span className="text-humsafar-700 font-semibold">Call: +92 332 7355 681</span>
                     </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-800">Business Hours</h3>
-                      <p className="text-gray-600">When we're available</p>
+                    <div className="flex items-center justify-center gap-3 bg-humsafar-50 rounded-xl p-3">
+                      <MessageCircle className="w-5 h-5 text-humsafar-600" />
+                      <span className="text-humsafar-700 font-semibold">WhatsApp: +92 332 7355 681</span>
+                    </div>
+                    <div className="flex items-center justify-center gap-3 bg-humsafar-50 rounded-xl p-3">
+                      <Mail className="w-5 h-5 text-humsafar-600" />
+                      <span className="text-humsafar-700 font-semibold">Email: info@humsafarforeverlove.com</span>
                     </div>
                   </div>
-                  <div className="text-gray-700 space-y-1">
-                    <p>Monday - Friday: 9:00 AM - 6:00 PM</p>
-                    <p>Saturday: 10:00 AM - 4:00 PM</p>
-                    <p>Sunday: Closed</p>
+                </div>
+              </div>
+
+              {/* Visit Us in Person */}
+              <Card className="border-0 shadow-xl bg-gradient-to-br from-humsafar-600 to-humsafar-500 text-white">
+                <CardContent className="p-8 md:p-12">
+                  <div className="text-center">
+                    <div className="flex items-center justify-center gap-4 mb-6">
+                      <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+                        <MapPin className="w-8 h-8 text-white" />
+                      </div>
+                      <h3 className="text-2xl font-bold">Visit Us in Person</h3>
+                    </div>
+                    <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 mb-6">
+                      <p className="text-sm text-white/90">R-552, block 16, Water Pump, FB Area, Gulberg Town, Karachi, Pakistan</p>
+                    </div>
+                    
+                    {/* Business Hours */}
+                    <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4">
+                      <div className="flex items-center justify-center gap-2 mb-4">
+                        <Clock className="w-5 h-5 text-white" />
+                        <p className="text-lg font-semibold text-white">Business Hours</p>
+                      </div>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between items-center">
+                          <span className="text-white/90">Monday - Friday:</span>
+                          <span className="text-white font-medium">9:00 AM - 6:00 PM</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-white/90">Saturday:</span>
+                          <span className="text-white font-medium">10:00 AM - 4:00 PM</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-white/90">Sunday:</span>
+                          <span className="text-red-200 font-medium">Closed</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
             </div>
+
+
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* FAQ Section */}
-      <section className="py-16 bg-humsafar50">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">Frequently Asked Questions</h2>
-            <p className="text-gray-600">Quick answers to common questions</p>
+      {/* Contact Section */}
+      <section id="contact-form" className="py-24 bg-gradient-to-br from-gray-50 via-white to-humsafar-50">
+        <div className="max-w-7xl mx-auto px-4">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 bg-humsafar-100 rounded-full px-6 py-2 mb-6">
+                <MessageCircle className="w-5 h-5 text-humsafar-600" />
+                <span className="text-humsafar-600 font-medium">Get In Touch</span>
+              </div>
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                Let's Start a
+                <span className="block bg-gradient-to-r from-humsafar-600 to-humsafar-400 bg-clip-text text-transparent">
+                  Conversation
+                </span>
+              </h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Whether you have questions about our services or need assistance with your matrimonial journey, we're here to help.
+              </p>
+            </div>
+            
+            <div className="grid lg:grid-cols-4 gap-8">
+              {/* Contact Form */}
+              <div className="lg:col-span-3">
+                <Card className="border-0 shadow-2xl bg-white/80 backdrop-blur-sm">
+                  <CardHeader className="pb-8">
+                    <CardTitle className="text-3xl text-gray-900 mb-2">Send us a Message</CardTitle>
+                    <p className="text-lg text-gray-600">Fill out the form below and we'll get back to you within 24 hours</p>
+                  </CardHeader>
+                  <CardContent className="space-y-8">
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-gray-800 mb-3">First Name</label>
+                        <Input 
+                          placeholder="Enter your first name" 
+                          className="h-12 border-2 border-gray-200 focus:border-humsafar-400 focus:ring-2 focus:ring-humsafar-100 rounded-xl transition-all duration-200" 
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-gray-800 mb-3">Last Name</label>
+                        <Input 
+                          placeholder="Enter your last name" 
+                          className="h-12 border-2 border-gray-200 focus:border-humsafar-400 focus:ring-2 focus:ring-humsafar-100 rounded-xl transition-all duration-200" 
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-800 mb-3">Email Address</label>
+                      <Input
+                        type="email"
+                        placeholder="Enter your email address"
+                        className="h-12 border-2 border-gray-200 focus:border-humsafar-400 focus:ring-2 focus:ring-humsafar-100 rounded-xl transition-all duration-200"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-800 mb-3">Phone Number</label>
+                      <Input 
+                        placeholder="Enter your phone number" 
+                        className="h-12 border-2 border-gray-200 focus:border-humsafar-400 focus:ring-2 focus:ring-humsafar-100 rounded-xl transition-all duration-200" 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-800 mb-3">Subject</label>
+                      <Input 
+                        placeholder="What is this regarding?" 
+                        className="h-12 border-2 border-gray-200 focus:border-humsafar-400 focus:ring-2 focus:ring-humsafar-100 rounded-xl transition-all duration-200" 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-800 mb-3">Message</label>
+                      <Textarea
+                        placeholder="Tell us how we can help you on your matrimonial journey..."
+                        rows={6}
+                        className="border-2 border-gray-200 focus:border-humsafar-400 focus:ring-2 focus:ring-humsafar-100 rounded-xl transition-all duration-200 resize-none"
+                      />
+                    </div>
+                    <Button className="w-full h-14 bg-gradient-to-r from-humsafar-600 to-humsafar-500 hover:from-humsafar-700 hover:to-humsafar-600 text-white font-semibold text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]">
+                      <MessageCircle className="w-5 h-5 mr-2" />
+                      Send Message
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Contact Information */}
+              <div id="contact-info" className="lg:col-span-1 space-y-6">
+                <div className="text-center mb-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Quick Contact</h3>
+                  <p className="text-sm text-gray-600">Choose your preferred method</p>
+                </div>
+                
+                <Card className="border-0 shadow-lg bg-gradient-to-br from-humsafar-50 to-white hover:shadow-xl transition-all duration-300">
+                  <CardContent className="p-6">
+                    <div className="text-center">
+                      <div className="w-12 h-12 bg-gradient-to-br from-humsafar-500 to-humsafar-600 rounded-xl flex items-center justify-center shadow-lg mx-auto mb-4">
+                        <Phone className="w-6 h-6 text-white" />
+                      </div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-2">Phone Support</h3>
+                      <p className="text-humsafar-600 font-semibold mb-2">+92 332 7355 681</p>
+                      <p className="text-xs text-gray-600">Available 24/7</p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-0 shadow-lg bg-gradient-to-br from-humsafar-50 to-white hover:shadow-xl transition-all duration-300">
+                   <CardContent className="p-6">
+                     <div className="text-center">
+                       <div className="w-12 h-12 bg-gradient-to-br from-humsafar-500 to-humsafar-600 rounded-xl flex items-center justify-center shadow-lg mx-auto mb-4">
+                         <Mail className="w-6 h-6 text-white" />
+                       </div>
+                       <h3 className="text-lg font-bold text-gray-900 mb-2">Email Support</h3>
+                       <p className="text-humsafar-600 font-semibold mb-2 text-sm">info@humsafarforeverlove.com</p>
+                       <p className="text-xs text-gray-600">Response within 24 hours</p>
+                     </div>
+                   </CardContent>
+                 </Card>
+
+                <Card className="border-0 shadow-lg bg-gradient-to-br from-humsafar-50 to-white hover:shadow-xl transition-all duration-300">
+                   <CardContent className="p-6">
+                     <div className="text-center">
+                       <div className="w-12 h-12 bg-gradient-to-br from-humsafar-500 to-humsafar-600 rounded-xl flex items-center justify-center shadow-lg mx-auto mb-4">
+                         <MapPin className="w-6 h-6 text-white" />
+                       </div>
+                       <h3 className="text-lg font-bold text-gray-900 mb-2">Visit Office</h3>
+                       <p className="text-humsafar-600 font-semibold mb-2 text-sm">Karachi, Pakistan</p>
+                       <p className="text-xs text-gray-600">Mon-Fri: 9AM-6PM</p>
+                     </div>
+                   </CardContent>
+                 </Card>
+              </div>
+            </div>
           </div>
-
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <Card className="border-humsafar-100">
-              <CardContent className="p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">How do I create a profile?</h3>
-                <p className="text-gray-600">
-                  Simply click on "Register Free" and fill out the registration form with your basic information and
-                  preferences.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-humsafar-100">
-              <CardContent className="p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">Is my information secure?</h3>
-                <p className="text-gray-600">
-                  Yes, we use advanced security measures to protect your personal information and ensure complete
-                  privacy.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-humsafar-100">
-              <CardContent className="p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">How does the matching work?</h3>
-                <p className="text-gray-600">
-                  Our advanced algorithm matches you based on your preferences, location, education, and other
-                  compatibility factors.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-humsafar-100">
-              <CardContent className="p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">Can I upgrade my package later?</h3>
-                <p className="text-gray-600">
-                  You can upgrade to Premium or VIP packages at any time to access more features and better matches.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-4 text-black">Still Have Questions?</h2>
-          <p className="text-xl mb-8 text-black">Our support team is here to help you 24/7</p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" variant="secondary" className="bg-humsafar-600 text-white hover:bg-humsafar-700">
-              <MessageCircle className="w-5 h-5 mr-2" />
-              Live Chat
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="border-humsafar-600 text-humsafar-600 hover:bg-humsafar-600 hover:text-white bg-transparent"
-            >
-              Call Now
-            </Button>
-          </div>
-        </div>
-      </section>
+        </section>
 
       <Footer />
     </div>

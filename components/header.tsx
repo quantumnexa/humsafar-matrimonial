@@ -34,6 +34,7 @@ export default function Header() {
     { title: "Browse Profiles", href: "/profiles" },
     { title: "Success Stories", href: "/success-stories" },
     { title: "Packages", href: "/packages" },
+    { title: "About", href: "/about" },
     { title: "Contact", href: "/contact" },
   ]
 

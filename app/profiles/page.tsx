@@ -52,6 +52,7 @@ export default function ProfilesListingPage() {
   const [selectedCity, setSelectedCity] = useState('All')
   const [selectedAgeFrom, setSelectedAgeFrom] = useState('From')
   const [selectedAgeTo, setSelectedAgeTo] = useState('To')
+  const [searchTerm, setSearchTerm] = useState('')
   const profilesPerPage = 12
 
   useEffect(() => {
@@ -188,6 +189,28 @@ export default function ProfilesListingPage() {
 
   // Apply filters
   const filteredProfiles = profiles.filter(profile => {
+    // Filter by search term (only visible fields in profile cards)
+    if (searchTerm.trim()) {
+      const searchLower = searchTerm.toLowerCase()
+      const age = (profile.age || '').toString().toLowerCase()
+      const education = (profile.education || '').toLowerCase()
+      const fieldOfStudy = (profile.field_of_study || '').toLowerCase()
+      const city = (profile.city || '').toLowerCase()
+      const religion = (profile.religion || '').toLowerCase()
+      const maritalStatus = (profile.marital_status || '').toLowerCase()
+      
+      const matchesSearch = age.includes(searchLower) || 
+                           education.includes(searchLower) || 
+                           fieldOfStudy.includes(searchLower) || 
+                           city.includes(searchLower) || 
+                           religion.includes(searchLower) || 
+                           maritalStatus.includes(searchLower)
+      
+      if (!matchesSearch) {
+        return false
+      }
+    }
+    
     // Filter by verified status if verifiedOnly is enabled
     if (verifiedOnly && !profile.is_verified) {
       return false
@@ -365,46 +388,62 @@ export default function ProfilesListingPage() {
       <Header />
       
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-humsafar-600 to-humsafar-700 text-white py-16 md:py-20">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-            Featured Profiles
-          </h1>
-          <p className="text-xl md:text-2xl text-humsafar-100 max-w-3xl mx-auto">
-            Discover verified and approved profiles with complete details
-          </p>
-        </div>
-      </div>
-
-      {/* Verification Badge Promotion */}
-      <div className="bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-lg p-4 mt-6 mx-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-              <svg className="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
+      <main className="container mx-auto px-4 py-8">
+        <div className="relative overflow-hidden bg-humsafar-500 rounded-3xl mb-16 py-20 px-8">
+          <div className="absolute inset-0 bg-black/10"></div>
+          <div className="relative z-10 text-center max-w-4xl mx-auto">
+            <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-6 py-2 mb-6">
+              <Users className="w-5 h-5 text-white" />
+              <span className="text-white font-medium">Verified Profiles</span>
             </div>
-            <div>
-              <h3 className="font-medium text-gray-900">Stand out and build trust with a verified badge</h3>
-            </div>
+            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
+              Featured Profiles
+              <span className="block text-white/60">
+                Find Your Perfect Match
+              </span>
+            </h1>
+            <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto mb-8 leading-relaxed">
+              Discover verified and approved profiles with complete details. Connect with genuine people looking for meaningful relationships.
+            </p>
           </div>
-          <Button className="bg-red-600 hover:bg-red-700 text-white">
-            Get Verified - Rs 200
-          </Button>
         </div>
-      </div>
+      </main>
+
+
 
       {/* Search and Filters Section */}
       <div className="bg-white shadow-sm border-b">
         <div className="container mx-auto px-4 py-6">
+          {/* Verification Badge Promotion */}
+          <div className="bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-lg p-4 mb-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                  <svg className="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="font-medium text-gray-900">Stand out and build trust with a verified badge</h3>
+                </div>
+              </div>
+              <Button className="bg-red-600 hover:bg-red-700 text-white">
+                Get Verified - Rs 200
+              </Button>
+            </div>
+          </div>
           {/* Search Bar */}
           <div className="flex flex-col md:flex-row gap-4 mb-6">
             <div className="flex-1">
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Search by name, profession, or location..."
+                  placeholder="Search by age, education, city, religion, or marital status..."
+                  value={searchTerm}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value)
+                    setCurrentPage(1) // Reset to first page when searching
+                  }}
                   className="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-humsafar-500 focus:border-humsafar-500"
                 />
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -420,56 +459,169 @@ export default function ProfilesListingPage() {
 
 
           {/* Advanced Filters */}
-          <div className="border border-gray-200 rounded-lg p-4">
-            <div className="flex justify-between items-center mb-4">
-              <div className="flex items-center gap-2">
-                <Filter className="h-5 w-5 text-humsafar-600" />
-                <h3 className="font-medium text-gray-900">Filters</h3>
+          <div className="bg-white border border-gray-200 rounded-lg p-4">
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              {/* Left side - Filters Label and Dropdowns */}
+              <div className="flex items-center gap-6 flex-wrap">
+                {/* Filters Label */}
+                <div className="flex items-center gap-2">
+                  <Filter className="h-5 w-5 text-humsafar-600" />
+                  <span className="font-medium text-gray-900">Filters</span>
+                </div>
+                
+                {/* Dropdown Filter Controls */}
+                <div className="flex items-center gap-4 flex-wrap">
+                {/* Marital Status */}
+                <div className="flex flex-col">
+                  <label className="text-xs font-medium text-gray-600 mb-1">Marital Status</label>
+                  <div className="relative">
+                    <select 
+                      className="w-32 px-3 py-2 pr-8 border border-gray-300 rounded-md focus:ring-humsafar-500 focus:border-humsafar-500 appearance-none bg-white text-sm"
+                      value={selectedMaritalStatus}
+                      onChange={(e) => setSelectedMaritalStatus(e.target.value)}
+                    >
+                      <option>All</option>
+                      <option>Single</option>
+                      <option>Divorced</option>
+                      <option>Widowed</option>
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                      <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Gender */}
+                <div className="flex flex-col">
+                  <label className="text-xs font-medium text-gray-600 mb-1">Gender</label>
+                  <div className="relative">
+                    <select 
+                      className="w-24 px-3 py-2 pr-8 border border-gray-300 rounded-md focus:ring-humsafar-500 focus:border-humsafar-500 appearance-none bg-white text-sm"
+                      value={selectedGender}
+                      onChange={(e) => setSelectedGender(e.target.value)}
+                    >
+                      <option>All</option>
+                      <option>Male</option>
+                      <option>Female</option>
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                      <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* City */}
+                <div className="flex flex-col">
+                  <label className="text-xs font-medium text-gray-600 mb-1">City</label>
+                  <div className="relative">
+                    <select 
+                      className="w-32 px-3 py-2 pr-8 border border-gray-300 rounded-md focus:ring-humsafar-500 focus:border-humsafar-500 appearance-none bg-white text-sm"
+                      value={selectedCity}
+                      onChange={(e) => setSelectedCity(e.target.value)}
+                    >
+                      <option>All</option>
+                      <option>Karachi</option>
+                      <option>Lahore</option>
+                      <option>Islamabad</option>
+                      <option>Rawalpindi</option>
+                      <option>Faisalabad</option>
+                      <option>Multan</option>
+                      <option>Peshawar</option>
+                      <option>Quetta</option>
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                      <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Age Range */}
+                <div className="flex flex-col">
+                  <label className="text-xs font-medium text-gray-600 mb-1">Age Range</label>
+                  <div className="flex gap-2 items-center">
+                    <div className="relative">
+                      <select 
+                        className="w-20 px-2 py-2 pr-7 border border-gray-300 rounded-md focus:ring-humsafar-500 focus:border-humsafar-500 text-sm appearance-none bg-white"
+                        value={selectedAgeFrom}
+                        onChange={(e) => setSelectedAgeFrom(e.target.value)}
+                      >
+                        <option>From</option>
+                        <option>18</option>
+                        <option>20</option>
+                        <option>25</option>
+                        <option>30</option>
+                        <option>35</option>
+                        <option>40</option>
+                        <option>45</option>
+                        <option>50</option>
+                      </select>
+                      <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                        <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                    </div>
+                    <span className="text-gray-500 text-xs">to</span>
+                    <div className="relative">
+                      <select 
+                        className="w-20 px-2 py-2 pr-7 border border-gray-300 rounded-md focus:ring-humsafar-500 focus:border-humsafar-500 text-sm appearance-none bg-white"
+                        value={selectedAgeTo}
+                        onChange={(e) => setSelectedAgeTo(e.target.value)}
+                      >
+                        <option>To</option>
+                        <option>25</option>
+                        <option>30</option>
+                        <option>35</option>
+                        <option>40</option>
+                        <option>45</option>
+                        <option>50</option>
+                        <option>60</option>
+                        <option>65</option>
+                      </select>
+                      <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                        <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                </div>
               </div>
               
-              <div className="flex items-center gap-6">
-                {/* Clear All button - only show when filters are applied */}
-                {(selectedMaritalStatus !== 'All' || selectedGender !== 'All' || selectedCity !== 'All' || selectedAgeFrom !== 'From' || selectedAgeTo !== 'To' || verifiedOnly || showViewedOnly) && (
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      className="bg-humsafar-600 border-humsafar-600 text-white hover:bg-humsafar-700 hover:border-humsafar-700 px-3"
-                      onClick={() => {
-                        setSelectedMaritalStatus('All')
-                        setSelectedGender('All')
-                        setSelectedCity('All')
-                        setSelectedAgeFrom('From')
-                        setSelectedAgeTo('To')
-                        setVerifiedOnly(false)
-                        setShowViewedOnly(false)
-                      }}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                )}
-                
-                {/* Toggle switches with labels */}
+              {/* Right side - Toggles and View Controls */}
+              <div className="flex items-center gap-4 flex-wrap">
+                {/* Verified Toggle */}
                 <div className="flex flex-col items-center gap-1">
-                  <span className="text-xs font-medium text-humsafar-700">Verified</span>
+                  <span className="text-xs font-medium text-humsafar-600">Verified</span>
                   <Switch 
                     checked={verifiedOnly}
                     onCheckedChange={setVerifiedOnly}
-                    className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-humsafar-500 data-[state=checked]:to-humsafar-700 data-[state=unchecked]:bg-humsafar-100 data-[state=unchecked]:border-humsafar-200 transition-all duration-300 shadow-sm hover:shadow-md"
+                    className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-humsafar-500 data-[state=checked]:to-humsafar-700 data-[state=unchecked]:bg-humsafar-200 transition-all duration-300"
                   />
                 </div>
                 
-                <div className="flex flex-col items-center gap-1">
-                  <span className="text-xs font-medium text-humsafar-700">Viewed</span>
-                  <Switch 
-                    checked={showViewedOnly}
-                    onCheckedChange={setShowViewedOnly}
-                    className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-humsafar-500 data-[state=checked]:to-humsafar-700 data-[state=unchecked]:bg-humsafar-100 data-[state=unchecked]:border-humsafar-200 transition-all duration-300 shadow-sm hover:shadow-md"
-                  />
-                </div>
+                {/* Viewed Toggle */}
+                {currentUser && userViewStats && userViewStats.views_limit > 0 && (
+                  <div className="flex flex-col items-center gap-1">
+                    <span className="text-xs font-medium text-humsafar-600">Viewed</span>
+                    <Switch 
+                      checked={showViewedOnly}
+                      onCheckedChange={setShowViewedOnly}
+                      className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-humsafar-500 data-[state=checked]:to-humsafar-700 data-[state=unchecked]:bg-humsafar-200 transition-all duration-300"
+                    />
+                  </div>
+                )}
                 
-                {/* Grid/List buttons */}
-                <div className="flex gap-1 bg-white rounded-lg shadow-sm border border-humsafar-100 p-1">
+                {/* Grid/List View Toggle */}
+                <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
                   <Button
                     variant={viewMode === "grid" ? "default" : "ghost"}
                     size="sm"
@@ -477,7 +629,7 @@ export default function ProfilesListingPage() {
                     className={`flex items-center gap-1 px-3 py-1 text-xs transition-all duration-200 ${
                       viewMode === "grid" 
                         ? "bg-humsafar-600 hover:bg-humsafar-700 text-white shadow-sm" 
-                        : "text-humsafar-600 hover:bg-humsafar-50 hover:text-humsafar-700"
+                        : "text-gray-600 hover:bg-white hover:text-humsafar-600"
                     }`}
                   >
                     <Grid className="w-3 h-3" />
@@ -490,7 +642,7 @@ export default function ProfilesListingPage() {
                     className={`flex items-center gap-1 px-3 py-1 text-xs transition-all duration-200 ${
                       viewMode === "list" 
                         ? "bg-humsafar-600 hover:bg-humsafar-700 text-white shadow-sm" 
-                        : "text-humsafar-600 hover:bg-humsafar-50 hover:text-humsafar-700"
+                        : "text-gray-600 hover:bg-white hover:text-humsafar-600"
                     }`}
                   >
                     <List className="w-3 h-3" />
@@ -499,125 +651,6 @@ export default function ProfilesListingPage() {
                 </div>
               </div>
             </div>
-            
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Marital Status</label>
-                <div className="relative">
-                  <select 
-                    className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-md focus:ring-humsafar-500 focus:border-humsafar-500 appearance-none bg-white"
-                    value={selectedMaritalStatus}
-                    onChange={(e) => setSelectedMaritalStatus(e.target.value)}
-                  >
-                    <option>All</option>
-                    <option>Single</option>
-                    <option>Divorced</option>
-                    <option>Widowed</option>
-                  </select>
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
-                <div className="relative">
-                  <select 
-                    className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-md focus:ring-humsafar-500 focus:border-humsafar-500 appearance-none bg-white"
-                    value={selectedGender}
-                    onChange={(e) => setSelectedGender(e.target.value)}
-                  >
-                    <option>All</option>
-                    <option>Male</option>
-                    <option>Female</option>
-                  </select>
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
-                <div className="relative">
-                  <select 
-                    className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-md focus:ring-humsafar-500 focus:border-humsafar-500 appearance-none bg-white"
-                    value={selectedCity}
-                    onChange={(e) => setSelectedCity(e.target.value)}
-                  >
-                    <option>All</option>
-                    <option>Karachi</option>
-                    <option>Lahore</option>
-                    <option>Islamabad</option>
-                    <option>Rawalpindi</option>
-                    <option>Faisalabad</option>
-                    <option>Multan</option>
-                    <option>Peshawar</option>
-                    <option>Quetta</option>
-                  </select>
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-              <div className="col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Age Range</label>
-                <div className="flex gap-2 items-center">
-                  <div className="relative">
-                    <select 
-                      className="w-20 px-2 py-2 pr-7 border border-gray-300 rounded-md focus:ring-humsafar-500 focus:border-humsafar-500 text-sm appearance-none bg-white"
-                      value={selectedAgeFrom}
-                      onChange={(e) => setSelectedAgeFrom(e.target.value)}
-                    >
-                      <option>From</option>
-                      <option>18</option>
-                      <option>20</option>
-                      <option>25</option>
-                      <option>30</option>
-                      <option>35</option>
-                      <option>40</option>
-                      <option>45</option>
-                      <option>50</option>
-                    </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                      <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </div>
-                  </div>
-                  <span className="text-gray-500 text-sm">to</span>
-                  <div className="relative">
-                    <select 
-                      className="w-20 px-2 py-2 pr-7 border border-gray-300 rounded-md focus:ring-humsafar-500 focus:border-humsafar-500 text-sm appearance-none bg-white"
-                      value={selectedAgeTo}
-                      onChange={(e) => setSelectedAgeTo(e.target.value)}
-                    >
-                      <option>To</option>
-                      <option>25</option>
-                      <option>30</option>
-                      <option>35</option>
-                      <option>40</option>
-                      <option>45</option>
-                      <option>50</option>
-                      <option>60</option>
-                      <option>65</option>
-                    </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                      <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-
           </div>
 
 
@@ -627,30 +660,21 @@ export default function ProfilesListingPage() {
       <div className="container mx-auto px-4 py-8">
 
         {/* Profile Visibility Stats */}
-        <div className="bg-humsafar-600 rounded-lg p-4 mb-6 shadow-sm border border-humsafar-100">
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              {currentUser && userViewStats ? (
-            <p className="text-sm text-white flex items-center gap-1">
-               <Eye className="w-4 h-4" />
-               Views used: <span className="font-bold">{userViewStats.views_this_month}/{userViewStats.views_limit}</span> this month
-             </p>
-           ) : (
-             <p className="text-sm text-white flex items-center gap-1">
-               <Eye className="w-4 h-4" />
-               <span className="font-bold">0 / 5</span> featured profiles used this month
-             </p>
-          )}
-            </div>
-            {currentUser && userViewStats ? (
+        {currentUser && userViewStats && userViewStats.views_limit > 0 && (
+          <div className="bg-humsafar-600 rounded-lg p-4 mb-6 shadow-sm border border-humsafar-100">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <p className="text-sm text-white flex items-center gap-1">
+                  <Eye className="w-4 h-4" />
+                  Views used: <span className="font-bold">{userViewStats.views_this_month}/{userViewStats.views_limit}</span> this month
+                </p>
+              </div>
               <span className="text-sm font-medium text-white">
                 {userViewStats.remaining_views} views remaining
               </span>
-            ) : (
-              <span className="text-sm font-medium text-white">5 views remaining</span>
-            )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Profile Count Display */}
         <div className="mb-6 flex justify-between items-center">
@@ -659,7 +683,7 @@ export default function ProfilesListingPage() {
               Showing <span className="text-humsafar-600 font-semibold">{startIndex + 1}-{Math.min(endIndex, filteredProfiles.length)}</span> of <span className="text-humsafar-600 font-semibold">{filteredProfiles.length}</span> profiles
             </span>
           </div>
-          {currentUser && <ViewedProfilesCart />}
+          {currentUser && userViewStats && userViewStats.views_limit > 0 && <ViewedProfilesCart />}
         </div>
 
 

@@ -143,15 +143,23 @@ export default function SuccessStoriesPage() {
 
       <main className="container mx-auto px-4 py-8">
         {/* Hero Section */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-humsafar-100 rounded-full mb-6">
-            <Heart className="h-8 w-8 text-humsafar-600 fill-current" />
+        <div className="relative overflow-hidden bg-humsafar-500 rounded-3xl mb-16 py-20 px-8">
+          <div className="absolute inset-0 bg-black/10"></div>
+          <div className="relative z-10 text-center max-w-4xl mx-auto">
+            <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-6 py-2 mb-6">
+              <Heart className="w-5 h-5 text-white" />
+              <span className="text-white font-medium">Love Stories</span>
+            </div>
+            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
+              Success Stories
+              <span className="block text-white/60">
+                Real Love, Real Happiness
+              </span>
+            </h1>
+            <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto mb-8 leading-relaxed">
+              Real couples, real love stories. Discover how Humsafar.pk helped thousands of people find their perfect life partners and build beautiful relationships.
+            </p>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Success Stories</h1>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Real couples, real love stories. Discover how Humsafar.pk helped thousands of people find their perfect life
-            partners and build beautiful relationships.
-          </p>
         </div>
 
         {/* Stats Section */}

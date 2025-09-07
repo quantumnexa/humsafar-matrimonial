@@ -1,15 +1,53 @@
 "use client"
 
-
+import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Slider } from "@/components/ui/slider"
 import { Check, Star, Crown, Zap, Sparkles, Eye, Shield, Rocket, CheckCircle, ArrowRight, Gift, MessageCircle, Clock, Users, TrendingUp, Target } from "lucide-react"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
 
 export default function PackagesPage() {
+  const [selectedProfileViews, setSelectedProfileViews] = useState(0)
+  
+  // Dynamic pricing calculation based on profile views - Lifetime access
+  // Custom packages are priced higher to encourage standard package selection
+  const calculatePrice = (views: number) => {
+    // Handle 0 views case
+    if (views === 0) return 0
+    
+    // Add premium for custom package (10-15% higher than standard packages)
+    if (views <= 20) {
+      // Standard Basic: Rs. 5,000 for 20 views, Custom: Rs. 5,500-6,000
+      const basePrice = 5000
+      const premium = Math.round(basePrice * 0.1) // 10% premium
+      return basePrice + premium
+    }
+    if (views <= 35) {
+      // Standard Standard: Rs. 8,000 for 35 views, Custom: Rs. 8,800-9,200
+      const basePrice = 8000
+      const premium = Math.round(basePrice * 0.15) // 15% premium
+      return basePrice + premium
+    }
+    if (views <= 55) {
+      // Standard Premium: Rs. 13,000 for 55 views, Custom: Rs. 14,300-15,000
+      const basePrice = 13000
+      const premium = Math.round(basePrice * 0.15) // 15% premium
+      return basePrice + premium
+    }
+    // For views above 55, charge extra with premium
+    const extraViews = views - 55
+    const basePrice = 13000
+    const premium = Math.round(basePrice * 0.15) // 15% premium on base
+    return basePrice + premium + (extraViews * 250) // Rs. 250 per extra view (higher than standard Rs. 200)
+  }
+  
+  const getDuration = (views: number) => {
+    return "Lifetime Access"
+  }
 
   const packages = [
     {
@@ -20,23 +58,24 @@ export default function PackagesPage() {
       color: "gray",
       icon: Star,
       popular: false,
-      profileViews: 5,
+      profileViews: 0,
       mainFeatures: [
-        "5 profile views per month",
+        "Create profile",
+        "Upload photos", 
+        "Browse profile cards only",
         "No expiry - Forever access",
       ],
       features: [
         "Create profile",
         "Upload photos",
-        "View limited matches",
-        "Express interest (limited)",
-        "Receive matches from premium users",
+        "Browse profile cards",
         "Basic search filters",
         "Mobile app access",
       ],
       limitations: [
-        "Limited to 5 profile views per month",
+        "Cannot view full profiles",
         "Cannot view contact details",
+        "Cannot express interest",
         "Basic customer support",
       ],
       addOns: [],
@@ -45,23 +84,21 @@ export default function PackagesPage() {
       id: "basic",
       name: "Basic Package",
       price: 5000,
-      duration: "3 months",
+      duration: "Lifetime",
       color: "blue",
       icon: Star,
       popular: false,
-      profileViews: 20, // 15 + 5 free
+      profileViews: 20,
       mainFeatures: [
-        "20 profile views per month",
-        "3 months validity",
+        "20 profile views - Lifetime",
+        "No expiry - Forever access",
       ],
       features: [
-        "15 additional profile views",
-        "50 contacts access",
-        "Advanced search filters",
+        "Create profile",
+        "Upload photos",
+        "20 profile views - Lifetime",
         "Profile views tracking",
-        "Priority customer support",
         "Mobile app premium features",
-        "Read receipts",
       ],
       addOns: ["Verified Badge"],
     },
@@ -69,52 +106,45 @@ export default function PackagesPage() {
       id: "standard",
       name: "Standard Package",
       price: 8000,
-      duration: "6 months",
+      duration: "Lifetime",
       color: "pink",
       icon: Crown,
       popular: true,
-      profileViews: 35, // 30 + 5 free
+      profileViews: 35,
       mainFeatures: [
-        "35 profile views per month",
-        "6 months validity",
+        "35 profile views - Lifetime",
+        "No expiry - Forever access",
       ],
       features: [
-        "30 additional profile views",
-        "100 contacts access",
-        "Priority listing",
-        "Advanced matching algorithm",
-        "Profile analytics",
-        "Dedicated support",
-        "Profile boost (monthly)",
+        "Create profile",
+        "Upload photos",
+        "35 profile views - Lifetime",
+        "Profile views tracking",
+        "Mobile app premium features",
       ],
-      addOns: ["Verified Badge", "Boost Profile", "Spotlight Profile"],
+      addOns: ["Verified Badge", "Boost Profile"],
     },
     {
       id: "premium",
       name: "Premium Package",
       price: 13000,
-      duration: "12 months",
+      duration: "Lifetime",
       color: "purple",
       icon: Zap,
       popular: false,
-      profileViews: 55, // 50 + 5 free
+      profileViews: 55,
       mainFeatures: [
-        "55 profile views per month",
-        "12 months validity",
+        "55 profile views - Lifetime",
+        "No expiry - Forever access",
       ],
       features: [
-        "50 additional profile views",
-        "200 contacts access",
-        "Spotlight profile",
-        "Priority listing",
-        "Advanced analytics",
-        "Personalized matchmaker support",
-        "Exclusive events access",
-        "Profile verification",
-        "Background check assistance",
-        "Unlimited everything",
+        "Create profile",
+        "Upload photos",
+        "55 profile views - Lifetime",
+        "Profile views tracking",
+        "Mobile app premium features",
       ],
-      addOns: ["Verified Badge", "Boost Profile", "Spotlight Profile"],
+      addOns: ["Verified Badge", "Boost Profile"],
     },
   ]
 
@@ -123,7 +153,7 @@ export default function PackagesPage() {
       name: "Verified Badge",
       price: 0,
       duration: "Included",
-      description: "Blue checkmark for profile authenticity - Included in all packages",
+      description: "Blue checkmark for profile authenticity - Included in all packages, FREE in custom packages with 10+ views",
       icon: Shield,
       included: true,
     },
@@ -131,18 +161,11 @@ export default function PackagesPage() {
       name: "Boost Profile",
       price: 500,
       duration: "24 hours",
-      description: "Increased visibility and profile views - Available in Standard & Premium",
+      description: "Increased visibility and profile views - Available in Standard & Premium, FREE in custom packages with 30+ views",
       icon: Rocket,
       included: false,
     },
-    {
-      name: "Spotlight Profile",
-      price: 1500,
-      duration: "7 days",
-      description: "Top search result placement for maximum visibility - Available in Standard & Premium",
-      icon: TrendingUp,
-      included: false,
-    },
+
   ]
 
   const getColorClasses = (color: string, isPopular = false) => {
@@ -199,13 +222,13 @@ export default function PackagesPage() {
             </div>
             <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
               Choose Your Perfect
-              <span className="block bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
+              <span className="block text-white/60">
                 Matrimonial Plan
               </span>
             </h1>
             <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto mb-8 leading-relaxed">
               Unlock premium features and connect with verified profiles to find your perfect life partner. 
-              Every plan includes 5 free profile views plus additional benefits.
+              Choose from our flexible plans with additional benefits.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
@@ -232,9 +255,120 @@ export default function PackagesPage() {
           <div className="absolute top-1/2 left-1/4 w-16 h-16 bg-yellow-300/20 rounded-full blur-lg"></div>
         </div>
 
+        {/* Dynamic Pricing Section */}
+        <section className="py-16 bg-white">
+          <div className="container mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Customize Your Package</h2>
+              <p className="text-xl text-gray-600">Select the number of profile views you need and see the price update in real-time</p>
+            </div>
+
+            <div className="max-w-4xl mx-auto">
+              <Card className="p-8 shadow-lg border-2 border-humsafar-200">
+                <div className="grid md:grid-cols-2 gap-8 items-center">
+                  {/* Profile Views Selector */}
+                  <div className="space-y-6">
+                    <div>
+                      <h3 className="text-2xl font-bold text-gray-900 mb-2">Profile Views</h3>
+                      <p className="text-gray-600">Choose how many profiles you want to view - Lifetime access</p>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-lg font-semibold text-gray-700">Total Views:</span>
+                        <span className="text-3xl font-bold text-humsafar-600">{selectedProfileViews}</span>
+                      </div>
+                      
+                      <div className="px-2">
+                        <Slider
+                          value={[selectedProfileViews]}
+                          onValueChange={(value) => setSelectedProfileViews(value[0])}
+                          max={100}
+                          min={0}
+                          step={5}
+                          className="w-full"
+                        />
+                        <div className="flex justify-between text-sm text-gray-500 mt-2">
+                          <span>0 views</span>
+                          <span>100 views</span>
+                        </div>
+                      </div>
+                      
+                      {/* Included Features */}
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <h4 className="font-semibold text-green-800 mb-3 flex items-center gap-2">
+                          <Gift className="w-4 h-4" />
+                          Included Features
+                        </h4>
+                        <div className="space-y-2">
+                          {selectedProfileViews >= 10 && (
+                            <div className="flex items-center gap-2 text-sm text-green-700">
+                              <Shield className="w-4 h-4" />
+                              <span>Verified Badge - FREE</span>
+                              <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">Included</Badge>
+                            </div>
+                          )}
+                          {selectedProfileViews >= 30 && (
+                            <div className="flex items-center gap-2 text-sm text-green-700">
+                              <Rocket className="w-4 h-4" />
+                              <span>Boost Profile - FREE</span>
+                              <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">Included</Badge>
+                            </div>
+                          )}
+                          {selectedProfileViews < 10 && (
+                            <div className="text-sm text-gray-500">
+                              Select 10+ views to unlock Verified Badge
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Dynamic Price Display */}
+                  <div className="text-center space-y-6">
+                    <div className="bg-humsafar-50 rounded-2xl p-6">
+                      <h3 className="text-lg font-semibold text-gray-700 mb-2">Your Package Price</h3>
+                      <div className="text-5xl font-bold text-humsafar-600 mb-2">
+                        Rs. {calculatePrice(selectedProfileViews).toLocaleString()}
+                      </div>
+                      <div className="text-gray-600">
+                        {getDuration(selectedProfileViews)}
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">Profile Views:</span>
+                        <span className="font-semibold">{selectedProfileViews} Total</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">Access:</span>
+                        <span className="font-semibold">{getDuration(selectedProfileViews)}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">Price per view:</span>
+                        <span className="font-semibold">Rs. {Math.round(calculatePrice(selectedProfileViews) / selectedProfileViews)}</span>
+                      </div>
+                    </div>
+                    
+                    <Button 
+                      className="w-full bg-humsafar-600 hover:bg-humsafar-700 text-white font-semibold py-3 rounded-lg"
+                      size="lg"
+                    >
+                      Choose This Package
+                      <ArrowRight className="w-5 h-5 ml-2" />
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          </div>
+        </section>
+
         {/* Profile View System */}
         <section id="profile-view-section" className="py-16 bg-gray-50">
-          <div className="container mx-auto px-4">
+          <div className="container mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Smart Profile View System</h2>
               <p className="text-xl text-gray-600">Transparent and intelligent profile viewing with clear usage tracking</p>
@@ -250,21 +384,12 @@ export default function PackagesPage() {
                   <h3 className="text-xl font-bold text-gray-900 mb-4">How It Works</h3>
                   <div className="space-y-4">
                     <div className="flex items-start gap-3">
-                      <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <CheckCircle className="w-4 h-4 text-white" />
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-gray-900">Free Profile Views</h4>
-                        <p className="text-sm text-gray-600">Every user gets 5 free profile views to explore potential matches</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
                       <div className="w-6 h-6 bg-humsafar-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                         <Shield className="w-4 h-4 text-white" />
                       </div>
                       <div>
-                        <h4 className="font-semibold text-gray-900">Package Limits</h4>
-                        <p className="text-sm text-gray-600">Purchase packages to unlock additional profile views and premium features</p>
+                        <h4 className="font-semibold text-gray-900">Package Benefits</h4>
+                        <p className="text-sm text-gray-600">Purchase packages to unlock profile views and premium features</p>
                       </div>
                     </div>
                   </div>
@@ -279,17 +404,6 @@ export default function PackagesPage() {
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 mb-4">Examples</h3>
                   <div className="space-y-3">
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="font-semibold text-green-800">Free Membership</span>
-                        <div className="flex items-center gap-1">
-                          <Eye className="w-4 h-4 text-green-600" />
-                          <span className="font-bold text-green-600">5</span>
-                        </div>
-                      </div>
-                      <p className="text-sm text-green-600">Total Profile Views: 5 (0 + 5 free)</p>
-                    </div>
-                    
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                       <div className="flex items-center justify-between mb-1">
                         <span className="font-semibold text-blue-800">Basic Package</span>
@@ -298,18 +412,29 @@ export default function PackagesPage() {
                           <span className="font-bold text-blue-600">20</span>
                         </div>
                       </div>
-                      <p className="text-sm text-blue-600">Total Profile Views: 20 (15 + 5 free)</p>
+                      <p className="text-sm text-blue-600">Total Profile Views: 20 - Lifetime</p>
                     </div>
                     
-                    <div className="bg-humsafar-50 border border-humsafar-200 rounded-lg p-3">
+                    <div className="bg-pink-50 border border-pink-200 rounded-lg p-3">
                       <div className="flex items-center justify-between mb-1">
-                        <span className="font-semibold text-humsafar-800">Premium Package</span>
+                        <span className="font-semibold text-pink-800">Standard Package</span>
                         <div className="flex items-center gap-1">
-                          <Eye className="w-4 h-4 text-humsafar-600" />
-                          <span className="font-bold text-humsafar-600">55</span>
+                          <Eye className="w-4 h-4 text-pink-600" />
+                          <span className="font-bold text-pink-600">35</span>
                         </div>
                       </div>
-                      <p className="text-sm text-humsafar-600">Total Profile Views: 55 (50 + 5 free)</p>
+                      <p className="text-sm text-pink-600">Total Profile Views: 35 - Lifetime</p>
+                    </div>
+                    
+                    <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-semibold text-purple-800">Premium Package</span>
+                        <div className="flex items-center gap-1">
+                          <Eye className="w-4 h-4 text-purple-600" />
+                          <span className="font-bold text-purple-600">55</span>
+                        </div>
+                      </div>
+                      <p className="text-sm text-purple-600">Total Profile Views: 55 - Lifetime</p>
                     </div>
                   </div>
                 </CardContent>
@@ -350,7 +475,7 @@ export default function PackagesPage() {
 
         {/* Packages Grid */}
         <section className="py-16 bg-gray-50">
-          <div className="max-w-7xl mx-auto px-4">
+          <div className="max-w-7xl mx-auto">
             <div id="packages-section">
               <div className="text-center mb-12">
                 <h2 className="text-3xl md:text-4xl font-bold text-humsafar-800 mb-4">
@@ -422,11 +547,11 @@ export default function PackagesPage() {
                           </div>
                         </div>
                            
-                        {/* Main Features */}
+                        {/* All Features */}
                         <div>
-                          <h4 className="font-semibold text-gray-900 mb-3 text-sm">Key Features</h4>
+                          <h4 className="font-semibold text-gray-900 mb-3 text-sm">All Features</h4>
                           <ul className="space-y-2">
-                            {pkg.mainFeatures.map((feature, index) => (
+                            {pkg.features.map((feature, index) => (
                               <li key={index} className="flex items-start gap-2 text-sm text-gray-700">
                                 <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
                                 <span>{feature}</span>
@@ -477,7 +602,7 @@ export default function PackagesPage() {
 
       {/* Add-ons Section */}
         <section className="py-16 bg-white">
-          <div className="max-w-6xl mx-auto px-4">
+          <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">
               <div className="flex justify-center mb-4">
                 <div className="w-12 h-12 bg-humsafar-600 rounded-full flex items-center justify-center">
@@ -492,7 +617,7 @@ export default function PackagesPage() {
               </p>
             </div>
             
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
               {addOnServices.map((addon, index) => (
                 <Card key={addon.name} className="bg-white border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-300 rounded-lg">
                   <CardHeader className="text-center pb-4">
@@ -533,7 +658,7 @@ export default function PackagesPage() {
 
       {/* FAQ Section */}
       <section className="py-20 bg-gradient-to-br from-humsafar-50 via-white to-humsafar-50">
-        <div className="max-w-4xl mx-auto px-4">
+        <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-humsafar-500 to-humsafar-600 rounded-full mb-6">
               <MessageCircle className="w-8 h-8 text-white" />
@@ -556,9 +681,8 @@ export default function PackagesPage() {
                   How do profile views work?
                 </h3>
                 <p className="text-humsafar-600 leading-relaxed pl-11">
-                  Every user gets 5 free profile views per month, whether they're logged in or not. 
-                  When you purchase a package, the package limit is added to your free views. 
-                  For example, Basic package (15) gives you 15 + 5 = 20 total profile views per month.
+                  When you purchase a package, you get the specified number of profile views per month. 
+                  For example, Basic package gives you 20 total profile views per month.
                 </p>
               </div>
             </div>
@@ -602,9 +726,8 @@ export default function PackagesPage() {
                   Can I view profiles without logging in?
                 </h3>
                 <p className="text-humsafar-600 leading-relaxed pl-11">
-                  Yes! You can view up to 5 profiles per month without creating an account. 
-                  After reaching this limit, you'll need to login to continue viewing profiles 
-                  or upgrade to a premium package for more views.
+                  You need to create an account and purchase a package to view profiles. 
+                  Free membership allows you to browse profile cards only.
                 </p>
               </div>
             </div>
