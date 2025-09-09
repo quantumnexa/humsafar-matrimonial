@@ -586,7 +586,7 @@ export default function AuthPage() {
                           id="phone" 
                           name="phone" 
                           type="tel" 
-                          placeholder="+92 300 1234567" 
+                          placeholder="+92 332 7355681" 
                           className="pl-12 pr-4 py-3 border-2 border-gray-200 focus:border-humsafar-500 focus:ring-2 focus:ring-humsafar-100 rounded-lg transition-all duration-200 hover:border-gray-300" 
                           required 
                         />

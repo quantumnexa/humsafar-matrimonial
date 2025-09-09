@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Heart, Menu, User, Settings, LogOut, Crown } from "lucide-react"
+import { Heart, Menu, User, Settings, LogOut, Crown, Phone, Mail, Facebook, Twitter, Instagram, Linkedin } from "lucide-react"
 import { supabase } from "@/lib/supabaseClient"
 import { isUserAdmin } from "@/lib/utils"
 
@@ -31,10 +31,11 @@ export default function Header() {
   const router = useRouter()
 
   const navigationItems = [
-    { title: "Browse Profiles", href: "/profiles" },
-    { title: "Success Stories", href: "/success-stories" },
-    { title: "Packages", href: "/packages" },
+    { title: "Home", href: "/" },
     { title: "About", href: "/about" },
+    { title: "Packages", href: "/packages" },
+    { title: "Featured Profile", href: "/profiles" },
+    { title: "Success Stories", href: "/success-stories" },
     { title: "Contact", href: "/contact" },
   ]
 
@@ -195,7 +196,46 @@ export default function Header() {
   }
 
   return (
-    <header className="bg-white shadow-sm border-b sticky top-0 z-50" suppressHydrationWarning>
+    <>
+      {/* Top Contact Bar */}
+        <div className="bg-humsafar-500 py-2 text-sm">
+        <div className="container mx-auto px-8">
+          <div className="flex items-center justify-between">
+            {/* Left: Contact Info */}
+             <div className="hidden md:flex items-center space-x-6 text-white">
+               <div className="flex items-center space-x-2">
+                 <Phone className="h-4 w-4" />
+                 <span>+92 332 7355681</span>
+               </div>
+               <div className="flex items-center space-x-2">
+                 <Mail className="h-4 w-4" />
+                 <span>info@humsafarforeverlove.com</span>
+               </div>
+             </div>
+            
+            {/* Right: Social Links */}
+            <div className="flex items-center space-x-4">
+              <a href="#" className="text-white hover:text-gray-200 transition-colors">
+                <Facebook className="h-4 w-4" />
+              </a>
+              <a href="#" className="text-white hover:text-gray-200 transition-colors">
+                <Twitter className="h-4 w-4" />
+              </a>
+              <a href="#" className="text-white hover:text-gray-200 transition-colors">
+                <Instagram className="h-4 w-4" />
+              </a>
+              <a href="#" className="text-white hover:text-gray-200 transition-colors">
+                <Linkedin className="h-4 w-4" />
+              </a>
+            </div>
+          </div>
+        </div>
+       </div>
+       
+       
+       
+       {/* Main Header */}
+      <header className="bg-white shadow-sm sticky top-0 z-50" suppressHydrationWarning>
       <div className="container mx-auto px-4" suppressHydrationWarning>
         <div className="flex items-center justify-between h-28" suppressHydrationWarning>
           {/* Left: Logo */}
@@ -443,5 +483,6 @@ export default function Header() {
         </div>
       )}
     </header>
+    </>
   );
 }

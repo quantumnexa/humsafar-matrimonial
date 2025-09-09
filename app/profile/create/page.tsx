@@ -152,7 +152,7 @@ export default function CreateProfilePage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="phone">Phone Number</Label>
-                    <Input id="phone" name="phone" type="tel" placeholder="+92 300 1234567" required />
+                    <Input id="phone" name="phone" type="tel" placeholder="+92 332 7355681" required />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="dateOfBirth">Date of Birth</Label>
