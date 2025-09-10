@@ -5,6 +5,34 @@ import { createClient } from '@supabase/supabase-js'
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   
+  // Handle canonical URL redirects and duplicate content prevention
+  // Remove trailing slashes (except root)
+  if (pathname !== '/' && pathname.endsWith('/')) {
+    const url = request.nextUrl.clone()
+    url.pathname = pathname.slice(0, -1)
+    return NextResponse.redirect(url, 301)
+  }
+  
+  // Handle common duplicate content patterns
+  if (pathname === '/index' || pathname === '/home') {
+    const url = request.nextUrl.clone()
+    url.pathname = '/'
+    return NextResponse.redirect(url, 301)
+  }
+  
+  // Normalize case for certain paths
+  if (pathname === '/PROFILES') {
+    const url = request.nextUrl.clone()
+    url.pathname = '/profiles'
+    return NextResponse.redirect(url, 301)
+  }
+  
+  if (pathname === '/PACKAGES') {
+    const url = request.nextUrl.clone()
+    url.pathname = '/packages'
+    return NextResponse.redirect(url, 301)
+  }
+  
   // Check if user is trying to access regular user areas while being admin
   if (pathname === "/" || pathname === "/profiles" || pathname === "/packages" || pathname === "/contact" || pathname === "/success-stories") {
     const adminAuth = request.cookies.get("humsafar_admin_auth")

@@ -1636,7 +1636,7 @@ export default function DashboardPage() {
                               <Input
                                 value={profileData.phone}
                                 onChange={(e) => handleInputChange("phone", e.target.value)}
-                                placeholder="Enter your phone number"
+                                placeholder="e.g., +92 300 1234567 or 03001234567"
                                 className="border-humsafar-200 focus:border-humsafar-500"
                               />
                             </div>
@@ -1653,7 +1653,7 @@ export default function DashboardPage() {
                             <Input
                               value={profileData.religion}
                               onChange={(e) => handleInputChange("religion", e.target.value)}
-                              placeholder="Enter your religion"
+                              placeholder="e.g., Islam, Christianity, Hinduism, Judaism"
                             />
                           </div>
                           <div>
@@ -1661,7 +1661,7 @@ export default function DashboardPage() {
                             <Input
                               value={profileData.sect}
                               onChange={(e) => handleInputChange("sect", e.target.value)}
-                              placeholder="Enter your sect"
+                              placeholder="e.g., Sunni, Shia, Catholic, Protestant"
                             />
                           </div>
                           <div>
@@ -1669,7 +1669,7 @@ export default function DashboardPage() {
                             <Input
                               value={profileData.caste}
                               onChange={(e) => handleInputChange("caste", e.target.value)}
-                              placeholder="Enter your caste"
+                              placeholder="e.g., Rajput, Sheikh, Arain, Jatt"
                             />
                           </div>
                           <div>
@@ -1677,7 +1677,7 @@ export default function DashboardPage() {
                             <Input
                               value={profileData.motherTongue}
                               onChange={(e) => handleInputChange("motherTongue", e.target.value)}
-                              placeholder="Enter your mother tongue"
+                              placeholder="e.g., Urdu, Punjabi, English, Arabic"
                             />
                           </div>
                           <div>
@@ -1692,7 +1692,7 @@ export default function DashboardPage() {
                                   handleInputChange("haveChildren", "no")
                                 }
                               }}
-                              placeholder="e.g., Never Married, Single, Divorced, Widowed"
+                              placeholder="e.g., Never Married, Divorced, Widowed, Separated"
                             />
                           </div>
                           <div>
@@ -1702,7 +1702,7 @@ export default function DashboardPage() {
                               onValueChange={(value) => handleInputChange("haveChildren", value)}
                             >
                               <SelectTrigger>
-                                <SelectValue placeholder="Select option" />
+                                <SelectValue placeholder="Do you have children?" />
                               </SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="yes">Yes</SelectItem>
@@ -1774,7 +1774,7 @@ export default function DashboardPage() {
                             <Input
                               value={profileData.country}
                               onChange={(e) => handleInputChange("country", e.target.value)}
-                              placeholder="Enter your country"
+                              placeholder="e.g., Pakistan, India, UAE, USA, UK"
                             />
                           </div>
                           <div>
@@ -1782,7 +1782,7 @@ export default function DashboardPage() {
                             <Input
                               value={profileData.state}
                               onChange={(e) => handleInputChange("state", e.target.value)}
-                              placeholder="Enter your state or province"
+                              placeholder="e.g., Punjab, Sindh, KPK, Balochistan"
                             />
                           </div>
                           <div>
@@ -1790,7 +1790,7 @@ export default function DashboardPage() {
                             <Input
                               value={profileData.city}
                               onChange={(e) => handleInputChange("city", e.target.value)}
-                              placeholder="Enter your city"
+                              placeholder="e.g., Karachi, Lahore, Islamabad, Rawalpindi"
                             />
                           </div>
                           <div>
@@ -1798,7 +1798,7 @@ export default function DashboardPage() {
                             <Input
                               value={profileData.area}
                               onChange={(e) => handleInputChange("area", e.target.value)}
-                              placeholder="Enter area/locality"
+                              placeholder="e.g., DHA, Gulshan, Model Town, F-7"
                             />
                           </div>
                           <div>
@@ -1806,7 +1806,7 @@ export default function DashboardPage() {
                             <Input
                               value={profileData.nationality}
                               onChange={(e) => handleInputChange("nationality", e.target.value)}
-                              placeholder="Enter your nationality"
+                              placeholder="e.g., Pakistani, Indian, American, British"
                             />
                           </div>
                           <div>
@@ -1814,7 +1814,7 @@ export default function DashboardPage() {
                             <Input
                               value={profileData.ethnicity}
                               onChange={(e) => handleInputChange("ethnicity", e.target.value)}
-                              placeholder="Enter your ethnicity"
+                              placeholder="e.g., Punjabi, Sindhi, Pashtun, Baloch"
                             />
                           </div>
                         </div>

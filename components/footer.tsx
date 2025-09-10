@@ -15,55 +15,55 @@ export default function Footer() {
           <div>
             <ul className="space-y-2 text-humsafar-100">
               <li className="flex items-center">
-                <span className="w-0 h-0 border-l-[6px] border-l-white border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent mr-3 flex-shrink-0"></span>
+                <img src="/bullet.svg" alt="bullet" className="w-3 h-3 mr-3 flex-shrink-0" />
                 <Link href="/match-making-process" className="hover:text-white transition-colors">
                   Match Making Process
                 </Link>
               </li>
               <li className="flex items-center">
-                <span className="w-0 h-0 border-l-[6px] border-l-white border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent mr-3 flex-shrink-0"></span>
+                <img src="/bullet.svg" alt="bullet" className="w-3 h-3 mr-3 flex-shrink-0" />
                 <Link href="/about" className="hover:text-white transition-colors">
                   About 
                 </Link>
               </li>
               <li className="flex items-center">
-                <span className="w-0 h-0 border-l-[6px] border-l-white border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent mr-3 flex-shrink-0"></span>
+                <img src="/bullet.svg" alt="bullet" className="w-3 h-3 mr-3 flex-shrink-0" />
                 <Link href="/terms-of-use" className="hover:text-white transition-colors">
                   Terms of Use
                 </Link>
               </li>
               <li className="flex items-center">
-                <span className="w-0 h-0 border-l-[6px] border-l-white border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent mr-3 flex-shrink-0"></span>
+                <img src="/bullet.svg" alt="bullet" className="w-3 h-3 mr-3 flex-shrink-0" />
                 <Link href="/shaadee-alerts" className="hover:text-white transition-colors">
                    Alerts
                 </Link>
               </li>
               <li className="flex items-center">
-                <span className="w-0 h-0 border-l-[6px] border-l-white border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent mr-3 flex-shrink-0"></span>
+                <img src="/bullet.svg" alt="bullet" className="w-3 h-3 mr-3 flex-shrink-0" />
                 <Link href="/how-do-we-stand-out" className="hover:text-white transition-colors">
                   How do we stand out?
                 </Link>
               </li>
               <li className="flex items-center">
-                <span className="w-0 h-0 border-l-[6px] border-l-white border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent mr-3 flex-shrink-0"></span>
+                <img src="/bullet.svg" alt="bullet" className="w-3 h-3 mr-3 flex-shrink-0" />
                 <Link href="/refund-policy" className="hover:text-white transition-colors">
                   Refund Policy
                 </Link>
               </li>
               <li className="flex items-center">
-                <span className="w-0 h-0 border-l-[6px] border-l-white border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent mr-3 flex-shrink-0"></span>
+                <img src="/bullet.svg" alt="bullet" className="w-3 h-3 mr-3 flex-shrink-0" />
                 <Link href="/privacy-policy" className="hover:text-white transition-colors">
                   Privacy Policy
                 </Link>
               </li>
               <li className="flex items-center">
-                <span className="w-0 h-0 border-l-[6px] border-l-white border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent mr-3 flex-shrink-0"></span>
+                <img src="/bullet.svg" alt="bullet" className="w-3 h-3 mr-3 flex-shrink-0" />
                 <Link href="/100-secure" className="hover:text-white transition-colors">
                   100% Secure
                 </Link>
               </li>
               <li className="flex items-center">
-                <span className="w-0 h-0 border-l-[6px] border-l-white border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent mr-3 flex-shrink-0"></span>
+                <img src="/bullet.svg" alt="bullet" className="w-3 h-3 mr-3 flex-shrink-0" />
                 <Link href="/match-guarantee" className="hover:text-white transition-colors">
                   Match Guarantee
                 </Link>
@@ -73,49 +73,49 @@ export default function Footer() {
           <div>
             <ul className="space-y-2 text-humsafar-100">
               <li className="flex items-center">
-                <span className="w-0 h-0 border-l-[6px] border-l-white border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent mr-3 flex-shrink-0"></span>
+                <img src="/bullet.svg" alt="bullet" className="w-3 h-3 mr-3 flex-shrink-0" />
                 <Link href="/we-care" className="hover:text-white transition-colors">
                   We Care
                 </Link>
               </li>
               <li className="flex items-center">
-                <span className="w-0 h-0 border-l-[6px] border-l-white border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent mr-3 flex-shrink-0"></span>
+                <img src="/bullet.svg" alt="bullet" className="w-3 h-3 mr-3 flex-shrink-0" />
                 <Link href="/word-from-ceo" className="hover:text-white transition-colors">
                   Word from the CEO
                 </Link>
               </li>
               <li className="flex items-center">
-                <span className="w-0 h-0 border-l-[6px] border-l-white border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent mr-3 flex-shrink-0"></span>
+                <img src="/bullet.svg" alt="bullet" className="w-3 h-3 mr-3 flex-shrink-0" />
                 <Link href="/technical-issues" className="hover:text-white transition-colors">
                   Technical Issues
                 </Link>
               </li>
               <li className="flex items-center">
-                <span className="w-0 h-0 border-l-[6px] border-l-white border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent mr-3 flex-shrink-0"></span>
+                <img src="/bullet.svg" alt="bullet" className="w-3 h-3 mr-3 flex-shrink-0" />
                 <Link href="/how-to-use-shaadee" className="hover:text-white transition-colors">
                   How to use 
                 </Link>
               </li>
               <li className="flex items-center">
-                <span className="w-0 h-0 border-l-[6px] border-l-white border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent mr-3 flex-shrink-0"></span>
+                <img src="/bullet.svg" alt="bullet" className="w-3 h-3 mr-3 flex-shrink-0" />
                 <Link href="/bank-accounts" className="hover:text-white transition-colors">
                   Bank Accounts
                 </Link>
               </li>
               <li className="flex items-center">
-                <span className="w-0 h-0 border-l-[6px] border-l-white border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent mr-3 flex-shrink-0"></span>
+                <img src="/bullet.svg" alt="bullet" className="w-3 h-3 mr-3 flex-shrink-0" />
                 <Link href="/faqs" className="hover:text-white transition-colors">
                   FAQs
                 </Link>
               </li>
               <li className="flex items-center">
-                <span className="w-0 h-0 border-l-[6px] border-l-white border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent mr-3 flex-shrink-0"></span>
+                <img src="/bullet.svg" alt="bullet" className="w-3 h-3 mr-3 flex-shrink-0" />
                 <Link href="/blog" className="hover:text-white transition-colors">
                   Blog
                 </Link>
               </li>
               <li className="flex items-center">
-                <span className="w-0 h-0 border-l-[6px] border-l-white border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent mr-3 flex-shrink-0"></span>
+                <img src="/bullet.svg" alt="bullet" className="w-3 h-3 mr-3 flex-shrink-0" />
                 <Link href="/contact" className="hover:text-white transition-colors">
                   Contact Us
                 </Link>

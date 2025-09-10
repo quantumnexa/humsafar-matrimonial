@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { GeistSans } from 'geist/font/sans'
 import { GeistMono } from 'geist/font/mono'
+import { StructuredData, generateOrganizationSchema, generateWebsiteSchema } from '../components/seo/structured-data'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -29,12 +30,20 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
+    site: '@HumsafarLove',
+    creator: '@HumsafarLove',
     title: 'Humsafar Forever Love - Premium Pakistani Matrimonial Service',
     description: 'Find your perfect life partner with Humsafar Forever Love. Pakistan\'s most trusted matrimonial platform.',
     images: ['/humsafar-logo.png'],
   },
   verification: {
     google: 'your-google-verification-code',
+  },
+  other: {
+    'fb:app_id': 'your-facebook-app-id',
+    'og:locale:alternate': 'ur_PK',
+    'article:author': 'Humsafar Forever Love',
+    'og:site_name': 'Humsafar Forever Love',
   },
   alternates: {
     canonical: 'https://humsafarforeverlove.com',
@@ -58,33 +67,8 @@ export default function RootLayout({
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png" />
         <link rel="manifest" href="/favicon/site.webmanifest" />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Organization",
-              "name": "Humsafar Forever Love",
-              "url": "https://humsafarforeverlove.com",
-              "logo": "https://humsafarforeverlove.com/humsafar-logo.png",
-              "description": "Pakistan's most trusted matrimonial platform connecting hearts across the globe",
-              "sameAs": [
-                "https://www.facebook.com/humsafarforeverlove",
-                "https://www.instagram.com/humsafarforeverlove"
-              ],
-              "contactPoint": {
-                "@type": "ContactPoint",
-                "contactType": "Customer Service",
-                "areaServed": "PK",
-                "availableLanguage": ["English", "Urdu"]
-              },
-              "address": {
-                "@type": "PostalAddress",
-                "addressCountry": "PK"
-              }
-            })
-          }}
-        />
+        <StructuredData data={generateOrganizationSchema()} />
+        <StructuredData data={generateWebsiteSchema()} />
         <style>{`
 html {
   font-family: ${GeistSans.style.fontFamily};

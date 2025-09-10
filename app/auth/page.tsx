@@ -627,21 +627,13 @@ export default function AuthPage() {
                       <Label htmlFor="city" className="text-sm font-medium text-gray-700">City</Label>
                       <div className="relative">
                         <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-humsafar-500 h-5 w-5" />
-                        <Select name="city" required>
-                          <SelectTrigger className="pl-12 pr-4 py-3 border-2 border-gray-200 focus:border-humsafar-500 focus:ring-2 focus:ring-humsafar-100 rounded-lg transition-all duration-200 hover:border-gray-300">
-                            <SelectValue placeholder="Select your city" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="karachi">Karachi</SelectItem>
-                            <SelectItem value="lahore">Lahore</SelectItem>
-                            <SelectItem value="islamabad">Islamabad</SelectItem>
-                            <SelectItem value="rawalpindi">Rawalpindi</SelectItem>
-                            <SelectItem value="faisalabad">Faisalabad</SelectItem>
-                            <SelectItem value="multan">Multan</SelectItem>
-                            <SelectItem value="peshawar">Peshawar</SelectItem>
-                            <SelectItem value="quetta">Quetta</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <Input 
+                          id="city" 
+                          name="city" 
+                          placeholder="Enter your city" 
+                          className="pl-12 pr-4 py-3 border-2 border-gray-200 focus:border-humsafar-500 focus:ring-2 focus:ring-humsafar-100 rounded-lg transition-all duration-200 hover:border-gray-300" 
+                          required 
+                        />
                       </div>
                     </div>
                     <div className="space-y-2">

@@ -6,13 +6,19 @@ const nextConfig = {
     NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
   },
   images: {
-    domains: ['znmrwfqycwlnrefksdaq.supabase.co'],
+    domains: ['znmrwfqycwlnrefksdaq.supabase.co', 'images.unsplash.com'],
     remotePatterns: [
       {
         protocol: 'https',
         hostname: 'znmrwfqycwlnrefksdaq.supabase.co',
         port: '',
         pathname: '/storage/v1/object/public/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        port: '',
+        pathname: '/**',
       },
     ],
   },

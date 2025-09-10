@@ -6,8 +6,42 @@ import { Button } from "@/components/ui/button"
 import { Heart, Calendar, MapPin, Quote, Star, Share2, ThumbsUp } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
+import { StructuredData, generateArticleSchema, generateBreadcrumbSchema } from "@/components/seo/structured-data"
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: 'Success Stories - Real Pakistani Couples | Humsafar Forever Love',
+  description: 'Read inspiring success stories of Pakistani couples who found their perfect match through Humsafar Forever Love. Real testimonials from happy married couples.',
+  keywords: 'Pakistani success stories, matrimonial success, happy couples, marriage testimonials, Pakistani weddings, love stories',
+  openGraph: {
+    title: 'Success Stories - Real Pakistani Couples | Humsafar Forever Love',
+    description: 'Read inspiring success stories of Pakistani couples who found their perfect match through Humsafar Forever Love.',
+    type: 'website',
+    images: [{
+      url: '/wedding-couple-hero-1.jpg',
+      width: 1200,
+      height: 630,
+      alt: 'Happy Pakistani couples success stories'
+    }]
+  },
+  alternates: {
+    canonical: 'https://humsafarforeverlove.com/success-stories'
+  }
+}
 
 export default function SuccessStoriesPage() {
+  const breadcrumbItems = [
+    { name: 'Home', url: 'https://humsafarforeverlove.com' },
+    { name: 'Success Stories', url: 'https://humsafarforeverlove.com/success-stories' }
+  ];
+
+  const articleSchema = generateArticleSchema({
+    title: 'Success Stories - Real Pakistani Couples',
+    description: 'Inspiring success stories of Pakistani couples who found their perfect match through Humsafar Forever Love matrimonial service.',
+    datePublished: '2024-01-01',
+    dateModified: new Date().toISOString(),
+    image: 'https://humsafarforeverlove.com/wedding-couple-hero-1.jpg'
+  });
   const successStories = [
     {
       id: 1,
@@ -18,8 +52,8 @@ export default function SuccessStoriesPage() {
         groomAge: 29,
         brideCity: "Karachi",
         groomCity: "Karachi",
-        brideImage: "/placeholder.svg?height=150&width=150",
-        groomImage: "/placeholder.svg?height=150&width=150",
+        brideImage: "https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?w=150&h=150&fit=crop&crop=face",
+        groomImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
       },
       weddingDate: "December 15, 2023",
       story:
@@ -39,8 +73,8 @@ export default function SuccessStoriesPage() {
         groomAge: 27,
         brideCity: "Lahore",
         groomCity: "Islamabad",
-        brideImage: "/placeholder.svg?height=150&width=150",
-        groomImage: "/placeholder.svg?height=150&width=150",
+        brideImage: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face",
+        groomImage: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
       },
       weddingDate: "October 22, 2023",
       story:
@@ -60,8 +94,8 @@ export default function SuccessStoriesPage() {
         groomAge: 31,
         brideCity: "Faisalabad",
         groomCity: "Multan",
-        brideImage: "/placeholder.svg?height=150&width=150",
-        groomImage: "/placeholder.svg?height=150&width=150",
+        brideImage: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+        groomImage: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
       },
       weddingDate: "September 8, 2023",
       story:
@@ -81,8 +115,8 @@ export default function SuccessStoriesPage() {
         groomAge: 28,
         brideCity: "Peshawar",
         groomCity: "Peshawar",
-        brideImage: "/placeholder.svg?height=150&width=150",
-        groomImage: "/placeholder.svg?height=150&width=150",
+        brideImage: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=150&h=150&fit=crop&crop=face",
+        groomImage: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face",
       },
       weddingDate: "November 30, 2023",
       story:
@@ -102,8 +136,8 @@ export default function SuccessStoriesPage() {
         groomAge: 30,
         brideCity: "Sialkot",
         groomCity: "Gujranwala",
-        brideImage: "/placeholder.svg?height=150&width=150",
-        groomImage: "/placeholder.svg?height=150&width=150",
+        brideImage: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=150&h=150&fit=crop&crop=face",
+        groomImage: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&h=150&fit=crop&crop=face",
       },
       weddingDate: "August 18, 2023",
       story:
@@ -123,8 +157,8 @@ export default function SuccessStoriesPage() {
         groomAge: 26,
         brideCity: "Rawalpindi",
         groomCity: "Islamabad",
-        brideImage: "/placeholder.svg?height=150&width=150",
-        groomImage: "/placeholder.svg?height=150&width=150",
+        brideImage: "https://images.unsplash.com/photo-1494790108755-2616c9c0b8d3?w=150&h=150&fit=crop&crop=face",
+        groomImage: "https://images.unsplash.com/photo-1463453091185-61582044d556?w=150&h=150&fit=crop&crop=face",
       },
       weddingDate: "July 5, 2023",
       story:
@@ -139,6 +173,8 @@ export default function SuccessStoriesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <StructuredData data={generateBreadcrumbSchema(breadcrumbItems)} />
+      <StructuredData data={articleSchema} />
       <Header />
 
       <main className="container mx-auto px-4 py-8">
@@ -293,7 +329,7 @@ export default function SuccessStoriesPage() {
         </div>
 
         {/* Call to Action */}
-        <div className="text-center mt-16 bg-gradient-to-r from-humsafar-600 to-humsafar700 rounded-2xl p-8 sm:p-12 text-white">
+        <div className="text-center mt-16 bg-humsafar-600 rounded-2xl p-8 sm:p-12 text-white">
           <Heart className="h-12 w-12 mx-auto mb-6 fill-current" />
           <h2 className="text-2xl sm:text-3xl font-bold mb-4">Ready to Write Your Own Success Story?</h2>
           <p className="text-humsafar-100 mb-8 max-w-2xl mx-auto">
