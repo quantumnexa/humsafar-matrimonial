@@ -50,7 +50,7 @@ export default function ContactLayout({
   return (
     <>
       <StructuredData data={generateBreadcrumbSchema(breadcrumbItems)} />
-      <StructuredData data={generateLocalBusinessSchema(localBusinessData)} />
+      <StructuredData data={generateLocalBusinessSchema()} />
       {children}
     </>
   );

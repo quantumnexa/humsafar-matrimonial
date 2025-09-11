@@ -15,7 +15,7 @@ export interface UserSubscription {
   features: any
   contacts_limit: number
   contacts_used: number
-  admin_notes?: string
+
   rejection_reason?: string
   created_at: string
   updated_at: string

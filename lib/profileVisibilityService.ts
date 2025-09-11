@@ -118,83 +118,9 @@ export class ProfileVisibilityService {
     }
   }
 
-  // Mark profiles as featured (admin function)
-  static async markProfileAsFeatured(profileId: string, isFeatured: boolean): Promise<boolean> {
-    try {
-      const { error } = await supabase
-        .from('user_profiles')
-        .update({ is_featured: isFeatured })
-        .eq('id', profileId)
-      
-      if (error) {
-        // Error marking profile as featured
-        return false
-      }
-      
-      return true
-    } catch (error) {
-      // Error marking profile as featured
-      return false
-    }
-  }
 
-  // Get all featured profiles for admin management
-  static async getAllFeaturedProfiles(): Promise<any[]> {
-    try {
-      // Use ProfileFilterService to get only approved profiles
-      const result = await ProfileFilterService.getFilteredProfiles({
-        currentUserId: null,
-        excludeCurrentUser: false,
-        isFeaturedSection: false
-      })
-      
-      return result.profiles || []
-    } catch (error) {
-      // Error getting all featured profiles
-      return []
-    }
-  }
 
-  // Set featured profiles to exactly 5 (admin function)
-  static async setFeaturedProfiles(profileIds: string[]): Promise<boolean> {
-    try {
-      // Get approved user IDs first
-      const approvedUserIds = await ProfileFilterService.getApprovedUserIds()
-      
-      // First, unmark all approved profiles as featured
-      if (approvedUserIds.length > 0) {
-        const { error: unmarkError } = await supabase
-          .from('user_profiles')
-          .update({ is_featured: false })
-          .in('user_id', approvedUserIds)
-        
-        if (unmarkError) {
-          // Error unmarking profiles
-          return false
-        }
-      }
-      
-      // Then mark the selected profiles as featured (only if they are approved)
-      if (profileIds.length > 0) {
-        const validProfileIds = profileIds.filter(id => approvedUserIds.includes(id))
-        
-        if (validProfileIds.length > 0) {
-          const { error: markError } = await supabase
-            .from('user_profiles')
-            .update({ is_featured: true })
-            .in('user_id', validProfileIds)
-          
-          if (markError) {
-            // Error marking profiles as featured
-            return false
-          }
-        }
-      }
-      
-      return true
-    } catch (error) {
-      // Error setting featured profiles
-      return false
-    }
-  }
+
+
+
 }

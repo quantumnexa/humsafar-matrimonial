@@ -13,7 +13,7 @@ import { ArrowLeft, User, Save } from "lucide-react"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
 import { supabase } from "@/lib/supabaseClient"
-import { calculateAge, isUserAdmin } from "@/lib/utils"
+import { calculateAge } from "@/lib/utils"
 import { UserSubscriptionService } from "@/lib/userSubscriptionService"
 
 export default function CreateProfilePage() {
@@ -38,13 +38,7 @@ export default function CreateProfilePage() {
         return
       }
 
-      // Check if user is an admin - if so, redirect to admin dashboard
-      const isAdmin = await isUserAdmin(user.id)
-      if (isAdmin) {
-        setError("Admin users should use the admin dashboard")
-        setLoading(false)
-        return
-      }
+
 
       const dateOfBirth = formData.get('dateOfBirth') as string
       const calculatedAge = calculateAge(dateOfBirth)

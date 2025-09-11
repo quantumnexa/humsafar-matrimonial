@@ -101,6 +101,5 @@ export const robotsDirectives = {
   // Payment/sensitive pages
   payment: 'noindex, nofollow',
   
-  // Admin/dashboard pages
-  admin: 'noindex, nofollow'
+  
 };

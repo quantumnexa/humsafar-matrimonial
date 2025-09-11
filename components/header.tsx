@@ -21,13 +21,17 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Heart, Menu, User, Settings, LogOut, Crown, Phone, Mail, Facebook, Twitter, Instagram, Linkedin } from "lucide-react"
 import { supabase } from "@/lib/supabaseClient"
-import { isUserAdmin } from "@/lib/utils"
+
+
+
 
 export default function Header() {
   const [user, setUser] = useState<any>(null)
   const [userProfile, setUserProfile] = useState<any>(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [isAdminUser, setIsAdminUser] = useState(false)
+
+
+
   const router = useRouter()
 
   const navigationItems = [
@@ -43,20 +47,6 @@ export default function Header() {
     // Get initial session
     const getInitialSession = async () => {
       try {
-        // Check for admin cookie first
-        if (typeof document !== 'undefined') {
-          const adminCookie = document.cookie
-            .split('; ')
-            .find(row => row.startsWith('humsafar_admin_auth='))
-          
-          if (adminCookie && adminCookie.split('=')[1] === 'true') {
-            setIsAdminUser(true)
-            setUser(null)
-            setUserProfile(null)
-            return
-          }
-        }
-
         // If we previously persisted session manually, restore it into Supabase on first load
         const persisted = localStorage.getItem('sb-auth-token')
         if (persisted) {
@@ -73,32 +63,19 @@ export default function Header() {
       const { data: { session } } = await supabase.auth.getSession()
       
       if (session?.user) {
-        // Check if user is an admin - if so, don't show them as logged in user
-        const isAdmin = await isUserAdmin(session.user.id)
+        setUser(session.user)
         
-        if (isAdmin) {
-          // Admin user - set admin state but don't show as regular user
-          setIsAdminUser(true)
-          setUser(null)
-          setUserProfile(null)
-        } else {
-          // Regular user - show as logged in
-          setIsAdminUser(false)
-          setUser(session.user)
-          
-          // Fetch user profile data
-          const { data: profile } = await supabase
-            .from('user_profiles')
-            .select('*')
-            .eq('user_id', session.user.id)
-            .single()
-          
-          setUserProfile(profile)
-        }
+        // Fetch user profile data
+        const { data: profile } = await supabase
+          .from('user_profiles')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .single()
+        
+        setUserProfile(profile)
       } else {
         setUser(null)
         setUserProfile(null)
-        setIsAdminUser(false)
       }
     }
 
@@ -113,27 +90,14 @@ export default function Header() {
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       
       if (session?.user) {
-        // Check if user is an admin - if so, don't show them as logged in user
-        const isAdmin = await isUserAdmin(session.user.id)
+        setUser(session.user)
         
-        if (isAdmin) {
-          // Admin user - set admin state but don't show as regular user
-          setIsAdminUser(true)
-          setUser(null)
-          setUserProfile(null)
-        } else {
-          // Regular user - show as logged in
-          setIsAdminUser(false)
-          setUser(session.user)
-          
-          // Fetch user profile data
-          const { data: profile } = await supabase.from("user_profiles").select("*").eq("user_id", session.user.id).single()
-          setUserProfile(profile)
-        }
+        // Fetch user profile data
+        const { data: profile } = await supabase.from("user_profiles").select("*").eq("user_id", session.user.id).single()
+        setUserProfile(profile)
       } else {
         setUser(null)
         setUserProfile(null)
-        setIsAdminUser(false)
       }
     })
 
@@ -148,26 +112,7 @@ export default function Header() {
     router.push('/')
   }
 
-  const handleSwitchToRegularUser = async () => {
-    try {
-      // Clear admin authentication
-      if (typeof window !== 'undefined') {
-        // Clear admin cookie
-        document.cookie = "humsafar_admin_auth=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"
-        // Clear admin localStorage
-        localStorage.removeItem("humsafar_admin_auth")
-      }
-      
-      // Clear any existing Supabase session
-      await supabase.auth.signOut()
-      
-      // Refresh the page to reset all auth states
-      window.location.href = '/'
-    } catch (error) {
-      // Fallback: just refresh the page
-      window.location.href = '/'
-    }
-  }
+
 
   const getInitials = (firstName: string, middleName?: string, lastName?: string) => {
     if (!firstName) return "U"
@@ -334,29 +279,6 @@ export default function Header() {
                   </DropdownMenu>
                 </div>
               </>
-            ) : isAdminUser ? (
-              <>
-                {/* Admin user interface */}
-                <div className="hidden sm:flex items-center space-x-3">
-                  <Link href="/admin/dashboard" legacyBehavior>
-                    <Button
-                      variant="outline"
-                      className="border-humsafar-500 text-humsafar-600 hover:bg-humsafar-500 hover:text-white bg-transparent"
-                    >
-                      <User className="h-4 w-4 mr-2" />
-                      Admin Dashboard
-                    </Button>
-                  </Link>
-                  <Button
-                    variant="outline"
-                    onClick={handleSwitchToRegularUser}
-                    className="border-humsafar-500 text-humsafar-600 hover:bg-humsafar-500 hover:text-white bg-transparent"
-                  >
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Switch to User Mode
-                  </Button>
-                </div>
-              </>
             ) : (
               <>
                 <Link href="/auth" className="hidden sm:block" legacyBehavior>
@@ -419,32 +341,6 @@ export default function Header() {
                           Log out
                         </Button>
                       </div>
-                    ) : isAdminUser ? (
-                      <div className="space-y-4">
-                        <div className="text-sm text-gray-600">Admin Mode</div>
-                        <Link
-                          href="/admin/dashboard"
-                          className="flex items-center space-x-2 text-gray-900 hover:text-humsafar-500"
-                          onClick={() => setMobileMenuOpen(false)}
-                          legacyBehavior
-                        >
-                          <a className="flex items-center space-x-2">
-                            <User className="h-5 w-5" />
-                            <span>Admin Dashboard</span>
-                          </a>
-                        </Link>
-                        <Button
-                          variant="ghost"
-                          className="w-full justify-start p-0 h-auto text-gray-900 hover:text-humsafar-500"
-                          onClick={() => {
-                            handleSwitchToRegularUser()
-                            setMobileMenuOpen(false)
-                          }}
-                        >
-                          <LogOut className="h-5 w-5 mr-2" />
-                          Switch to User Mode
-                        </Button>
-                      </div>
                     ) : (
                       <div className="space-y-4">
                         <Link href="/auth" onClick={() => setMobileMenuOpen(false)} legacyBehavior>
@@ -473,15 +369,7 @@ export default function Header() {
           </div>
         </div>
       )}
-      {isAdminUser && (
-        <div className="bg-yellow-600 text-white overflow-hidden relative">
-          <div className="container mx-auto px-4 py-2">
-            <div className="whitespace-nowrap animate-marquee">
-              Admin Mode Active - You can switch to User Mode anytime
-            </div>
-          </div>
-        </div>
-      )}
+
     </header>
     </>
   );

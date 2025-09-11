@@ -13,7 +13,7 @@ import { ArrowLeft, User, Save, Loader2 } from "lucide-react"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
 import { supabase } from "@/lib/supabaseClient"
-import { calculateAge, isUserAdmin } from "@/lib/utils"
+import { calculateAge } from "@/lib/utils"
 
 export default function EditProfilePage() {
   const [loading, setLoading] = useState(false)
@@ -35,13 +35,7 @@ export default function EditProfilePage() {
         return
       }
 
-      // Check if user is an admin - if so, redirect to admin dashboard
-      const isAdmin = await isUserAdmin(user.id)
-      if (isAdmin) {
-        alert("Admin users should use the admin dashboard")
-        router.push("/admin/dashboard")
-        return
-      }
+
 
       const { data: profileData, error } = await supabase
         .from('user_profiles')
@@ -311,4 +305,4 @@ export default function EditProfilePage() {
       <Footer />
     </div>
   );
-} 
+}

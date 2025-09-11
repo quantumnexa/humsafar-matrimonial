@@ -17,7 +17,7 @@ import Header from "@/components/header"
 import Footer from "@/components/footer"
 import { supabase } from "@/lib/supabaseClient"
 import { useRouter } from "next/navigation"
-import { calculateAge, isUserAdmin } from "@/lib/utils"
+import { calculateAge } from "@/lib/utils"
 
 // Supabase storage bucket for profile photos
 const PROFILE_PHOTOS_BUCKET = "humsafar-user-images"
@@ -151,13 +151,7 @@ export default function DashboardPage() {
         return
       }
 
-      // Check if user is an admin - if so, redirect to admin dashboard
-      const isAdmin = await isUserAdmin(session.user.id)
-      if (isAdmin) {
-        alert("Admin users should use the admin dashboard")
-        router.push("/admin/dashboard")
-        return
-      }
+
 
       setIsAuthenticated(true)
       setIsLoading(false)
@@ -240,11 +234,8 @@ export default function DashboardPage() {
       const uid = sessionData.session?.user?.id ?? null
       
       if (uid) {
-        // Check if user is an admin - if so, don't set userId
-        const isAdmin = await isUserAdmin(uid)
-        if (!isAdmin) {
-          setUserId(uid)
-        }
+        // Set userId for profile view tracking
+         setUserId(uid)
       }
 
       if (!uid) return

@@ -52,20 +52,6 @@ export default function HomePage() {
   useEffect(() => {
     setIsClient(true)
     
-    // Auto-logout admin users when visiting homepage
-    const adminAuth = localStorage.getItem("humsafar_admin_auth")
-    if (adminAuth === "true") {
-      // Clear admin auth
-      localStorage.removeItem("humsafar_admin_auth")
-      document.cookie = "humsafar_admin_auth=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"
-      
-      // Clear any other admin-related data
-      localStorage.removeItem("supabase.auth.token")
-      
-      // Optional: Show a toast or redirect
-      // Admin session cleared - redirected to homepage
-    }
-    
     // Check user authentication
     checkAuthentication()
   }, [])
