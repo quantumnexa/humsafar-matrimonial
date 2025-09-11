@@ -7,8 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Eye, EyeOff, Mail, Lock, Shield } from "lucide-react"
-import Header from "@/components/header"
-import Footer from "@/components/footer"
 import { supabase } from "@/lib/supabaseClient"
 
 // Admin credentials
@@ -80,11 +78,29 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-humsafar-50 to-white">
-      <Header />
-      <div className="flex items-center justify-center py-16 px-4">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b border-humsafar-200">
+        <div className="px-6 py-6">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center space-x-4">
+              <img 
+                src="/humsafar-logo.png" 
+                alt="Humsafar Forever Love" 
+                className="h-10 w-auto"
+              />
+            </div>
+            <div className="flex items-center space-x-4">
+              <span className="text-sm text-gray-600">Secure Admin Access</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <div className="flex-1 flex items-center justify-center px-4 py-12 bg-humsafar-50">
         <div className="w-full max-w-md">
-          <Card className="border-humsafar-100">
+          <Card className="border-humsafar-50 shadow-sm">
             <CardHeader className="text-center">
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-humsafar-100">
                 <Shield className="h-6 w-6 text-humsafar-600" />
@@ -103,7 +119,7 @@ export default function AdminLoginPage() {
                       name="email" 
                       type="email" 
                       placeholder="Enter admin email" 
-                      className="pl-12 pr-4 py-3 border-2 border-gray-200 focus:border-humsafar-500 focus:ring-2 focus:ring-humsafar-100 rounded-lg transition-all duration-200 hover:border-gray-300" 
+                      className="pl-12 pr-4 py-3 border border-gray-100 focus:border-humsafar-400 focus:ring-2 focus:ring-humsafar-50 rounded-lg transition-all duration-200 hover:border-gray-200" 
                       required 
                     />
                   </div>
@@ -117,7 +133,7 @@ export default function AdminLoginPage() {
                       name="password"
                       type={showPassword ? "text" : "password"}
                       placeholder="Enter admin password"
-                      className="pl-12 pr-12 py-3 border-2 border-gray-200 focus:border-humsafar-500 focus:ring-2 focus:ring-humsafar-100 rounded-lg transition-all duration-200 hover:border-gray-300"
+                      className="pl-12 pr-12 py-3 border border-gray-100 focus:border-humsafar-400 focus:ring-2 focus:ring-humsafar-50 rounded-lg transition-all duration-200 hover:border-gray-200"
                       required
                     />
                     <button
@@ -131,7 +147,7 @@ export default function AdminLoginPage() {
                 </div>
                 
                 {error && (
-                  <div className="text-red-500 text-sm bg-red-50 p-3 rounded-lg border border-red-200">
+                  <div className="text-[#ee406d] text-sm bg-[#ee406d]/5 p-3 rounded-lg border border-[#ee406d]/20">
                     <div className="font-medium mb-1">Authentication Error:</div>
                     <div>{error}</div>
                   </div>
@@ -158,24 +174,11 @@ export default function AdminLoginPage() {
                 </p>
               </div>
               
-              <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                <div className="flex items-center">
-                  <Shield className="h-4 w-4 text-amber-600 mr-2" />
-                  <div className="text-xs text-amber-700">
-                    <p className="font-medium mb-1">Admin Access Only</p>
-                    <p>This is a secure admin area. Only authorized personnel should access this page.</p>
-                    <p className="mt-2 font-mono text-amber-600">
-                      Admin Email: info@humsafarforeverlove.com<br/>
-                      Use your Supabase account password
-                    </p>
-                  </div>
-                </div>
-              </div>
+
             </CardContent>
           </Card>
         </div>
       </div>
-      <Footer />
     </div>
   )
 }

@@ -38,7 +38,7 @@ export default function CEONotePage() {
                 <MessageCircle className="w-5 h-5 mr-2" />
                 Read Message
               </Button>
-              <Button size="lg" variant="outline" className="border-white/20 text-white hover:bg-white/10">
+              <Button size="lg" variant="outline" className="bg-transparent border-white/20 text-white hover:bg-white/10">
                 Our Vision
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>

@@ -19,7 +19,8 @@ import {
   LogOut,
   AlertTriangle,
   TrendingUp,
-  Banknote
+  Banknote,
+  Shield
 } from 'lucide-react';
 
 interface AdminSession {
@@ -135,10 +136,10 @@ export default function AdminDashboard() {
   const sidebarItems = [
     { icon: Home, label: 'Dashboard', href: '/admin/dashboard', active: true },
     { icon: Users, label: 'Profiles', href: '/admin/profiles' },
-    { icon: Heart, label: 'Matchmakers', href: '/admin/matchmakers' },
+    { icon: UserCheck, label: 'Users', href: '/admin/users' },
     { icon: Banknote, label: 'Payments', href: '/admin/payments' },
+    { icon: Shield, label: 'Content', href: '/admin/content' },
     { icon: BarChart3, label: 'Analytics', href: '/admin/analytics' },
-    { icon: FileText, label: 'Reports', href: '/admin/reports' },
     { icon: Gift, label: 'Promo Codes', href: '/admin/promo-codes' },
     { icon: Settings, label: 'Settings', href: '/admin/settings' },
   ];
@@ -146,7 +147,7 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'w-64' : 'w-16'} bg-gradient-to-b from-humsafar-600 to-humsafar-700 shadow-xl transition-all duration-300 flex flex-col`}>
+      <div className={`${sidebarOpen ? 'w-64' : 'w-16'} bg-humsafar-500 shadow-xl transition-all duration-300 flex flex-col`}>
         {/* Sidebar Header */}
         <div className="p-4 border-b border-humsafar-500/30">
           <div className="flex items-center justify-between">
@@ -193,7 +194,7 @@ export default function AdminDashboard() {
           <Button
             onClick={handleLogout}
             variant="ghost"
-            className="w-full justify-start text-red-200 hover:text-white hover:bg-red-500/20"
+            className="w-full justify-start text-red-200 hover:text-white hover:bg-[#ee406d]/20"
           >
             <LogOut className="h-5 w-5" />
             {sidebarOpen && <span className="ml-3">Logout</span>}
@@ -207,7 +208,7 @@ export default function AdminDashboard() {
         <header className="bg-white shadow-sm border-b border-humsafar-200">
           <div className="px-6 py-4">
             <div className="flex justify-between items-center">
-              <h1 className="text-2xl font-bold text-humsafar-700">Dashboard</h1>
+              <h1 className="text-2xl font-bold text-humsafar-500">Dashboard</h1>
               <div className="flex items-center space-x-4">
                 <span className="text-sm text-gray-600">Welcome back, {adminSession.email}</span>
               </div>
@@ -225,7 +226,7 @@ export default function AdminDashboard() {
                 <Users className="h-5 w-5 text-humsafar-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-humsafar-700">{stats.totalProfiles}</div>
+                <div className="text-2xl font-bold text-humsafar-500">{stats.totalProfiles}</div>
                 <p className="text-xs text-gray-500">
                   Active user profiles
                 </p>
@@ -238,7 +239,7 @@ export default function AdminDashboard() {
                 <UserCheck className="h-5 w-5 text-orange-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-humsafar-700">{stats.pendingVerifications}</div>
+                <div className="text-2xl font-bold text-humsafar-500">{stats.pendingVerifications}</div>
                 <p className="text-xs text-gray-500">
                   Awaiting approval • Click to manage
                 </p>
@@ -251,7 +252,7 @@ export default function AdminDashboard() {
                 <Banknote className="h-5 w-5 text-green-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-humsafar-700">₨{stats.revenue.toLocaleString()}</div>
+                <div className="text-2xl font-bold text-humsafar-500">₨{stats.revenue.toLocaleString()}</div>
                 <p className="text-xs text-gray-500">
                   This month
                 </p>
@@ -261,10 +262,10 @@ export default function AdminDashboard() {
             <Card className="hover:shadow-xl transition-all duration-300 bg-white border-0">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-gray-600">Flagged Content</CardTitle>
-                <AlertTriangle className="h-5 w-5 text-red-500" />
+                <AlertTriangle className="h-5 w-5 text-[#ee406d]" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-humsafar-700">{stats.flaggedContent}</div>
+                <div className="text-2xl font-bold text-humsafar-500">{stats.flaggedContent}</div>
                 <p className="text-xs text-gray-500">
                   Needs review
                 </p>
@@ -277,7 +278,7 @@ export default function AdminDashboard() {
                 <TrendingUp className="h-5 w-5 text-humsafar-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-humsafar-700">{stats.conversions}%</div>
+                <div className="text-2xl font-bold text-humsafar-500">{stats.conversions}%</div>
                 <p className="text-xs text-gray-500">
                   Success rate
                 </p>
@@ -290,7 +291,7 @@ export default function AdminDashboard() {
                 <Gift className="h-5 w-5 text-purple-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-humsafar-700">{stats.activePromos}</div>
+                <div className="text-2xl font-bold text-humsafar-500">{stats.activePromos}</div>
                 <p className="text-xs text-gray-500">
                   Running campaigns
                 </p>
@@ -315,7 +316,7 @@ export default function AdminDashboard() {
             <Card className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 border-0">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2 text-gray-800">
-                  <Heart className="h-5 w-5 text-red-500" />
+                  <Heart className="h-5 w-5 text-[#ee406d]" />
                   <span>Matchmaking</span>
                 </CardTitle>
                 <CardDescription className="text-gray-600">

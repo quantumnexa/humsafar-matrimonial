@@ -9,6 +9,8 @@ import {
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
+  NavigationMenuTrigger,
+  NavigationMenuContent,
 } from "@/components/ui/navigation-menu"
 import {
   DropdownMenu,
@@ -41,6 +43,26 @@ export default function Header() {
     { title: "Featured Profile", href: "/profiles" },
     { title: "Success Stories", href: "/success-stories" },
     { title: "Contact", href: "/contact" },
+  ]
+
+  const morePages = [
+    { title: "Match Making Process", href: "/match-making-process" },
+    { title: "About", href: "/about" },
+    { title: "Terms of Use", href: "/terms-of-use" },
+    { title: "Alerts", href: "/alerts" },
+    { title: "How do we stand out?", href: "/how-do-we-stand-out" },
+    { title: "Refund Policy", href: "/refund-policy" },
+    { title: "Privacy Policy", href: "/privacy-policy" },
+    { title: "100% Secure", href: "/100-secure" },
+    { title: "Match Guarantee", href: "/match-guarantee" },
+    { title: "We Care", href: "/we-care" },
+    { title: "Word from CEO", href: "/ceo-note" },
+    { title: "Technical Issues", href: "/technical-support" },
+    { title: "How to Use", href: "/how-to-use" },
+    { title: "Bank Accounts", href: "/bank-accounts" },
+    { title: "FAQs", href: "/faqs" },
+    { title: "Blog", href: "/blog" },
+    { title: "Contact Us", href: "/contact" },
   ]
 
   useEffect(() => {
@@ -203,6 +225,24 @@ export default function Header() {
                     </Link>
                   </NavigationMenuItem>
                 ))}
+                
+                {/* More Pages Dropdown */}
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger className="group inline-flex h-12 w-max items-center justify-center rounded-md bg-background px-6 py-3 text-base font-semibold transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50">
+                    More
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <div className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                      {morePages.map((page) => (
+                        <Link key={page.title} href={page.href} legacyBehavior passHref>
+                          <NavigationMenuLink className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                            <div className="text-sm font-medium leading-none">{page.title}</div>
+                          </NavigationMenuLink>
+                        </Link>
+                      ))}
+                    </div>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
               </NavigationMenuList>
             </NavigationMenu>
           </div>
@@ -238,14 +278,6 @@ export default function Header() {
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                         <Avatar className="h-8 w-8">
-                          <AvatarImage src="/placeholder.svg?height=32&width=32" alt="User" />
-                          <AvatarFallback>
-                            {getInitials(
-                              userProfile?.first_name || user?.user_metadata?.first_name || "",
-                              userProfile?.middle_name || user?.user_metadata?.middle_name || "",
-                              userProfile?.last_name || user?.user_metadata?.last_name || "",
-                            )}
-                          </AvatarFallback>
                         </Avatar>
                       </Button>
                     </DropdownMenuTrigger>
@@ -313,6 +345,34 @@ export default function Header() {
                       <a className="block py-2">{item.title}</a>
                     </Link>
                   ))}
+                  
+                  {/* Dashboard Button */}
+                  <div className="pt-4">
+                    <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} legacyBehavior>
+                      <a>
+                        <Button className="w-full bg-humsafar-500 hover:bg-humsafar-600 text-white flex items-center justify-center space-x-2">
+                          <User className="h-5 w-5" />
+                          <span>Dashboard</span>
+                        </Button>
+                      </a>
+                    </Link>
+                  </div>
+                  
+                  {/* Additional Pages */}
+                  <div className="pt-4 border-t">
+                    <div className="text-sm font-semibold text-gray-500 mb-3">More Pages</div>
+                    {morePages.map((page) => (
+                      <Link
+                        key={page.title}
+                        href={page.href}
+                        className="text-base font-medium text-gray-700 hover:text-humsafar-500 transition-colors"
+                        onClick={() => setMobileMenuOpen(false)}
+                        legacyBehavior
+                      >
+                        <a className="block py-2">{page.title}</a>
+                      </Link>
+                    ))}
+                  </div>
 
                   <div className="pt-6 border-t">
                     {user ? (

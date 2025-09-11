@@ -13,39 +13,37 @@ export default function HowWeStandOutPage() {
       <Header />
       
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-humsafar-600 via-humsafar-700 to-humsafar-800 text-white py-20">
-        {/* Background decorative elements */}
-        <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-        
-        <div className="container mx-auto px-4 relative">
-          <div className="text-center max-w-4xl mx-auto">
-            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-6 py-2 mb-6">
-              <Trophy className="w-5 h-5" />
-              <span className="font-medium">Our Excellence</span>
+      <section className="container mx-auto px-4 py-8">
+      </section>
+
+        <div className="relative overflow-hidden bg-humsafar-500 rounded-3xl mb-16 py-20 px-8">
+          <div className="absolute inset-0 bg-black/10"></div>
+          <div className="relative z-10 text-center max-w-4xl mx-auto">
+            <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-6 py-2 mb-6">
+              <Trophy className="w-5 h-5 text-white" />
+              <span className="text-white font-medium">Our Excellence</span>
             </div>
-            
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white to-humsafar-100 bg-clip-text text-transparent">
+            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
               How We Stand Out
+              <span className="block text-white/60">
+                Our Unique Approach
+              </span>
             </h1>
-            
-            <p className="text-xl text-humsafar-100 mb-8 leading-relaxed">
+            <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto mb-8 leading-relaxed">
               Discover what makes Humsafar Forever Love the preferred choice for matrimonial services
             </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" className="bg-white text-humsafar-600 hover:bg-humsafar-50 font-semibold">
                 <Star className="w-5 h-5 mr-2" />
                 Our Features
               </Button>
-              <Button size="lg" variant="outline" className="border-white/20 text-white hover:bg-white/10">
+              <Button size="lg" variant="outline" className="bg-transparent border-white/20 text-white hover:bg-white/10">
                 Success Stories
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </div>
           </div>
         </div>
-      </section>
       
       <main className="container mx-auto px-4 py-16" id="features">
 

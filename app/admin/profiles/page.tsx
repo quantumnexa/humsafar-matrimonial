@@ -27,6 +27,7 @@ import {
   MapPin,
   Calendar,
   Banknote,
+  Shield,
   Eye
 } from 'lucide-react';
 
@@ -244,12 +245,12 @@ export default function AdminProfiles() {
   }
 
   const sidebarItems = [
-    { icon: Home, label: 'Dashboard', href: '/admin/dashboard' },
+    { icon: Home, label: 'Dashboard', href: '/admin/dashboard', active: false },
     { icon: Users, label: 'Profiles', href: '/admin/profiles', active: true },
-    { icon: Heart, label: 'Matchmakers', href: '/admin/matchmakers' },
+    { icon: UserCheck, label: 'Users', href: '/admin/users' },
     { icon: Banknote, label: 'Payments', href: '/admin/payments' },
+    { icon: Shield, label: 'Content', href: '/admin/content' },
     { icon: BarChart3, label: 'Analytics', href: '/admin/analytics' },
-    { icon: FileText, label: 'Reports', href: '/admin/reports' },
     { icon: Gift, label: 'Promo Codes', href: '/admin/promo-codes' },
     { icon: Settings, label: 'Settings', href: '/admin/settings' },
   ];
@@ -266,7 +267,7 @@ export default function AdminProfiles() {
       case 'pending':
         return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100"><Clock className="w-3 h-3 mr-1" />Pending</Badge>;
       case 'rejected':
-        return <Badge className="bg-red-100 text-red-800 hover:bg-red-100"><XCircle className="w-3 h-3 mr-1" />Rejected</Badge>;
+        return <Badge className="bg-[#ee406d]/10 text-[#ee406d] hover:bg-[#ee406d]/10"><XCircle className="w-3 h-3 mr-1" />Rejected</Badge>;
       case 'flagged':
         return <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-100"><XCircle className="w-3 h-3 mr-1" />Flagged</Badge>;
       default:
@@ -277,7 +278,7 @@ export default function AdminProfiles() {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'w-64' : 'w-16'} bg-gradient-to-b from-humsafar-600 to-humsafar-700 shadow-xl transition-all duration-300 flex flex-col`}>
+      <div className={`${sidebarOpen ? 'w-64' : 'w-16'} bg-humsafar-500 shadow-xl transition-all duration-300 flex flex-col`}>
         {/* Sidebar Header */}
         <div className="p-4 border-b border-humsafar-500/30">
           <div className="flex items-center justify-between">

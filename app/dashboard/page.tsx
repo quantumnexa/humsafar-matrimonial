@@ -1249,23 +1249,23 @@ export default function DashboardPage() {
           </div>
         </div>
       ) : (
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
           {/* Dashboard Header */}
-          <div className="mb-8">
-            <div className="flex justify-between items-center mb-4">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-800">My Profile Dashboard</h1>
-                <p className="text-gray-600">Manage your profile information and preferences</p>
+          <div className="mb-6 md:mb-8">
+            <div className="flex flex-col space-y-4 md:flex-row md:justify-between md:items-center md:space-y-0 mb-4">
+              <div className="text-center md:text-left">
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-800">My Profile Dashboard</h1>
+                <p className="text-sm md:text-base text-gray-600 mt-1">Manage your profile information and preferences</p>
               </div>
-              <div className="flex gap-3">
+              <div className="flex justify-center md:justify-end">
                 {/* Preview using current user id */}
                 <Link href={`/profile/${userId || 1}`} legacyBehavior>
                   <Button
                     variant="outline"
-                    className="border-humsafar-600 text-humsafar-600 hover:bg-humsafar-600 hover:text-white bg-transparent"
+                    className="border-humsafar-600 text-humsafar-600 hover:bg-humsafar-600 hover:text-white bg-transparent w-full md:w-auto"
                   >
                     <Eye className="w-4 h-4 mr-2" />
-                    Preview Profile
+                    <span className="text-sm md:text-base">Preview Profile</span>
                   </Button>
                 </Link>
               </div>
@@ -1307,13 +1307,13 @@ export default function DashboardPage() {
 
           {/* Main Content */}
           <Card className="border-humsafar-100 ">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               {/* Save Changes Button - Right Aligned */}
-              <div className="mb-6 flex justify-end">
+              <div className="mb-4 md:mb-6 flex justify-center md:justify-end">
                 <Button
                   onClick={handleSaveAll}
                   disabled={isSavingAll}
-                  className="bg-humsafar-500 hover:bg-humsafar-600 text-white px-6"
+                  className="bg-humsafar-500 hover:bg-humsafar-600 text-white px-6 w-full md:w-auto"
                 >
                   {isSavingAll ? (
                     <div className="flex items-center space-x-2">
@@ -1327,48 +1327,54 @@ export default function DashboardPage() {
               </div>
 
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full ">
-                <TabsList className="grid w-full grid-cols-6 mb-8 bg-humsafar-500 text-white">
+                <TabsList className="flex w-full overflow-x-auto scrollbar-hide mb-6 md:mb-8 bg-humsafar-500 text-white md:grid md:grid-cols-6 gap-1 p-1 md:p-2 shadow-lg rounded-lg">
                   <TabsTrigger
                     value="photos"
-                    className={`flex items-center gap-2 transition-all duration-200 ${activeTab === "photos" ? "bg-white text-humsafar-500 font-semibold shadow-md" : "hover:bg-humsafar-400"}`}
+                    className={`flex items-center gap-2 transition-all duration-300 flex-shrink-0 px-4 py-3 md:px-3 md:py-2 rounded-lg text-sm font-medium whitespace-nowrap min-w-[80px] md:min-w-0 ${activeTab === "photos" ? "bg-white text-humsafar-500 font-semibold shadow-lg scale-105" : "hover:bg-humsafar-400 hover:scale-102 active:scale-95"}`}
                   >
-                    <ImageIcon className="w-4 h-4" />
-                    Photos
+                    <ImageIcon className="w-4 h-4 flex-shrink-0" />
+                    <span className="hidden sm:inline">Photos</span>
+                    <span className="sm:hidden text-xs">Photos</span>
                   </TabsTrigger>
                   <TabsTrigger
                     value="basic"
-                    className={`flex items-center gap-2 transition-all duration-200 ${activeTab === "basic" ? "bg-white text-humsafar-500 font-semibold shadow-md" : "hover:bg-humsafar-400"}`}
+                    className={`flex items-center gap-2 transition-all duration-300 flex-shrink-0 px-4 py-3 md:px-3 md:py-2 rounded-lg text-sm font-medium whitespace-nowrap min-w-[80px] md:min-w-0 ${activeTab === "basic" ? "bg-white text-humsafar-500 font-semibold shadow-lg scale-105" : "hover:bg-humsafar-400 hover:scale-102 active:scale-95"}`}
                   >
-                    <User className="w-4 h-4" />
-                    Basic Info
+                    <User className="w-4 h-4 flex-shrink-0" />
+                    <span className="hidden sm:inline">Basic Info</span>
+                    <span className="sm:hidden text-xs">Basic</span>
                   </TabsTrigger>
                   <TabsTrigger
                     value="lifestyle"
-                    className={`flex items-center gap-2 transition-all duration-200 ${activeTab === "lifestyle" ? "bg-white text-humsafar-500 font-semibold shadow-md" : "hover:bg-humsafar-400"}`}
+                    className={`flex items-center gap-2 transition-all duration-300 flex-shrink-0 px-4 py-3 md:px-3 md:py-2 rounded-lg text-sm font-medium whitespace-nowrap min-w-[80px] md:min-w-0 ${activeTab === "lifestyle" ? "bg-white text-humsafar-500 font-semibold shadow-lg scale-105" : "hover:bg-humsafar-400 hover:scale-102 active:scale-95"}`}
                   >
-                    <Heart className="w-4 h-4" />
-                    Lifestyle
+                    <Heart className="w-4 h-4 flex-shrink-0" />
+                    <span className="hidden sm:inline">Lifestyle</span>
+                    <span className="sm:hidden text-xs">Life</span>
                   </TabsTrigger>
                   <TabsTrigger
                     value="education"
-                    className={`flex items-center gap-2 transition-all duration-200 ${activeTab === "education" ? "bg-white text-humsafar-500 font-semibold shadow-md" : "hover:bg-humsafar-400"}`}
+                    className={`flex items-center gap-2 transition-all duration-300 flex-shrink-0 px-4 py-3 md:px-3 md:py-2 rounded-lg text-sm font-medium whitespace-nowrap min-w-[80px] md:min-w-0 ${activeTab === "education" ? "bg-white text-humsafar-500 font-semibold shadow-lg scale-105" : "hover:bg-humsafar-400 hover:scale-102 active:scale-95"}`}
                   >
-                    <GraduationCap className="w-4 h-4" />
-                    Career
+                    <GraduationCap className="w-4 h-4 flex-shrink-0" />
+                    <span className="hidden sm:inline">Career</span>
+                    <span className="sm:hidden text-xs">Career</span>
                   </TabsTrigger>
                   <TabsTrigger
                     value="family"
-                    className={`flex items-center gap-2 transition-all duration-200 ${activeTab === "family" ? "bg-white text-humsafar-500 font-semibold shadow-md" : "hover:bg-humsafar-400"}`}
+                    className={`flex items-center gap-2 transition-all duration-300 flex-shrink-0 px-4 py-3 md:px-3 md:py-2 rounded-lg text-sm font-medium whitespace-nowrap min-w-[80px] md:min-w-0 ${activeTab === "family" ? "bg-white text-humsafar-500 font-semibold shadow-lg scale-105" : "hover:bg-humsafar-400 hover:scale-102 active:scale-95"}`}
                   >
-                    <Users className="w-4 h-4" />
-                    Family
+                    <Users className="w-4 h-4 flex-shrink-0" />
+                    <span className="hidden sm:inline">Family</span>
+                    <span className="sm:hidden text-xs">Family</span>
                   </TabsTrigger>
                   <TabsTrigger
                     value="partner"
-                    className={`flex items-center gap-2 transition-all duration-200 ${activeTab === "partner" ? "bg-white text-humsafar-500 font-semibold shadow-md" : "hover:bg-humsafar-400"}`}
+                    className={`flex items-center gap-2 transition-all duration-300 flex-shrink-0 px-4 py-3 md:px-3 md:py-2 rounded-lg text-sm font-medium whitespace-nowrap min-w-[80px] md:min-w-0 ${activeTab === "partner" ? "bg-white text-humsafar-500 font-semibold shadow-lg scale-105" : "hover:bg-humsafar-400 hover:scale-102 active:scale-95"}`}
                   >
-                    <Settings className="w-4 h-4" />
-                    Partner
+                    <Settings className="w-4 h-4 flex-shrink-0" />
+                    <span className="hidden sm:inline">Partner</span>
+                    <span className="sm:hidden text-xs">Partner</span>
                   </TabsTrigger>
                 </TabsList>
 
@@ -1426,7 +1432,7 @@ export default function DashboardPage() {
                         </div>
                       )}
                       
-                      <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 gap-2 md:gap-3 mb-3">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 mb-3">
                       {photos.map((photo, index) => (
                         <div key={photo.id} className="relative group">
                           {/* Use display_url if present (signed/private), else image_url */}
@@ -1529,18 +1535,18 @@ export default function DashboardPage() {
                       </ul>
                     </div>
                     {/* Navigation buttons for Photos step */}
-                    <div className="flex justify-between mt-6 p-4 border-t border-gray-200  rounded-lg">
+                    <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-0 mt-6 p-4 border-t border-gray-200 rounded-lg">
                       <Button
                         onClick={handlePrev}
                         disabled={isFirstTab(activeTab as TabKey)}
                         variant="outline"
-                        className="px-6 bg-white hover:bg-gray-50 border-humsafar-500 text-humsafar-500"
+                        className="w-full sm:w-auto px-4 sm:px-6 bg-white hover:bg-gray-50 border-humsafar-500 text-humsafar-500"
                       >
                         Previous
                       </Button>
                       <div className="flex gap-3">
                         {!isLastTab(activeTab as TabKey) && (
-                          <Button onClick={handleNext} className="bg-humsafar-600 hover:bg-humsafar-700 text-white px-6">
+                          <Button onClick={handleNext} className="w-full sm:w-auto bg-humsafar-600 hover:bg-humsafar-700 text-white px-4 sm:px-6">
                             Next
                           </Button>
                         )}
@@ -1567,7 +1573,7 @@ export default function DashboardPage() {
                           </div>
                           <h4 className="text-lg font-semibold text-humsafar-800">Essential Profile Information</h4>
                         </div>
-                        <div className="grid md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="space-y-4">
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
@@ -1638,7 +1644,7 @@ export default function DashboardPage() {
 
                       <div>
                         <h4 className="text-lg font-semibold text-gray-700 mb-4">Additional Personal Details</h4>
-                        <div className="grid md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Religion</label>
                             <Input
@@ -1708,7 +1714,7 @@ export default function DashboardPage() {
                       {/* Physical Appearance */}
                       <div>
                         <h4 className="text-lg font-semibold text-gray-700 mb-4">Physical Appearance</h4>
-                        <div className="grid md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Height</label>
                             <Input
@@ -1759,7 +1765,7 @@ export default function DashboardPage() {
                       {/* Location */}
                       <div>
                         <h4 className="text-lg font-semibold text-gray-700 mb-4">Location</h4>
-                        <div className="grid md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Country</label>
                             <Input
@@ -1811,24 +1817,23 @@ export default function DashboardPage() {
                         </div>
                       </div>
                       {/* Navigation Buttons - Always Visible */}
-                      <div className="flex justify-between mt-6 p-4 border-t border-gray-200  rounded-lg">
-                        <Button
-                          onClick={handlePrev}
-                          disabled={isFirstTab(activeTab as TabKey)}
-                          variant="outline"
-                          className="px-6 bg-white hover:bg-gray-50 border-humsafar-500 text-humsafar-500"
-                        >
-                          Previous
-                        </Button>
-                        <div className="flex gap-3">
-                          {!isLastTab(activeTab as TabKey) && (
-                            <Button onClick={handleNext} className="bg-humsafar-600 hover:bg-humsafar-700 text-white px-6">
-                              Next
-                            </Button>
-                          )}
-
-                        </div>
+                      <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-0 mt-6 p-4 border-t border-gray-200 rounded-lg">
+                      <Button
+                        onClick={handlePrev}
+                        disabled={isFirstTab(activeTab as TabKey)}
+                        variant="outline"
+                        className="w-full sm:w-auto px-4 sm:px-6 bg-white hover:bg-gray-50 border-humsafar-500 text-humsafar-500"
+                      >
+                        Previous
+                      </Button>
+                      <div className="flex gap-3">
+                        {!isLastTab(activeTab as TabKey) && (
+                          <Button onClick={handleNext} className="w-full sm:w-auto bg-humsafar-600 hover:bg-humsafar-700 text-white px-4 sm:px-6">
+                            Next
+                          </Button>
+                        )}
                       </div>
+                    </div>
                     </div>
                   </div>
                 </TabsContent>
@@ -1842,7 +1847,7 @@ export default function DashboardPage() {
                       {/* Living & Habits */}
                       <div>
                         <h4 className="text-lg font-semibold text-gray-700 mb-4">Living & Habits</h4>
-                        <div className="grid md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Diet</label>
                             <Input
@@ -1881,7 +1886,7 @@ export default function DashboardPage() {
                       {/* Religious Values */}
                       <div>
                         <h4 className="text-lg font-semibold text-gray-700 mb-4">Religious Values</h4>
-                        <div className="grid md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Religious Values</label>
                             <Input
@@ -1949,24 +1954,23 @@ export default function DashboardPage() {
                         <p className="text-sm text-gray-500 mt-2">{profileData.about.length}/500 characters</p>
                       </div>
                       {/* Navigation Buttons - SECTION 3 */}
-                      <div className="flex justify-between mt-6 p-4 border-t border-gray-200  rounded-lg">
-                        <Button
-                          onClick={handlePrev}
-                          disabled={isFirstTab(activeTab as TabKey)}
-                          variant="outline"
-                          className="px-6 bg-white hover:bg-gray-50 border-humsafar-500 text-humsafar-500"
-                        >
-                          Previous
-                        </Button>
-                        <div className="flex gap-3">
-                          {!isLastTab(activeTab as TabKey) && (
-                            <Button onClick={handleNext} className="bg-humsafar-600 hover:bg-humsafar-700 text-white px-6">
-                              Next
-                            </Button>
-                          )}
-
-                        </div>
+                      <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-0 mt-6 p-4 border-t border-gray-200 rounded-lg">
+                      <Button
+                        onClick={handlePrev}
+                        disabled={isFirstTab(activeTab as TabKey)}
+                        variant="outline"
+                        className="w-full sm:w-auto px-4 sm:px-6 bg-white hover:bg-gray-50 border-humsafar-500 text-humsafar-500"
+                      >
+                        Previous
+                      </Button>
+                      <div className="flex gap-3">
+                        {!isLastTab(activeTab as TabKey) && (
+                          <Button onClick={handleNext} className="w-full sm:w-auto bg-humsafar-600 hover:bg-humsafar-700 text-white px-4 sm:px-6">
+                            Next
+                          </Button>
+                        )}
                       </div>
+                    </div>
                     </div>
                   </div>
                 </TabsContent>
@@ -1980,7 +1984,7 @@ export default function DashboardPage() {
                       {/* Education */}
                       <div>
                         <h4 className="text-lg font-semibold text-gray-700 mb-4">Education</h4>
-                        <div className="grid md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Highest Education</label>
                             <Input
@@ -2012,7 +2016,7 @@ export default function DashboardPage() {
                       {/* Career */}
                       <div>
                         <h4 className="text-lg font-semibold text-gray-700 mb-4">Career</h4>
-                        <div className="grid md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Employment Type</label>
                             <Select
@@ -2044,24 +2048,23 @@ export default function DashboardPage() {
                         </div>
                       </div>
                       {/* Navigation Buttons - Always Visible */}
-                      <div className="flex justify-between mt-6 p-4 border-t border-gray-200  rounded-lg">
-                        <Button
-                          onClick={handlePrev}
-                          disabled={isFirstTab(activeTab as TabKey)}
-                          variant="outline"
-                          className="px-6 bg-white hover:bg-gray-50 border-humsafar-500 text-humsafar-500"
-                        >
-                          Previous
-                        </Button>
-                        <div className="flex gap-3">
-                          {!isLastTab(activeTab as TabKey) && (
-                            <Button onClick={handleNext} className="bg-humsafar-600 hover:bg-humsafar-700 text-white px-6">
-                              Next
-                            </Button>
-                          )}
-
-                        </div>
+                      <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-0 mt-6 p-4 border-t border-gray-200 rounded-lg">
+                      <Button
+                        onClick={handlePrev}
+                        disabled={isFirstTab(activeTab as TabKey)}
+                        variant="outline"
+                        className="w-full sm:w-auto px-4 sm:px-6 bg-white hover:bg-gray-50 border-humsafar-500 text-humsafar-500"
+                      >
+                        Previous
+                      </Button>
+                      <div className="flex gap-3">
+                        {!isLastTab(activeTab as TabKey) && (
+                          <Button onClick={handleNext} className="w-full sm:w-auto bg-humsafar-600 hover:bg-humsafar-700 text-white px-4 sm:px-6">
+                            Next
+                          </Button>
+                        )}
                       </div>
+                    </div>
                     </div>
                   </div>
                 </TabsContent>
@@ -2075,7 +2078,7 @@ export default function DashboardPage() {
                       {/* Family Background */}
                       <div>
                         <h4 className="text-lg font-semibold text-gray-700 mb-4">Family Background</h4>
-                        <div className="grid md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Father's Occupation</label>
                             <Input
@@ -2143,7 +2146,7 @@ export default function DashboardPage() {
                       {/* House Ownership */}
                       <div>
                         <h4 className="text-lg font-semibold text-gray-700 mb-4">House Ownership</h4>
-                        <div className="grid md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">House Status</label>
                             <Select
@@ -2189,24 +2192,23 @@ export default function DashboardPage() {
 
 
                       {/* Navigation Buttons - Always Visible */}
-                      <div className="flex justify-between mt-6 p-4 border-t border-gray-200  rounded-lg">
-                        <Button
-                          onClick={handlePrev}
-                          disabled={isFirstTab(activeTab as TabKey)}
-                          variant="outline"
-                          className="px-6 bg-white hover:bg-gray-50 border-humsafar-500 text-humsafar-500"
-                        >
-                          Previous
-                        </Button>
-                        <div className="flex gap-3">
-                          {!isLastTab(activeTab as TabKey) && (
-                            <Button onClick={handleNext} className="bg-humsafar-600 hover:bg-humsafar-700 text-white px-6">
-                              Next
-                            </Button>
-                          )}
-
-                        </div>
+                      <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-0 mt-6 p-4 border-t border-gray-200 rounded-lg">
+                      <Button
+                        onClick={handlePrev}
+                        disabled={isFirstTab(activeTab as TabKey)}
+                        variant="outline"
+                        className="w-full sm:w-auto px-4 sm:px-6 bg-white hover:bg-gray-50 border-humsafar-500 text-humsafar-500"
+                      >
+                        Previous
+                      </Button>
+                      <div className="flex gap-3">
+                        {!isLastTab(activeTab as TabKey) && (
+                          <Button onClick={handleNext} className="w-full sm:w-auto bg-humsafar-600 hover:bg-humsafar-700 text-white px-4 sm:px-6">
+                            Next
+                          </Button>
+                        )}
                       </div>
+                    </div>
                     </div>
                   </div>
                 </TabsContent>
@@ -2220,7 +2222,7 @@ export default function DashboardPage() {
                       {/* Basic Preferences */}
                       <div>
                         <h4 className="text-lg font-semibold text-gray-700 mb-4">Basic Requirements</h4>
-                        <div className="grid md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Age From</label>
                             <Input
@@ -2296,7 +2298,7 @@ export default function DashboardPage() {
                       {/* Religious & Cultural */}
                       <div>
                         <h4 className="text-lg font-semibold text-gray-700 mb-4">Religious & Cultural</h4>
-                        <div className="grid md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Religion</label>
                             <Input
@@ -2389,7 +2391,7 @@ export default function DashboardPage() {
                       {/* Children Preferences */}
                       <div>
                         <h4 className="text-lg font-semibold text-gray-700 mb-4">Children Preferences</h4>
-                        <div className="grid md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Want Children</label>
                             <Select
@@ -2438,24 +2440,23 @@ export default function DashboardPage() {
                         <p className="text-sm text-gray-500 mt-2">{profileData.lookingFor.length}/500 characters</p>
                       </div>
                       {/* Navigation Buttons - Always Visible */}
-                      <div className="flex justify-between mt-6 p-4 border-t border-gray-200  rounded-lg">
-                        <Button
-                          onClick={handlePrev}
-                          disabled={isFirstTab(activeTab as TabKey)}
-                          variant="outline"
-                          className="px-6 bg-white hover:bg-gray-50 border-humsafar-500 text-humsafar-500"
-                        >
-                          Previous
-                        </Button>
-                        <div className="flex gap-3">
-                          {!isLastTab(activeTab as TabKey) && (
-                            <Button onClick={handleNext} className="bg-humsafar-600 hover:bg-humsafar-700 text-white px-6">
-                              Next
-                            </Button>
-                          )}
-
-                        </div>
+                      <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-0 mt-6 p-4 border-t border-gray-200 rounded-lg">
+                      <Button
+                        onClick={handlePrev}
+                        disabled={isFirstTab(activeTab as TabKey)}
+                        variant="outline"
+                        className="w-full sm:w-auto px-4 sm:px-6 bg-white hover:bg-gray-50 border-humsafar-500 text-humsafar-500"
+                      >
+                        Previous
+                      </Button>
+                      <div className="flex gap-3">
+                        {!isLastTab(activeTab as TabKey) && (
+                          <Button onClick={handleNext} className="w-full sm:w-auto bg-humsafar-600 hover:bg-humsafar-700 text-white px-4 sm:px-6">
+                            Next
+                          </Button>
+                        )}
                       </div>
+                    </div>
                     </div>
                   </div>
                 </TabsContent>
