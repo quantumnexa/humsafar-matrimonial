@@ -275,7 +275,7 @@ export default function FAQsPage() {
         </div>
 
         {/* Popular Topics */}
-        <Card className="border-rose-200 bg-gradient-to-r from-rose-50 to-pink-50">
+        <Card className="border-rose-200 bg-gradient-to-r from-rose-50 to-humsafar-50">
           <CardHeader>
             <CardTitle className="text-center text-2xl">
               Popular Help Topics

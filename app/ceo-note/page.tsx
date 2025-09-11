@@ -44,10 +44,10 @@ export default function CEONotePage() {
               </Button>
             </div>
             
-            <div className="bg-pink-500/20 backdrop-blur-sm border border-pink-400/30 rounded-xl p-4 max-w-2xl mx-auto">
+            <div className="bg-humsafar-500/20 backdrop-blur-sm border border-humsafar-400/30 rounded-xl p-4 max-w-2xl mx-auto">
               <div className="flex items-center gap-3">
-                <Heart className="w-5 h-5 text-pink-200 flex-shrink-0" />
-                <p className="text-pink-100 text-sm font-medium">
+                <Heart className="w-5 h-5 text-humsafar-200 flex-shrink-0" />
+                <p className="text-humsafar-100 text-sm font-medium">
                   <strong>Our Promise:</strong> Hassle-free & personalized matchmaking with sincerity
                 </p>
               </div>
@@ -279,7 +279,7 @@ export default function CEONotePage() {
         <Card className="border-0 shadow-xl bg-white mb-8">
           <CardHeader>
             <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-pink-600 rounded-xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-gradient-to-br from-humsafar-500 to-humsafar-600 rounded-xl flex items-center justify-center">
                 <Heart className="w-6 h-6 text-white" />
               </div>
               <CardTitle className="text-2xl text-gray-900">Our Goal</CardTitle>
@@ -287,11 +287,11 @@ export default function CEONotePage() {
           </CardHeader>
           <CardContent className="space-y-8">
             {/* Connect True Soulmates */}
-            <div className="bg-pink-50 rounded-xl p-6">
+            <div className="bg-humsafar-50 rounded-xl p-6">
               <div className="flex items-center gap-3 mb-4">
-                <Heart className="w-6 h-6 text-pink-600" />
-                <h3 className="text-xl font-semibold text-pink-700">Connect True Soulmates</h3>
-                <Badge variant="outline" className="bg-pink-100 text-pink-700 border-pink-300">
+                <Heart className="w-6 h-6 text-humsafar-600" />
+                <h3 className="text-xl font-semibold text-humsafar-700">Connect True Soulmates</h3>
+                <Badge variant="outline" className="bg-humsafar-100 text-humsafar-700 border-humsafar-300">
                   Perfect Matches
                 </Badge>
               </div>
@@ -300,8 +300,8 @@ export default function CEONotePage() {
               </p>
               
               <div className="grid md:grid-cols-2 gap-6">
-                <div className="bg-white rounded-lg p-4 border border-pink-200">
-                  <h4 className="font-semibold text-pink-600 mb-3">Deep Compatibility</h4>
+                <div className="bg-white rounded-lg p-4 border border-humsafar-200">
+                  <h4 className="font-semibold text-humsafar-600 mb-3">Deep Compatibility</h4>
                   <ul className="text-gray-700 space-y-1 text-sm">
                     <li>• Emotional compatibility assessment</li>
                     <li>• Shared values and beliefs</li>
@@ -311,8 +311,8 @@ export default function CEONotePage() {
                   </ul>
                 </div>
                 
-                <div className="bg-white rounded-lg p-4 border border-pink-200">
-                  <h4 className="font-semibold text-pink-600 mb-3">Lasting Relationships</h4>
+                <div className="bg-white rounded-lg p-4 border border-humsafar-200">
+                  <h4 className="font-semibold text-humsafar-600 mb-3">Lasting Relationships</h4>
                   <ul className="text-gray-700 space-y-1 text-sm">
                     <li>• Foundation for lifelong partnership</li>
                     <li>• Mutual respect and understanding</li>

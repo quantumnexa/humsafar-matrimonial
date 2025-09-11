@@ -228,7 +228,7 @@ export default function ViewedProfilesCart() {
                 alt={name}
                 width={96}
                 height={96}
-                className="w-full h-full object-cover rounded-full border-2 border-pink-200"
+                className="w-full h-full object-cover rounded-full border-2 border-humsafar-200"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement
                   target.src = '/placeholder.jpg'
@@ -316,7 +316,7 @@ export default function ViewedProfilesCart() {
           <History className="w-4 h-4 mr-2 text-white" />
           <span className="text-white">Viewed Profiles</span>
           {viewedProfiles.length > 0 && (
-            <Badge className="absolute -top-2 -right-2 bg-pink-600 text-white text-xs px-1.5 py-0.5 rounded-full">
+            <Badge className="absolute -top-2 -right-2 bg-humsafar-600 text-white text-xs px-1.5 py-0.5 rounded-full">
               {viewedProfiles.length}
             </Badge>
           )}
@@ -325,7 +325,7 @@ export default function ViewedProfilesCart() {
       
       <DialogContent className="max-w-2xl max-h-[80vh]">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-pink-700">
+          <DialogTitle className="flex items-center gap-2 text-humsafar-700">
             <History className="w-5 h-5" />
             Your Viewed Profiles This Month
           </DialogTitle>
@@ -334,7 +334,7 @@ export default function ViewedProfilesCart() {
         <ScrollArea className="max-h-[60vh] pr-4">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-8">
-              <div className="w-8 h-8 border-4 border-pink-100 border-t-pink-600 rounded-full animate-spin mb-4"></div>
+              <div className="w-8 h-8 border-4 border-humsafar-100 border-t-humsafar-600 rounded-full animate-spin mb-4"></div>
               <p className="text-gray-500">Loading your viewed profiles...</p>
             </div>
           ) : profilesWithDetails.length === 0 ? (
@@ -348,7 +348,7 @@ export default function ViewedProfilesCart() {
               </p>
               <Button 
                 onClick={() => setIsOpen(false)}
-                className="bg-pink-600 hover:bg-pink-700 text-white"
+                className="bg-humsafar-600 hover:bg-humsafar-700 text-white"
               >
                 Browse Profiles
               </Button>
@@ -376,7 +376,7 @@ export default function ViewedProfilesCart() {
                 variant="outline" 
                 size="sm"
                 onClick={() => setIsOpen(false)}
-                className="text-pink-600 border-pink-200 hover:bg-pink-50"
+                className="text-humsafar-600 border-humsafar-200 hover:bg-humsafar-50"
               >
                 Continue Browsing
               </Button>

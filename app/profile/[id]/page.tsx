@@ -101,7 +101,7 @@ function HobbiesDisplay({ hobbies }: { hobbies: string }) {
         {hobbyList.map((hobby, index) => (
           <div
             key={index}
-            className="inline-flex items-center gap-2 px-3 py-2 bg-white border border-gray-300 rounded-full text-sm font-medium text-gray-700 hover:border-pink-300 hover:bg-pink-50 transition-colors"
+            className="inline-flex items-center gap-2 px-3 py-2 bg-white border border-gray-300 rounded-full text-sm font-medium text-gray-700 hover:border-humsafar-300 hover:bg-humsafar-50 transition-colors"
           >
             <span className="text-base">{getHobbyEmoji(hobby)}</span>
             <span>{hobby.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</span>
@@ -647,12 +647,12 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
    // Show loading state
    if (loading) {
      return (
-       <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white">
+       <div className="min-h-screen bg-gradient-to-b from-humsafar-50 to-white">
          <Header />
          <div className="container mx-auto px-4 py-8">
            <div className="flex justify-center items-center min-h-[400px]">
              <div className="text-center">
-               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 mx-auto mb-4"></div>
+               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-humsafar-600 mx-auto mb-4"></div>
                <p className="text-gray-600">Loading profile...</p>
              </div>
            </div>
@@ -665,14 +665,14 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
    // Show login prompt for non-authenticated users
    if (!currentUser) {
      return (
-       <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white">
+       <div className="min-h-screen bg-gradient-to-b from-humsafar-50 to-white">
          <Header />
          <div className="container mx-auto px-4 py-8">
            <div className="mb-6">
              <Link href="/profiles" legacyBehavior>
                <Button
                  variant="outline"
-                 className="border-pink-600 text-pink-600 hover:bg-pink-600 hover:text-white bg-transparent"
+                 className="border-humsafar-600 text-humsafar-600 hover:bg-humsafar-600 hover:text-white bg-transparent"
                >
                  <ArrowLeft className="w-4 h-4 mr-2" />
                  Back to Profiles
@@ -681,15 +681,15 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
            </div>
            
            <div className="flex justify-center items-center min-h-[400px]">
-             <Card className="max-w-md w-full border-pink-100">
+             <Card className="max-w-md w-full border-humsafar-100">
                <CardContent className="p-8 text-center">
-                 <Lock className="w-16 h-16 text-pink-600 mx-auto mb-4" />
+                 <Lock className="w-16 h-16 text-humsafar-600 mx-auto mb-4" />
                  <h2 className="text-2xl font-bold text-gray-800 mb-4">Login Required</h2>
                  <p className="text-gray-600 mb-6">
                    Please login to view detailed profiles and connect with potential matches.
                  </p>
                  <Link href="/auth" legacyBehavior>
-                   <Button className="w-full bg-pink-600 hover:bg-pink-700 text-white">
+                   <Button className="w-full bg-humsafar-600 hover:bg-humsafar-700 text-white">
                      Login to Continue
                    </Button>
                  </Link>
@@ -786,7 +786,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
   // Show loading while waiting for params to resolve
   if (!id) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white">
+      <div className="min-h-screen bg-gradient-to-b from-humsafar-50 to-white">
         <Header />
         <div className="container mx-auto px-4 py-8">
           <div className="flex justify-center items-center h-64">
@@ -799,7 +799,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-humsafar-50 to-white">
       {currentUser && <ProfileViewTracker profileUserId={profile?.user_id || id} />}
       <Header />
       <div className="container mx-auto px-4 py-8">
@@ -807,7 +807,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
           <Link href="/profiles" legacyBehavior>
             <Button
               variant="outline"
-              className="border-pink-600 text-pink-600 hover:bg-pink-600 hover:text-white bg-transparent"
+              className="border-humsafar-600 text-humsafar-600 hover:bg-humsafar-600 hover:text-white bg-transparent"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Profiles
@@ -828,7 +828,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
             </div>
 
             <div className="lg:col-span-2">
-              <Card className="border-pink-100 h-full">
+              <Card className="border-humsafar-100 h-full">
                 <CardContent className="p-6 h-full">
                   <>
                     {/* User ID Display */}
@@ -852,7 +852,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
                            <div className="flex items-center gap-3 flex-wrap">
                           <h1 className="text-3xl font-bold text-gray-800">{name}</h1>
                              {age ? (
-                               <span className="text-xl font-semibold text-pink-600">{age}</span>
+                               <span className="text-xl font-semibold text-humsafar-600">{age}</span>
                           ) : null}
                            </div>
                                                      {isVerified && (

@@ -575,12 +575,20 @@ export default function DashboardPage() {
   const handleNext = () => {
     saveDraftToStorage()
     const next = getNextTab(activeTab as TabKey)
-    if (next) setActiveTab(next)
+    if (next) {
+      setActiveTab(next)
+      // Scroll to top of page when navigating to next tab
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
   }
   const handlePrev = () => {
     saveDraftToStorage()
     const prev = getPrevTab(activeTab as TabKey)
-    if (prev) setActiveTab(prev)
+    if (prev) {
+      setActiveTab(prev)
+      // Scroll to top of page when navigating to previous tab
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
   }
 
   // Function to check table structure
@@ -1327,10 +1335,10 @@ export default function DashboardPage() {
               </div>
 
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full ">
-                <TabsList className="flex w-full overflow-x-auto scrollbar-hide mb-6 md:mb-8 bg-humsafar-500 text-white md:grid md:grid-cols-6 gap-1 p-1 md:p-2 shadow-lg rounded-lg">
+                <TabsList className="flex w-full overflow-x-auto overflow-y-hidden scrollbar-hide mb-6 md:mb-8 bg-humsafar-500 text-white md:grid md:grid-cols-6 gap-1 p-1 md:p-2 shadow-lg rounded-lg h-fit">
                   <TabsTrigger
                     value="photos"
-                    className={`flex items-center gap-2 transition-all duration-300 flex-shrink-0 px-4 py-3 md:px-3 md:py-2 rounded-lg text-sm font-medium whitespace-nowrap min-w-[80px] md:min-w-0 ${activeTab === "photos" ? "bg-white text-humsafar-500 font-semibold shadow-lg scale-105" : "hover:bg-humsafar-400 hover:scale-102 active:scale-95"}`}
+                    className={`flex items-center gap-2 transition-all duration-300 flex-shrink-0 px-4 py-3 md:px-3 md:py-2 rounded-lg text-sm font-medium whitespace-nowrap min-w-[80px] md:min-w-0 ${activeTab === "photos" ? "bg-white text-humsafar-500 font-semibold shadow-lg" : "hover:bg-humsafar-400 active:scale-95"}`}
                   >
                     <ImageIcon className="w-4 h-4 flex-shrink-0" />
                     <span className="hidden sm:inline">Photos</span>
@@ -1564,7 +1572,7 @@ export default function DashboardPage() {
                     {/* Personal Details */}
                     <div className="space-y-6">
                       {/* Essential Profile Information */}
-                      <div className="bg-gradient-to-r from-humsafar-50 to-indigo-50 border border-humsafar-200 rounded-lg p-6">
+                      <div className="bg-humsafar-100 border border-humsafar-200 rounded-lg p-6">
                         <div className="flex items-center mb-4">
                           <div className="w-8 h-8 bg-humsafar-100 rounded-full flex items-center justify-center mr-3">
                             <svg className="w-5 h-5 text-humsafar-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

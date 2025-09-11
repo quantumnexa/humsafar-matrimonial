@@ -107,7 +107,7 @@ export default function PackagesPage() {
       name: "Standard Package",
       price: 8000,
       duration: "Lifetime",
-      color: "pink",
+      color: "humsafar",
       icon: Crown,
       popular: true,
       profileViews: 35,
@@ -184,7 +184,7 @@ export default function PackagesPage() {
         button: "bg-blue-600 hover:bg-blue-700",
         badge: "bg-blue-100 text-blue-800",
       },
-      pink: {
+      humsafar: {
         border: isPopular ? "border-humsafar-500 ring-2 ring-humsafar-200" : "border-humsafar-200",
         bg: "bg-humsafar50",
         text: "text-humsafar-600",
@@ -415,15 +415,15 @@ export default function PackagesPage() {
                       <p className="text-sm text-blue-600">Total Profile Views: 20 - Lifetime</p>
                     </div>
                     
-                    <div className="bg-pink-50 border border-pink-200 rounded-lg p-3">
+                    <div className="bg-humsafar-50 border border-humsafar-200 rounded-lg p-3">
                       <div className="flex items-center justify-between mb-1">
-                        <span className="font-semibold text-pink-800">Standard Package</span>
+                        <span className="font-semibold text-humsafar-800">Standard Package</span>
                         <div className="flex items-center gap-1">
-                          <Eye className="w-4 h-4 text-pink-600" />
-                          <span className="font-bold text-pink-600">35</span>
+                          <Eye className="w-4 h-4 text-humsafar-600" />
+                          <span className="font-bold text-humsafar-600">35</span>
                         </div>
                       </div>
-                      <p className="text-sm text-pink-600">Total Profile Views: 35 - Lifetime</p>
+                      <p className="text-sm text-humsafar-600">Total Profile Views: 35 - Lifetime</p>
                     </div>
                     
                     <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">

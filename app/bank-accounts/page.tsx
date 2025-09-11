@@ -230,7 +230,7 @@ export default function BankDetailsPage() {
         </div>
 
         {/* Important Notes */}
-        <Card className="border-rose-200 bg-gradient-to-r from-rose-50 to-pink-50 mb-8">
+        <Card className="border-rose-200 bg-gradient-to-r from-rose-50 to-humsafar-50 mb-8">
           <CardHeader>
             <CardTitle className="text-2xl text-center">
               Important Payment Notes

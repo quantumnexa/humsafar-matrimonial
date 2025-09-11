@@ -364,7 +364,7 @@ export default function AdminDashboard() {
             <Card className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 border-0">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2 text-gray-800">
-                  <Gift className="h-5 w-5 text-pink-500" />
+                  <Gift className="h-5 w-5 text-humsafar-500" />
                   <span>Promo Codes</span>
                 </CardTitle>
                 <CardDescription className="text-gray-600">

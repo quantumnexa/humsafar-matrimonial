@@ -62,15 +62,15 @@ export default function PrivacyPolicyPage() {
                       <span>Basic details: Name, age, gender, contact information</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="w-2 h-2 bg-pink-600 rounded-full mt-2 flex-shrink-0"></span>
+                      <span className="w-2 h-2 bg-humsafar-600 rounded-full mt-2 flex-shrink-0"></span>
                       <span>Profile information: Education, profession, family details</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="w-2 h-2 bg-pink-600 rounded-full mt-2 flex-shrink-0"></span>
+                      <span className="w-2 h-2 bg-humsafar-600 rounded-full mt-2 flex-shrink-0"></span>
                       <span>Preferences: Partner preferences and lifestyle choices</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="w-2 h-2 bg-pink-600 rounded-full mt-2 flex-shrink-0"></span>
+                      <span className="w-2 h-2 bg-humsafar-600 rounded-full mt-2 flex-shrink-0"></span>
                       <span>Photos and documents for verification purposes</span>
                     </li>
                   </ul>
@@ -80,15 +80,15 @@ export default function PrivacyPolicyPage() {
                   <h3 className="text-lg font-semibold text-gray-800 mb-3">Technical Information</h3>
                   <ul className="space-y-2 text-gray-700">
                     <li className="flex items-start gap-2">
-                      <span className="w-2 h-2 bg-pink-600 rounded-full mt-2 flex-shrink-0"></span>
+                      <span className="w-2 h-2 bg-humsafar-600 rounded-full mt-2 flex-shrink-0"></span>
                       <span>Device information and IP address</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="w-2 h-2 bg-pink-600 rounded-full mt-2 flex-shrink-0"></span>
+                      <span className="w-2 h-2 bg-humsafar-600 rounded-full mt-2 flex-shrink-0"></span>
                       <span>Browser type and operating system</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="w-2 h-2 bg-pink-600 rounded-full mt-2 flex-shrink-0"></span>
+                      <span className="w-2 h-2 bg-humsafar-600 rounded-full mt-2 flex-shrink-0"></span>
                       <span>Usage patterns and interaction data</span>
                     </li>
                   </ul>
@@ -111,19 +111,19 @@ export default function PrivacyPolicyPage() {
                   <h3 className="text-lg font-semibold text-gray-800">Primary Uses</h3>
                   <ul className="space-y-2 text-gray-700">
                     <li className="flex items-start gap-2">
-                      <span className="w-2 h-2 bg-pink-600 rounded-full mt-2 flex-shrink-0"></span>
+                      <span className="w-2 h-2 bg-humsafar-600 rounded-full mt-2 flex-shrink-0"></span>
                       <span>Create and maintain your profile</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="w-2 h-2 bg-pink-600 rounded-full mt-2 flex-shrink-0"></span>
+                      <span className="w-2 h-2 bg-humsafar-600 rounded-full mt-2 flex-shrink-0"></span>
                       <span>Match you with compatible partners</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="w-2 h-2 bg-pink-600 rounded-full mt-2 flex-shrink-0"></span>
+                      <span className="w-2 h-2 bg-humsafar-600 rounded-full mt-2 flex-shrink-0"></span>
                       <span>Facilitate communication between members</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="w-2 h-2 bg-pink-600 rounded-full mt-2 flex-shrink-0"></span>
+                      <span className="w-2 h-2 bg-humsafar-600 rounded-full mt-2 flex-shrink-0"></span>
                       <span>Verify profiles for authenticity</span>
                     </li>
                   </ul>
@@ -133,19 +133,19 @@ export default function PrivacyPolicyPage() {
                   <h3 className="text-lg font-semibold text-gray-800">Secondary Uses</h3>
                   <ul className="space-y-2 text-gray-700">
                     <li className="flex items-start gap-2">
-                      <span className="w-2 h-2 bg-pink-600 rounded-full mt-2 flex-shrink-0"></span>
+                      <span className="w-2 h-2 bg-humsafar-600 rounded-full mt-2 flex-shrink-0"></span>
                       <span>Improve our services and user experience</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="w-2 h-2 bg-pink-600 rounded-full mt-2 flex-shrink-0"></span>
+                      <span className="w-2 h-2 bg-humsafar-600 rounded-full mt-2 flex-shrink-0"></span>
                       <span>Send important updates and notifications</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="w-2 h-2 bg-pink-600 rounded-full mt-2 flex-shrink-0"></span>
+                      <span className="w-2 h-2 bg-humsafar-600 rounded-full mt-2 flex-shrink-0"></span>
                       <span>Provide customer support</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="w-2 h-2 bg-pink-600 rounded-full mt-2 flex-shrink-0"></span>
+                      <span className="w-2 h-2 bg-humsafar-600 rounded-full mt-2 flex-shrink-0"></span>
                       <span>Ensure platform security and prevent fraud</span>
                     </li>
                   </ul>
@@ -236,19 +236,19 @@ export default function PrivacyPolicyPage() {
                   <h3 className="text-lg font-semibold text-gray-800 mb-3">You have the right to:</h3>
                   <ul className="space-y-2 text-gray-700">
                     <li className="flex items-start gap-2">
-                      <span className="w-2 h-2 bg-pink-600 rounded-full mt-2 flex-shrink-0"></span>
+                      <span className="w-2 h-2 bg-humsafar-600 rounded-full mt-2 flex-shrink-0"></span>
                       <span>Access your personal information</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="w-2 h-2 bg-pink-600 rounded-full mt-2 flex-shrink-0"></span>
+                      <span className="w-2 h-2 bg-humsafar-600 rounded-full mt-2 flex-shrink-0"></span>
                       <span>Update or correct your data</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="w-2 h-2 bg-pink-600 rounded-full mt-2 flex-shrink-0"></span>
+                      <span className="w-2 h-2 bg-humsafar-600 rounded-full mt-2 flex-shrink-0"></span>
                       <span>Delete your account and data</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="w-2 h-2 bg-pink-600 rounded-full mt-2 flex-shrink-0"></span>
+                      <span className="w-2 h-2 bg-humsafar-600 rounded-full mt-2 flex-shrink-0"></span>
                       <span>Control your privacy settings</span>
                     </li>
                   </ul>
@@ -258,19 +258,19 @@ export default function PrivacyPolicyPage() {
                   <h3 className="text-lg font-semibold text-gray-800 mb-3">Privacy Controls:</h3>
                   <ul className="space-y-2 text-gray-700">
                     <li className="flex items-start gap-2">
-                      <span className="w-2 h-2 bg-pink-600 rounded-full mt-2 flex-shrink-0"></span>
+                      <span className="w-2 h-2 bg-humsafar-600 rounded-full mt-2 flex-shrink-0"></span>
                       <span>Hide your profile from specific users</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="w-2 h-2 bg-pink-600 rounded-full mt-2 flex-shrink-0"></span>
+                      <span className="w-2 h-2 bg-humsafar-600 rounded-full mt-2 flex-shrink-0"></span>
                       <span>Control who can contact you</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="w-2 h-2 bg-pink-600 rounded-full mt-2 flex-shrink-0"></span>
+                      <span className="w-2 h-2 bg-humsafar-600 rounded-full mt-2 flex-shrink-0"></span>
                       <span>Manage photo visibility</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="w-2 h-2 bg-pink-600 rounded-full mt-2 flex-shrink-0"></span>
+                      <span className="w-2 h-2 bg-humsafar-600 rounded-full mt-2 flex-shrink-0"></span>
                       <span>Opt-out of marketing communications</span>
                     </li>
                   </ul>
