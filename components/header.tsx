@@ -165,7 +165,7 @@ export default function Header() {
   return (
     <>
       {/* Top Contact Bar */}
-        <div className="bg-humsafar-500 py-2 text-sm">
+        <div className="bg-humsafar-500 py-2 text-sm relative z-40">
         <div className="container mx-auto px-8">
           <div className="flex items-center justify-between">
             {/* Left: Contact Info */}
@@ -226,23 +226,7 @@ export default function Header() {
                   </NavigationMenuItem>
                 ))}
                 
-                {/* More Pages Dropdown */}
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger className="group inline-flex h-12 w-max items-center justify-center rounded-md bg-background px-6 py-3 text-base font-semibold transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50">
-                    More
-                  </NavigationMenuTrigger>
-                  <NavigationMenuContent>
-                    <div className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-                      {morePages.map((page) => (
-                        <Link key={page.title} href={page.href} legacyBehavior passHref>
-                          <NavigationMenuLink className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
-                            <div className="text-sm font-medium leading-none">{page.title}</div>
-                          </NavigationMenuLink>
-                        </Link>
-                      ))}
-                    </div>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
+                {/* More Pages Dropdown - Removed from desktop, moved to footer */}
               </NavigationMenuList>
             </NavigationMenu>
           </div>
@@ -313,7 +297,7 @@ export default function Header() {
               </>
             ) : (
               <>
-                <Link href="/auth" className="hidden sm:block" legacyBehavior>
+                <Link href="/auth" className="hidden lg:block" legacyBehavior>
                   <Button className="bg-humsafar-500 hover:bg-humsafar-600 text-white">Login / Register</Button>
                 </Link>
               </>
@@ -326,8 +310,8 @@ export default function Header() {
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-                <div className="flex flex-col space-y-4 mt-8">
+              <SheetContent side="right" className="w-[300px] sm:w-[400px] flex flex-col h-full">
+                <div className="flex flex-col space-y-4 mt-8 overflow-y-auto flex-1 pr-2 max-h-[calc(100vh-8rem)] scrollbar-hide">
                   <Link href="/" className="flex items-center mb-6" legacyBehavior>
                     <a className="flex items-center">
                       <img src="/humsafar-logo.png" alt="Humsafar Logo" className="w-40" />
@@ -346,17 +330,31 @@ export default function Header() {
                     </Link>
                   ))}
                   
-                  {/* Dashboard Button */}
-                  <div className="pt-4">
-                    <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} legacyBehavior>
-                      <a>
-                        <Button className="w-full bg-humsafar-500 hover:bg-humsafar-600 text-white flex items-center justify-center space-x-2">
-                          <User className="h-5 w-5" />
-                          <span>Dashboard</span>
-                        </Button>
-                      </a>
-                    </Link>
-                  </div>
+                  {/* Authentication-based buttons */}
+                  {user ? (
+                    // Dashboard Button (for authenticated users)
+                    <div className="pt-4">
+                      <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} legacyBehavior>
+                        <a>
+                          <Button className="w-full bg-humsafar-500 hover:bg-humsafar-600 text-white flex items-center justify-center space-x-2">
+                            <User className="h-5 w-5" />
+                            <span>Dashboard</span>
+                          </Button>
+                        </a>
+                      </Link>
+                    </div>
+                  ) : (
+                    // Login/Register Button (for non-authenticated users)
+                    <div className="pt-4">
+                      <Link href="/auth" onClick={() => setMobileMenuOpen(false)} legacyBehavior>
+                        <a>
+                          <Button className="w-full bg-humsafar-500 hover:bg-humsafar-600 text-white">
+                            Login / Register
+                          </Button>
+                        </a>
+                      </Link>
+                    </div>
+                  )}
                   
                   {/* Additional Pages */}
                   <div className="pt-4 border-t">
@@ -374,21 +372,11 @@ export default function Header() {
                     ))}
                   </div>
 
-                  <div className="pt-6 border-t">
-                    {user ? (
+                  {/* User greeting and logout section */}
+                  {user && (
+                    <div className="pt-6 border-t">
                       <div className="space-y-4">
                         <div className="text-sm text-gray-600">Hello, {getUserDisplayName()}</div>
-                        <Link
-                          href="/dashboard"
-                          className="flex items-center space-x-2 text-gray-900 hover:text-humsafar-500"
-                          onClick={() => setMobileMenuOpen(false)}
-                          legacyBehavior
-                        >
-                          <a className="flex items-center space-x-2">
-                            <User className="h-5 w-5" />
-                            <span>Dashboard</span>
-                          </a>
-                        </Link>
                         <Button
                           variant="ghost"
                           className="w-full justify-start p-0 h-auto text-gray-900 hover:text-humsafar-500"
@@ -401,18 +389,8 @@ export default function Header() {
                           Log out
                         </Button>
                       </div>
-                    ) : (
-                      <div className="space-y-4">
-                        <Link href="/auth" onClick={() => setMobileMenuOpen(false)} legacyBehavior>
-                          <a>
-                            <Button className="w-full bg-humsafar-500 hover:bg-humsafar-600 text-white">
-                              Login / Register
-                            </Button>
-                          </a>
-                        </Link>
-                      </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
               </SheetContent>
             </Sheet>
