@@ -117,6 +117,18 @@ export default function Header() {
         // Fetch user profile data
         const { data: profile } = await supabase.from("user_profiles").select("*").eq("user_id", session.user.id).single()
         setUserProfile(profile)
+        
+        // Check user subscription status for terminated profiles
+        const { data: subscriptionData } = await supabase
+          .from("user_subscriptions")
+          .select("profile_status")
+          .eq("user_id", session.user.id)
+          .single()
+        
+        // If profile is terminated, redirect to terminated page
+        if (subscriptionData?.profile_status === 'terminated') {
+          router.push('/profile-terminated')
+        }
       } else {
         setUser(null)
         setUserProfile(null)

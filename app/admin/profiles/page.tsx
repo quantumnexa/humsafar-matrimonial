@@ -6,30 +6,18 @@ import { supabase } from '@/lib/supabaseClient';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
   Users, 
-  Heart, 
-  Settings, 
-  UserCheck, 
-  BarChart3, 
-  FileText, 
-  Gift,
-  Menu,
-  Home,
-  LogOut,
-  CheckCircle,
-  XCircle,
-  Clock,
-  User,
-  Mail,
-  Phone,
-  MapPin,
-  Calendar,
-  Banknote,
-  Shield,
-  Eye
+  Eye, 
+  Check, 
+  X, 
+  RotateCcw,
+  AlertTriangle,
+  Trash2,
+  CheckCircle
 } from 'lucide-react';
+import AdminSidebar from '@/components/AdminSidebar';
+import AdminProfileDeletionDialog from '@/components/admin-profile-deletion-dialog';
 
 interface AdminSession {
   id: string;
@@ -37,310 +25,391 @@ interface AdminSession {
   loginTime: string;
 }
 
-interface UserProfile {
-  id: string;
+interface ProfileData {
   user_id: string;
-  email: string;
+  profile_status: 'pending' | 'approved' | 'rejected' | 'terminated' | 'flagged';
+  subscription_status: string;
   first_name: string;
-  middle_name?: string;
   last_name: string;
+  email: string;
   phone?: string;
-  gender?: string;
-  date_of_birth?: string;
-  age?: number;
   city?: string;
-  profile_status: 'pending' | 'approved' | 'rejected' | 'flagged';
+  age?: number;
+  gender?: string;
   created_at: string;
   updated_at: string;
-  images?: UserImage[];
-  completionPercentage?: number;
-  user_subscriptions?: {
-    profile_status: 'pending' | 'approved' | 'rejected' | 'flagged';
-    subscription_status: string;
-    created_at: string;
-  }[];
+  mainImage?: string;
 }
 
-interface UserImage {
-  id: string;
-  user_id: string;
-  image_url: string;
-  is_primary: boolean;
-  created_at: string;
-}
-
-export default function AdminProfiles() {
+export default function ProfilesManagement() {
   const [adminSession, setAdminSession] = useState<AdminSession | null>(null);
   const [loading, setLoading] = useState(true);
-  const [profiles, setProfiles] = useState<UserProfile[]>([]);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [profiles, setProfiles] = useState<ProfileData[]>([]);
+  const [activeTab, setActiveTab] = useState('all');
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    checkAdminAuth();
+    fetchProfiles();
+  }, []);
+
+  const checkAdminAuth = () => {
+    const session = localStorage.getItem('admin_session');
+    if (!session) {
+      router.push('/admin/login');
+      return;
+    }
+
+    try {
+      const parsedSession = JSON.parse(session);
+      setAdminSession(parsedSession);
+    } catch (error) {
+      console.error('Invalid admin session:', error);
+      localStorage.removeItem('admin_session');
+      router.push('/admin/login');
+    }
+  };
 
   const fetchProfiles = async () => {
     try {
-      // Fetch user profiles with subscription status
-      const { data: profilesData, error: profilesError } = await supabase
-        .from('user_profiles')
+      setLoading(true);
+      
+      // Fetch profiles from user_subscriptions joined with user_profiles
+      const { data, error } = await supabase
+        .from('user_subscriptions')
         .select(`
-          *,
-          user_subscriptions!inner(
-            profile_status,
-            subscription_status,
-            created_at
+          user_id,
+          profile_status,
+          subscription_status,
+          created_at,
+          updated_at,
+          user_profiles!inner (
+            first_name,
+            last_name,
+            email,
+            phone,
+            city,
+            age,
+            gender
           )
         `)
         .order('created_at', { ascending: false });
 
-      if (profilesError) {
-        console.error('Error fetching profiles:', profilesError);
+      if (error) {
+        console.error('Error fetching profiles:', error);
         return;
       }
 
-      // Fetch user images for each profile
-      const profilesWithImages = await Promise.all(
-        profilesData.map(async (profile) => {
-          const { data: imagesData } = await supabase
-            .from('user_images')
-            .select('*')
-            .eq('user_id', profile.user_id)
-            .order('is_primary', { ascending: false });
+      // Transform the data to flatten the structure
+      const transformedProfiles: ProfileData[] = data?.map(item => {
+        // Handle both array and object structure for user_profiles
+        const userProfile = Array.isArray(item.user_profiles) 
+          ? item.user_profiles[0] 
+          : item.user_profiles;
+        
+        return {
+          user_id: item.user_id,
+          profile_status: item.profile_status,
+          subscription_status: item.subscription_status,
+          first_name: userProfile?.first_name || '',
+          last_name: userProfile?.last_name || '',
+          email: userProfile?.email || '',
+          phone: userProfile?.phone || '',
+          city: userProfile?.city || '',
+          age: userProfile?.age || null,
+          gender: userProfile?.gender || '',
+          created_at: item.created_at,
+          updated_at: item.updated_at
+        };
+      }) || [];
 
-          // Use subscription status as the primary status
-          const actualStatus = profile.user_subscriptions?.[0]?.profile_status || profile.profile_status;
-          
-          return {
-            ...profile,
-            profile_status: actualStatus,
-            images: imagesData || [],
-            completionPercentage: calculateProfileCompletion(profile)
-          };
+      // Enhance profiles with images (same logic as other pages)
+      const enhancedProfiles = await Promise.all(
+        transformedProfiles.map(async (profile) => {
+          try {
+            // Get main image for each profile
+            const { data: images } = await supabase
+              .from('user_images')
+              .select('image_url, is_main')
+              .eq('user_id', profile.user_id)
+              .order('is_main', { ascending: false })
+              .limit(1)
+            
+            let mainImage = '/placeholder.jpg'
+            if (images && images.length > 0) {
+              const imageUrl = images[0].image_url
+              if (imageUrl && imageUrl !== '/placeholder.jpg') {
+                // Check if imageUrl is already a full URL
+                if (imageUrl.startsWith('http')) {
+                  mainImage = imageUrl
+                } else {
+                  mainImage = `https://kzmfreck4dxcc4cifgls.supabase.co/storage/v1/object/public/humsafar-user-images/${imageUrl}`
+                }
+              }
+            }
+            
+            return {
+              ...profile,
+              mainImage
+            }
+          } catch (error) {
+            // Error fetching image for profile
+            return {
+              ...profile,
+              mainImage: '/placeholder.jpg'
+            }
+          }
         })
+      )
+
+      setProfiles(enhancedProfiles);
+    } catch (error) {
+      console.error('Error in fetchProfiles:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredProfiles = profiles.filter(profile => {
+    if (activeTab === 'all') return true;
+    // Remove flagged case since it's not a valid profile status
+    if (activeTab === 'flagged') return false;
+    return profile.profile_status === activeTab;
+  });
+
+  const updateProfileStatus = async (userId: string, newStatus: 'approved' | 'rejected' | 'terminated' | 'pending' | 'flagged') => {
+    try {
+      setActionLoading(userId);
+
+      const { error } = await supabase
+        .from('user_subscriptions')
+        .update({ 
+          profile_status: newStatus,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', userId);
+
+      if (error) {
+        console.error('Error updating profile status:', error);
+        alert('Failed to update profile status');
+        return;
+      }
+
+      // Update local state
+      setProfiles(prevProfiles => 
+        prevProfiles.map(profile => 
+          profile.user_id === userId 
+            ? { ...profile, profile_status: newStatus, updated_at: new Date().toISOString() }
+            : profile
+        )
       );
 
-      setProfiles(profilesWithImages);
+      alert(`Profile status updated to ${newStatus}`);
     } catch (error) {
-      console.error('Error fetching profiles:', error);
+      console.error('Error in updateProfileStatus:', error);
+      alert('An error occurred while updating profile status');
+    } finally {
+      setActionLoading(null);
     }
   };
 
-  const calculateProfileCompletion = (profile: any): number => {
-    const fields = [
-      'first_name', 'last_name', 'email', 'phone', 'gender', 
-      'date_of_birth', 'city'
-    ];
-    
-    const completedFields = fields.filter(field => 
-      profile[field] && profile[field].toString().trim() !== ''
-    ).length;
-    
-    return Math.round((completedFields / fields.length) * 100);
-  };
-
-  const handleApproveProfile = async (profileId: string) => {
-    try {
-      // Find the profile to get user_id
-      const profile = profiles.find(p => p.id === profileId);
-      if (!profile) return;
-
-      // Update user_subscriptions table
-      const { error } = await supabase
-        .from('user_subscriptions')
-        .update({ profile_status: 'approved', updated_at: new Date().toISOString() })
-        .eq('user_id', profile.user_id);
-
-      if (error) {
-        console.error('Error approving profile:', error);
-        return;
-      }
-
-      // Update local state
-      setProfiles(profiles.map(p => 
-        p.id === profileId 
-          ? { ...p, profile_status: 'approved' as const }
-          : p
-      ));
-    } catch (error) {
-      console.error('Error approving profile:', error);
-    }
-  };
-
-  const handleRejectProfile = async (profileId: string) => {
-    try {
-      // Find the profile to get user_id
-      const profile = profiles.find(p => p.id === profileId);
-      if (!profile) return;
-
-      // Update user_subscriptions table
-      const { error } = await supabase
-        .from('user_subscriptions')
-        .update({ profile_status: 'rejected', updated_at: new Date().toISOString() })
-        .eq('user_id', profile.user_id);
-
-      if (error) {
-        console.error('Error rejecting profile:', error);
-        return;
-      }
-
-      // Update local state
-      setProfiles(profiles.map(p => 
-        p.id === profileId 
-          ? { ...p, profile_status: 'rejected' as const }
-          : p
-      ));
-    } catch (error) {
-      console.error('Error rejecting profile:', error);
-    }
-  };
-
-  const handleViewProfile = (userId: string) => {
+  const viewProfile = (userId: string) => {
     // Open profile in new tab
     window.open(`/profile/${userId}`, '_blank');
   };
 
-  useEffect(() => {
-    const checkAdminAuth = () => {
-      try {
-        const session = localStorage.getItem('admin_session');
-        if (session) {
-          const parsedSession = JSON.parse(session);
-          setAdminSession(parsedSession);
-          fetchProfiles();
-        } else {
-          router.push('/admin/login');
-        }
-      } catch (error) {
-        console.error('Error checking admin auth:', error);
-        router.push('/admin/login');
-      } finally {
-        setLoading(false);
-      }
-    };
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status) {
+      case 'approved': return 'default';
+      case 'pending': return 'secondary';
+      case 'rejected': return 'destructive';
+      case 'terminated': return 'outline';
+      default: return 'secondary';
+    }
+  };
 
-    checkAdminAuth();
-  }, [router]);
+  const getStatusActions = (profile: ProfileData) => {
+    const { profile_status, user_id } = profile;
+    const isLoading = actionLoading === user_id;
 
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-      localStorage.removeItem('admin_session');
-      router.push('/admin/login');
-    } catch (error) {
-      console.error('Logout error:', error);
-      localStorage.removeItem('admin_session');
-      router.push('/admin/login');
+    switch (profile_status) {
+      case 'pending':
+        return (
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => viewProfile(user_id)}
+              className="flex-1"
+            >
+              <Eye className="h-4 w-4 mr-1" />
+              View Profile
+            </Button>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant="default"
+                onClick={() => updateProfileStatus(user_id, 'approved')}
+                disabled={isLoading}
+                className="bg-green-600 hover:bg-green-700 w-8 h-8 p-0"
+                title="Approve Profile"
+              >
+                <Check className="h-4 w-4" />
+              </Button>
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={() => updateProfileStatus(user_id, 'rejected')}
+                disabled={isLoading}
+                className="w-8 h-8 p-0"
+                title="Reject Profile"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => updateProfileStatus(user_id, 'terminated')}
+                disabled={isLoading}
+                className="w-8 h-8 p-0 border-orange-500 text-orange-500 hover:bg-orange-50"
+                title="Terminate Profile (Temporary)"
+              >
+                <AlertTriangle className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        );
+
+      case 'approved':
+        return (
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => viewProfile(user_id)}
+              className="flex-1"
+            >
+              <Eye className="h-4 w-4 mr-1" />
+              View Profile
+            </Button>
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={() => updateProfileStatus(user_id, 'terminated')}
+              disabled={actionLoading === user_id}
+              className="w-8 h-8 p-0 rounded-md flex-shrink-0"
+              title="Terminate Profile (Temporary)"
+            >
+              <AlertTriangle className="h-4 w-4" />
+            </Button>
+            <AdminProfileDeletionDialog
+              userId={user_id}
+              userName={`${profile.first_name} ${profile.last_name}`}
+              userEmail={profile.email}
+              onDeleteSuccess={() => fetchProfiles()}
+            />
+          </div>
+        );
+
+      case 'rejected':
+        return (
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => viewProfile(user_id)}
+              className="flex-1"
+            >
+              <Eye className="h-4 w-4 mr-1" />
+              View Profile
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => updateProfileStatus(user_id, 'terminated')}
+              disabled={actionLoading === user_id}
+              className="w-8 h-8 p-0 border-orange-500 text-orange-500 hover:bg-orange-50"
+              title="Terminate Profile (Temporary)"
+            >
+              <AlertTriangle className="h-4 w-4" />
+            </Button>
+          </div>
+        );
+
+      case 'terminated':
+        return (
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => viewProfile(user_id)}
+              className="flex-1"
+            >
+              <Eye className="h-4 w-4 mr-1" />
+              View Profile
+            </Button>
+            <Button
+              size="sm"
+              variant="default"
+              onClick={() => updateProfileStatus(user_id, 'approved')}
+              disabled={isLoading}
+              className="bg-blue-600 hover:bg-blue-700 flex-shrink-0"
+            >
+              <RotateCcw className="h-4 w-4 mr-1" />
+              Reinstate
+            </Button>
+            <AdminProfileDeletionDialog
+              userId={user_id}
+              userName={`${profile.first_name} ${profile.last_name}`}
+              userEmail={profile.email}
+              onDeleteSuccess={() => fetchProfiles()}
+            />
+          </div>
+        );
+
+      default:
+        return (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => viewProfile(user_id)}
+            className="w-full"
+          >
+            <Eye className="h-4 w-4 mr-1" />
+            View Profile
+          </Button>
+        );
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-lg text-gray-600">Loading...</div>
+      <div className="flex h-screen bg-gray-50">
+        <AdminSidebar currentPath="/admin/profiles" />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-humsafar-500 mx-auto mb-4"></div>
+            <p className="text-humsafar-600">Loading profiles...</p>
+          </div>
+        </div>
       </div>
     );
   }
 
-  if (!adminSession) {
-    return null;
-  }
-
-  const sidebarItems = [
-    { icon: Home, label: 'Dashboard', href: '/admin/dashboard', active: false },
-    { icon: Users, label: 'Profiles', href: '/admin/profiles', active: true },
-    { icon: UserCheck, label: 'Users', href: '/admin/users' },
-    { icon: Banknote, label: 'Payments', href: '/admin/payments' },
-    { icon: Shield, label: 'Content', href: '/admin/content' },
-    { icon: BarChart3, label: 'Analytics', href: '/admin/analytics' },
-    { icon: Gift, label: 'Promo Codes', href: '/admin/promo-codes' },
-    { icon: Settings, label: 'Settings', href: '/admin/settings' },
-  ];
-
-  const filteredProfiles = profiles.filter(profile => {
-    if (filterStatus === 'all') return true;
-    return profile.profile_status === filterStatus;
-  });
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'approved':
-        return <Badge className="bg-green-100 text-green-800 hover:bg-green-100"><CheckCircle className="w-3 h-3 mr-1" />Approved</Badge>;
-      case 'pending':
-        return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100"><Clock className="w-3 h-3 mr-1" />Pending</Badge>;
-      case 'rejected':
-        return <Badge className="bg-[#ee406d]/10 text-[#ee406d] hover:bg-[#ee406d]/10"><XCircle className="w-3 h-3 mr-1" />Rejected</Badge>;
-      case 'flagged':
-        return <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-100"><XCircle className="w-3 h-3 mr-1" />Flagged</Badge>;
-      default:
-        return <Badge variant="secondary">{status}</Badge>;
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'w-64' : 'w-16'} bg-humsafar-500 shadow-xl transition-all duration-300 flex flex-col`}>
-        {/* Sidebar Header */}
-        <div className="p-4 border-b border-humsafar-500/30">
-          <div className="flex items-center justify-between">
-            {sidebarOpen && (
-              <h2 className="text-xl font-bold text-white">Admin Panel</h2>
-            )}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2"
-            >
-              <Menu className="h-4 w-4 text-white" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Sidebar Navigation */}
-        <nav className="flex-1 p-4">
-          <ul className="space-y-2">
-            {sidebarItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <li key={item.href}>
-                  <Button
-                    variant={item.active ? "secondary" : "ghost"}
-                    className={`w-full justify-start text-white hover:bg-humsafar-500/30 ${
-                      item.active ? 'bg-humsafar-500/50' : ''
-                    }`}
-                    onClick={() => router.push(item.href)}
-                  >
-                    <Icon className="h-4 w-4" />
-                    {sidebarOpen && <span className="ml-2">{item.label}</span>}
-                  </Button>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
-
-        {/* Sidebar Footer */}
-        <div className="p-4 border-t border-humsafar-500/30">
-          <Button
-            variant="ghost"
-            className="w-full justify-start text-white hover:bg-humsafar-500/30"
-            onClick={handleLogout}
-          >
-            <LogOut className="h-4 w-4" />
-            {sidebarOpen && <span className="ml-2">Logout</span>}
-          </Button>
-        </div>
-      </div>
-
+      <AdminSidebar currentPath="/admin/profiles" />
+      
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
         <header className="bg-white shadow-sm border-b border-humsafar-200">
           <div className="px-6 py-4">
             <div className="flex justify-between items-center">
-              <h1 className="text-2xl font-bold text-humsafar-700">Profile Management</h1>
+              <h1 className="text-2xl font-bold text-humsafar-500">Profiles Management</h1>
               <div className="flex items-center space-x-4">
-                <span className="text-sm text-gray-600">Welcome back, {adminSession.email}</span>
+                <span className="text-sm text-gray-600">Manage user profiles and their approval status</span>
               </div>
             </div>
           </div>
@@ -348,166 +417,268 @@ export default function AdminProfiles() {
 
         {/* Main Content Area */}
         <main className="flex-1 p-6">
-          {/* Filter Tabs */}
-          <div className="mb-6">
-            <div className="flex space-x-2">
-              {['all', 'pending', 'approved', 'rejected', 'flagged'].map((status) => (
-                <Button
-                  key={status}
-                  variant={filterStatus === status ? "default" : "outline"}
-                  onClick={() => setFilterStatus(status)}
-                  className="capitalize"
-                >
-                  {status === 'all' ? 'All Profiles' : status}
-                  {status !== 'all' && (
-                    <Badge className="ml-2 bg-white text-humsafar-600">
-                      {profiles.filter(p => p.profile_status === status).length}
-                    </Badge>
-                  )}
-                </Button>
-              ))}
+          {/* Tab Navigation */}
+          <div className="mb-8">
+            <div className="flex space-x-2 p-1 rounded-xl">
+              <button
+                onClick={() => setActiveTab('all')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  activeTab === 'all'
+                    ? 'bg-humsafar-600 text-white shadow-sm'
+                    : 'bg-humsafar-50 text-humsafar-700 hover:text-humsafar-900 hover:bg-humsafar-100 border border-humsafar-200'
+                }`}
+              >
+                All Profiles
+                <span className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${
+                  activeTab === 'all'
+                    ? 'bg-humsafar-500 text-white'
+                    : 'bg-humsafar-200 text-humsafar-800'
+                }`}>
+                  {profiles.length}
+                </span>
+              </button>
+              
+              <button
+                onClick={() => setActiveTab('pending')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  activeTab === 'pending'
+                    ? 'bg-humsafar-600 text-white shadow-sm'
+                    : 'bg-humsafar-50 text-humsafar-700 hover:text-humsafar-900 hover:bg-humsafar-100 border border-humsafar-200'
+                }`}
+              >
+                Pending
+                <span className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${
+                  activeTab === 'pending'
+                    ? 'bg-humsafar-500 text-white'
+                    : 'bg-red-100 text-red-600'
+                }`}>
+                  {profiles.filter(p => p.profile_status === 'pending').length}
+                </span>
+              </button>
+              
+              <button
+                onClick={() => setActiveTab('approved')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  activeTab === 'approved'
+                    ? 'bg-humsafar-600 text-white shadow-sm'
+                    : 'bg-humsafar-50 text-humsafar-700 hover:text-humsafar-900 hover:bg-humsafar-100 border border-humsafar-200'
+                }`}
+              >
+                Approved
+                <span className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${
+                  activeTab === 'approved'
+                    ? 'bg-humsafar-500 text-white'
+                    : 'bg-green-100 text-green-600'
+                }`}>
+                  {profiles.filter(p => p.profile_status === 'approved').length}
+                </span>
+              </button>
+              
+              <button
+                onClick={() => setActiveTab('rejected')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  activeTab === 'rejected'
+                    ? 'bg-humsafar-600 text-white shadow-sm'
+                    : 'bg-humsafar-50 text-humsafar-700 hover:text-humsafar-900 hover:bg-humsafar-100 border border-humsafar-200'
+                }`}
+              >
+                Rejected
+                <span className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${
+                  activeTab === 'rejected'
+                    ? 'bg-humsafar-500 text-white'
+                    : 'bg-red-100 text-red-600'
+                }`}>
+                  {profiles.filter(p => p.profile_status === 'rejected').length}
+                </span>
+              </button>
+              
+              <button
+                onClick={() => setActiveTab('flagged')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  activeTab === 'flagged'
+                    ? 'bg-humsafar-600 text-white shadow-sm'
+                    : 'bg-humsafar-50 text-humsafar-700 hover:text-humsafar-900 hover:bg-humsafar-100 border border-humsafar-200'
+                }`}
+              >
+                Flagged
+                <span className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${
+                  activeTab === 'flagged'
+                    ? 'bg-humsafar-500 text-white'
+                    : 'bg-orange-100 text-orange-600'
+                }`}>
+                  {profiles.filter(p => p.profile_status === 'flagged').length}
+                </span>
+              </button>
+              
+              <button
+                onClick={() => setActiveTab('terminated')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  activeTab === 'terminated'
+                    ? 'bg-humsafar-600 text-white shadow-sm'
+                    : 'bg-humsafar-50 text-humsafar-700 hover:text-humsafar-900 hover:bg-humsafar-100 border border-humsafar-200'
+                }`}
+              >
+                Terminated
+                <span className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${
+                  activeTab === 'terminated'
+                    ? 'bg-humsafar-500 text-white'
+                    : 'bg-red-100 text-red-600'
+                }`}>
+                  {profiles.filter(p => p.profile_status === 'terminated').length}
+                </span>
+              </button>
             </div>
           </div>
 
-          {/* Profiles Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProfiles.map((profile) => (
-              <Card key={profile.id} className="hover:shadow-lg transition-all duration-300 border-0">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <Avatar className="h-12 w-12">
-                        <AvatarImage 
-                          src={profile.images?.find(img => img.is_primary)?.image_url || profile.images?.[0]?.image_url} 
-                          alt={`${profile.first_name} ${profile.last_name}`}
-                        />
-                        <AvatarFallback>
-                          <User className="h-6 w-6" />
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <CardTitle className="text-lg">
-                          {profile.first_name} {profile.middle_name} {profile.last_name}
-                        </CardTitle>
-                        <CardDescription className="text-sm text-gray-500">
-                          ID: {profile.user_id.slice(0, 8)}...
-                        </CardDescription>
-                      </div>
-                    </div>
-                    {getStatusBadge(profile.profile_status)}
-                  </div>
-                </CardHeader>
-                
-                <CardContent className="space-y-4">
-                  {/* Profile Completion */}
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Profile Completion</span>
-                      <span className="font-medium">{profile.completionPercentage}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-humsafar-500 h-2 rounded-full transition-all duration-300" 
-                        style={{ width: `${profile.completionPercentage}%` }}
-                      ></div>
-                    </div>
-                  </div>
+         
+          {/* Profiles List */}
+          <Card>
+            <CardHeader>
+             
+              <CardDescription>
+                Manage profile approval status and view profile details
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {filteredProfiles.length === 0 ? (
+                <div className="text-center py-8">
+                  <Users className="h-12 w-12 text-humsafar-400 mx-auto mb-4" />
+                  <p className="text-humsafar-600">No profiles found matching your criteria</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredProfiles.map((profile) => {
+                    // Calculate profile completion percentage
+                    const calculateProfileCompletion = (profile: ProfileData) => {
+                      const fields = [
+                        profile.first_name,
+                        profile.last_name,
+                        profile.email,
+                        profile.phone,
+                        profile.city,
+                        profile.age,
+                        profile.gender
+                      ];
+                      const filledFields = fields.filter(field => field && field !== '').length;
+                      return Math.round((filledFields / fields.length) * 100);
+                    };
 
-                  {/* Profile Details */}
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center space-x-2 text-gray-600">
-                      <Mail className="h-4 w-4" />
-                      <span>{profile.email}</span>
-                    </div>
-                    {profile.phone && (
-                      <div className="flex items-center space-x-2 text-gray-600">
-                        <Phone className="h-4 w-4" />
-                        <span>{profile.phone}</span>
-                      </div>
-                    )}
-                    {profile.city && (
-                      <div className="flex items-center space-x-2 text-gray-600">
-                        <MapPin className="h-4 w-4" />
-                        <span>{profile.city}</span>
-                      </div>
-                    )}
-                    {profile.age && (
-                      <div className="flex items-center space-x-2 text-gray-600">
-                        <Calendar className="h-4 w-4" />
-                        <span>{profile.age} years old</span>
-                      </div>
-                    )}
-                  </div>
+                    const completionPercentage = calculateProfileCompletion(profile);
+                    const shortId = profile.user_id.slice(0, 8);
 
-                  {/* Action Buttons */}
-                  <div className="flex space-x-2 pt-4">
-                    {/* View Profile Button - Always visible */}
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      className="flex-1"
-                      onClick={() => handleViewProfile(profile.user_id)}
-                    >
-                      <Eye className="h-4 w-4 mr-1" />
-                      View Profile
-                    </Button>
-                    
-                    {profile.profile_status === 'pending' && (
-                      <>
-                        <Button 
-                          size="sm" 
-                          className="flex-1 bg-green-600 hover:bg-green-700"
-                          onClick={() => handleApproveProfile(profile.id)}
-                        >
-                          <CheckCircle className="h-4 w-4 mr-1" />
-                          Approve
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="destructive" 
-                          className="flex-1"
-                          onClick={() => handleRejectProfile(profile.id)}
-                        >
-                          <XCircle className="h-4 w-4 mr-1" />
-                          Reject
-                        </Button>
-                      </>
-                    )}
-                    {profile.profile_status === 'approved' && (
-                      <Button size="sm" variant="outline" className="flex-1" disabled>
-                        <CheckCircle className="h-4 w-4 mr-1" />
-                        Approved
-                      </Button>
-                    )}
-                    {profile.profile_status === 'rejected' && (
-                      <Button 
-                        size="sm" 
-                        className="flex-1 bg-green-600 hover:bg-green-700"
-                        onClick={() => handleApproveProfile(profile.id)}
+                    return (
+                      <div
+                        key={profile.user_id}
+                        className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-all duration-200 hover:border-humsafar-200"
                       >
-                        <CheckCircle className="h-4 w-4 mr-1" />
-                        Re-approve
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                        {/* Header with Avatar, Name, ID and Status */}
+                        <div className="flex items-start gap-3 mb-4">
+                          <div className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 border-2 border-humsafar-200 overflow-hidden">
+                            {profile.mainImage && profile.mainImage !== '/placeholder.jpg' ? (
+                              <img 
+                                src={profile.mainImage} 
+                                alt={`${profile.first_name} ${profile.last_name}`}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  // Fallback to placeholder if image fails to load
+                                  const target = e.target as HTMLImageElement;
+                                  target.style.display = 'none';
+                                  target.nextElementSibling?.classList.remove('hidden');
+                                }}
+                              />
+                            ) : null}
+                            <div className={`w-full h-full bg-gradient-to-br from-humsafar-100 to-humsafar-200 rounded-full flex items-center justify-center ${profile.mainImage && profile.mainImage !== '/placeholder.jpg' ? 'hidden' : ''}`}>
+                              <svg className="w-6 h-6 text-humsafar-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                              </svg>
+                            </div>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between mb-1">
+                              <h3 className="font-semibold text-lg text-gray-900 truncate">
+                                {profile.first_name} {profile.last_name}
+                              </h3>
+                              <Badge 
+                                variant={getStatusBadgeVariant(profile.profile_status)}
+                                className={`ml-2 flex-shrink-0 ${
+                                  profile.profile_status === 'approved' 
+                                    ? 'bg-green-100 text-green-800 hover:bg-green-200' 
+                                    : ''
+                                }`}
+                              >
+                                {profile.profile_status === 'approved' && (
+                                  <CheckCircle className="w-3 h-3 mr-1" />
+                                )}
+                                {profile.profile_status.charAt(0).toUpperCase() + profile.profile_status.slice(1)}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-gray-500">ID: {shortId}...</p>
+                          </div>
+                        </div>
 
-          {/* Empty State */}
-          {filteredProfiles.length === 0 && (
-            <div className="text-center py-12">
-              <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No profiles found</h3>
-              <p className="text-gray-500">
-                {filterStatus === 'all' 
-                  ? 'No user profiles available yet.' 
-                  : `No profiles with ${filterStatus} status.`
-                }
-              </p>
-            </div>
-          )}
+                        {/* Profile Completion */}
+                        <div className="mb-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm font-medium text-gray-700">Profile Completion</span>
+                            <span className="text-sm font-bold text-gray-900">{completionPercentage}%</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div 
+                              className="bg-gradient-to-r from-humsafar-500 to-humsafar-600 h-2 rounded-full transition-all duration-300"
+                              style={{ width: `${completionPercentage}%` }}
+                            ></div>
+                          </div>
+                        </div>
+
+                        {/* Contact Information */}
+                        <div className="space-y-2 mb-4">
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <svg className="w-4 h-4 text-humsafar-500" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                              <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                            </svg>
+                            <span className="truncate">{profile.email}</span>
+                          </div>
+                          
+                          {profile.phone && (
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                              <svg className="w-4 h-4 text-humsafar-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                              </svg>
+                              <span>{profile.phone}</span>
+                            </div>
+                          )}
+                          
+                          {profile.city && (
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                              <svg className="w-4 h-4 text-humsafar-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                              </svg>
+                              <span>{profile.city}</span>
+                            </div>
+                          )}
+                          
+                          {profile.age && (
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                              <svg className="w-4 h-4 text-humsafar-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                              </svg>
+                              <span>{profile.age} years old</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="pt-4 border-t border-gray-100">
+                          {getStatusActions(profile)}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </main>
       </div>
     </div>

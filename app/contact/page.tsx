@@ -1,6 +1,8 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import Link from "next/link"
+import { supabase } from "@/lib/supabaseClient"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -20,11 +22,151 @@ import {
   HeadphonesIcon,
   Users,
   Globe,
+  Loader2,
+  CheckCircle,
+  AlertCircle,
 } from "lucide-react"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
 
 export default function ContactPage() {
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    subject: '',
+    message: ''
+  })
+  const [isLoading, setIsLoading] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
+  const [errorMessage, setErrorMessage] = useState('')
+
+  // Auto-fill form data for logged in users
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        
+        if (user) {
+          // Fetch user profile data
+          const { data: profile } = await supabase
+            .from('user_profiles')
+            .select('first_name, last_name, phone')
+            .eq('user_id', user.id)
+            .single()
+          
+          if (profile) {
+            setFormData(prev => ({
+              ...prev,
+              firstName: profile.first_name || '',
+              lastName: profile.last_name || '',
+              email: user.email || '',
+              phone: profile.phone || ''
+            }))
+          } else {
+            // If no profile data, at least fill email from auth
+            setFormData(prev => ({
+              ...prev,
+              email: user.email || ''
+            }))
+          }
+        }
+      } catch (error) {
+        // Silently handle error - user might not be logged in
+        console.log('User not logged in or error fetching profile data')
+      }
+    }
+
+    loadUserData()
+  }, [])
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }))
+  }
+
+  const validateForm = () => {
+    if (!formData.firstName.trim()) {
+      setErrorMessage('First name is required')
+      return false
+    }
+    if (!formData.lastName.trim()) {
+      setErrorMessage('Last name is required')
+      return false
+    }
+    if (!formData.email.trim()) {
+      setErrorMessage('Email is required')
+      return false
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      setErrorMessage('Please enter a valid email address')
+      return false
+    }
+    if (!formData.phone.trim()) {
+      setErrorMessage('Phone number is required')
+      return false
+    }
+    if (!formData.subject.trim()) {
+      setErrorMessage('Subject is required')
+      return false
+    }
+    if (!formData.message.trim()) {
+      setErrorMessage('Message is required')
+      return false
+    }
+    return true
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setErrorMessage('')
+    
+    if (!validateForm()) {
+      setSubmitStatus('error')
+      return
+    }
+
+    setIsLoading(true)
+    setSubmitStatus('idle')
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
+
+      if (response.ok) {
+        setSubmitStatus('success')
+        alert('Email submitted successfully! We will get back to you soon.')
+        setFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          phone: '',
+          subject: '',
+          message: ''
+        })
+      } else {
+        const errorData = await response.json()
+        throw new Error(errorData.details || errorData.error || 'Failed to send message')
+      }
+    } catch (error) {
+      setSubmitStatus('error')
+      const errorMsg = error instanceof Error ? error.message : 'Failed to send message. Please try again or contact us directly.'
+      setErrorMessage(errorMsg)
+      console.error('Form submission error:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-humsafar-50 via-white to-humsafar-100">
       <Header />
@@ -188,56 +330,133 @@ export default function ContactPage() {
                     <p className="text-lg text-gray-600">Fill out the form below and we'll get back to you within 24 hours</p>
                   </CardHeader>
                   <CardContent className="space-y-8">
-                    <div className="grid md:grid-cols-2 gap-6">
+                    <form onSubmit={handleSubmit}>
+                      {submitStatus === 'success' && (
+                        <div className="bg-green-50 border-l-4 border-green-400 rounded-xl p-6 mb-6 shadow-sm">
+                          <div className="flex items-start gap-4">
+                            <div className="flex-shrink-0">
+                              <CheckCircle className="w-6 h-6 text-green-600" />
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="text-green-800 font-semibold text-lg mb-2">Message Sent Successfully!</h3>
+                              <p className="text-green-700 mb-3">Your message has been delivered to our team and a confirmation email has been sent to your inbox.</p>
+                              <div className="text-sm text-green-600">
+                                <p className="mb-1">✓ Our team has received your message</p>
+                                <p className="mb-1">✓ Confirmation email sent to your address</p>
+                                <p>✓ We'll respond within 24-48 hours</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {submitStatus === 'error' && errorMessage && (
+                        <div className="bg-red-50 border-l-4 border-red-400 rounded-xl p-6 mb-6 shadow-sm">
+                          <div className="flex items-start gap-4">
+                            <div className="flex-shrink-0">
+                              <AlertCircle className="w-6 h-6 text-red-600" />
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="text-red-800 font-semibold text-lg mb-2">Error Sending Message</h3>
+                              <p className="text-red-700 mb-3">{errorMessage}</p>
+                              <div className="text-sm text-red-600">
+                                <p className="mb-1">• Please check your internet connection</p>
+                                <p className="mb-1">• Verify all required fields are filled correctly</p>
+                                <p>• If the problem persists, contact us directly at info@humsafarforeverlove.com</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      <div className="grid md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <label className="block text-sm font-semibold text-gray-800 mb-3">First Name *</label>
+                          <Input 
+                            name="firstName"
+                            value={formData.firstName}
+                            onChange={handleInputChange}
+                            placeholder="Enter your first name" 
+                            className="h-12 border-2 border-gray-200 focus:border-humsafar-400 focus:ring-2 focus:ring-humsafar-100 rounded-xl transition-all duration-200" 
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="block text-sm font-semibold text-gray-800 mb-3">Last Name *</label>
+                          <Input 
+                            name="lastName"
+                            value={formData.lastName}
+                            onChange={handleInputChange}
+                            placeholder="Enter your last name" 
+                            className="h-12 border-2 border-gray-200 focus:border-humsafar-400 focus:ring-2 focus:ring-humsafar-100 rounded-xl transition-all duration-200" 
+                            required
+                          />
+                        </div>
+                      </div>
                       <div className="space-y-2">
-                        <label className="block text-sm font-semibold text-gray-800 mb-3">First Name</label>
-                        <Input 
-                          placeholder="Enter your first name" 
-                          className="h-12 border-2 border-gray-200 focus:border-humsafar-400 focus:ring-2 focus:ring-humsafar-100 rounded-xl transition-all duration-200" 
+                        <label className="block text-sm font-semibold text-gray-800 mb-3">Email Address *</label>
+                        <Input
+                          type="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleInputChange}
+                          placeholder="Enter your email address"
+                          className="h-12 border-2 border-gray-200 focus:border-humsafar-400 focus:ring-2 focus:ring-humsafar-100 rounded-xl transition-all duration-200"
+                          required
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="block text-sm font-semibold text-gray-800 mb-3">Last Name</label>
+                        <label className="block text-sm font-semibold text-gray-800 mb-3">Phone Number *</label>
                         <Input 
-                          placeholder="Enter your last name" 
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handleInputChange}
+                          placeholder="Enter your phone number" 
                           className="h-12 border-2 border-gray-200 focus:border-humsafar-400 focus:ring-2 focus:ring-humsafar-100 rounded-xl transition-all duration-200" 
+                          required
                         />
                       </div>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="block text-sm font-semibold text-gray-800 mb-3">Email Address</label>
-                      <Input
-                        type="email"
-                        placeholder="Enter your email address"
-                        className="h-12 border-2 border-gray-200 focus:border-humsafar-400 focus:ring-2 focus:ring-humsafar-100 rounded-xl transition-all duration-200"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="block text-sm font-semibold text-gray-800 mb-3">Phone Number</label>
-                      <Input 
-                        placeholder="Enter your phone number" 
-                        className="h-12 border-2 border-gray-200 focus:border-humsafar-400 focus:ring-2 focus:ring-humsafar-100 rounded-xl transition-all duration-200" 
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="block text-sm font-semibold text-gray-800 mb-3">Subject</label>
-                      <Input 
-                        placeholder="What is this regarding?" 
-                        className="h-12 border-2 border-gray-200 focus:border-humsafar-400 focus:ring-2 focus:ring-humsafar-100 rounded-xl transition-all duration-200" 
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="block text-sm font-semibold text-gray-800 mb-3">Message</label>
-                      <Textarea
-                        placeholder="Tell us how we can help you on your matrimonial journey..."
-                        rows={6}
-                        className="border-2 border-gray-200 focus:border-humsafar-400 focus:ring-2 focus:ring-humsafar-100 rounded-xl transition-all duration-200 resize-none"
-                      />
-                    </div>
-                    <Button className="w-full h-14 bg-gradient-to-r from-humsafar-600 to-humsafar-500 hover:from-humsafar-700 hover:to-humsafar-600 text-white font-semibold text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]">
-                      <MessageCircle className="w-5 h-5 mr-2" />
-                      Send Message
-                    </Button>
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-gray-800 mb-3">Subject *</label>
+                        <Input 
+                          name="subject"
+                          value={formData.subject}
+                          onChange={handleInputChange}
+                          placeholder="What is this regarding?" 
+                          className="h-12 border-2 border-gray-200 focus:border-humsafar-400 focus:ring-2 focus:ring-humsafar-100 rounded-xl transition-all duration-200" 
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-gray-800 mb-3">Message *</label>
+                        <Textarea
+                          name="message"
+                          value={formData.message}
+                          onChange={handleInputChange}
+                          placeholder="Tell us how we can help you on your matrimonial journey..."
+                          rows={6}
+                          className="border-2 border-gray-200 focus:border-humsafar-400 focus:ring-2 focus:ring-humsafar-100 rounded-xl transition-all duration-200 resize-none"
+                          required
+                        />
+                      </div>
+                      <Button 
+                        type="submit"
+                        disabled={isLoading}
+                        className="w-full h-14 bg-gradient-to-r from-humsafar-600 to-humsafar-500 hover:from-humsafar-700 hover:to-humsafar-600 text-white font-semibold text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                      >
+                        {isLoading ? (
+                          <>
+                            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                            Sending...
+                          </>
+                        ) : (
+                          <>
+                            <MessageCircle className="w-5 h-5 mr-2" />
+                            Send Message
+                          </>
+                        )}
+                      </Button>
+                    </form>
                   </CardContent>
                 </Card>
               </div>

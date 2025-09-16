@@ -9,19 +9,15 @@ import {
   Users, 
   Heart, 
   DollarSign, 
-  Settings, 
   UserCheck, 
   BarChart3, 
-  FileText, 
-  Gift,
-  Menu,
-  Home,
-  LogOut,
+  FileText,
   AlertTriangle,
   TrendingUp,
   Banknote,
-  Shield
+  Gift
 } from 'lucide-react';
+import AdminSidebar from '@/components/AdminSidebar';
 
 interface AdminSession {
   id: string;
@@ -32,7 +28,7 @@ interface AdminSession {
 export default function AdminDashboard() {
   const [adminSession, setAdminSession] = useState<AdminSession | null>(null);
   const [loading, setLoading] = useState(true);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+
   const [stats, setStats] = useState({
     totalProfiles: 0,
     pendingVerifications: 0,
@@ -133,75 +129,12 @@ export default function AdminDashboard() {
     return null;
   }
 
-  const sidebarItems = [
-    { icon: Home, label: 'Dashboard', href: '/admin/dashboard', active: true },
-    { icon: Users, label: 'Profiles', href: '/admin/profiles' },
-    { icon: UserCheck, label: 'Users', href: '/admin/users' },
-    { icon: Banknote, label: 'Payments', href: '/admin/payments' },
-    { icon: Shield, label: 'Content', href: '/admin/content' },
-    { icon: BarChart3, label: 'Analytics', href: '/admin/analytics' },
-    { icon: Gift, label: 'Promo Codes', href: '/admin/promo-codes' },
-    { icon: Settings, label: 'Settings', href: '/admin/settings' },
-  ];
+
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'w-64' : 'w-16'} bg-humsafar-500 shadow-xl transition-all duration-300 flex flex-col`}>
-        {/* Sidebar Header */}
-        <div className="p-4 border-b border-humsafar-500/30">
-          <div className="flex items-center justify-between">
-            {sidebarOpen && (
-              <h2 className="text-xl font-bold text-white">Admin Panel</h2>
-            )}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2"
-            >
-              <Menu className="h-4 w-4 text-white" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Sidebar Navigation */}
-        <nav className="flex-1 p-4">
-          <ul className="space-y-2">
-            {sidebarItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <li key={item.href}>
-                  <a
-                    href={item.href}
-                    className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
-                      item.active
-                        ? 'bg-humsafar-500/20 text-white border border-humsafar-400/30'
-                        : 'text-humsafar-100 hover:bg-humsafar-500/10 hover:text-white'
-                    }`}
-                  >
-                    <Icon className="h-5 w-5" />
-                    {sidebarOpen && <span className="font-medium">{item.label}</span>}
-                  </a>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
-
-        {/* Sidebar Footer */}
-        <div className="p-4 border-t border-humsafar-500/30">
-          <Button
-            onClick={handleLogout}
-            variant="ghost"
-            className="w-full justify-start text-red-200 hover:text-white hover:bg-[#ee406d]/20"
-          >
-            <LogOut className="h-5 w-5" />
-            {sidebarOpen && <span className="ml-3">Logout</span>}
-          </Button>
-        </div>
-      </div>
-
+      <AdminSidebar currentPath="/admin/dashboard" />
+      
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
@@ -252,7 +185,7 @@ export default function AdminDashboard() {
                 <Banknote className="h-5 w-5 text-green-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-humsafar-500">₨{stats.revenue.toLocaleString()}</div>
+                <div className="text-2xl font-bold text-humsafar-500">₨ {stats.revenue.toLocaleString()}</div>
                 <p className="text-xs text-gray-500">
                   This month
                 </p>

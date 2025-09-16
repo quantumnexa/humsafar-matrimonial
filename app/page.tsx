@@ -24,10 +24,14 @@ import {
 } from "lucide-react"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
+import AnimatedCounterSection from "@/components/animated-counter"
 import Image from "next/image"
 import { supabase } from "@/lib/supabaseClient"
 import { ProfileFilterService } from "@/lib/profileFilterService"
 import { ProfileViewService } from "@/lib/profileViewService"
+import CustomAlert from "@/components/ui/custom-alert"
+import { useCustomAlert } from "@/hooks/use-custom-alert"
+import ProtectedImage from "@/components/ui/protected-image"
 
 // Helper function to capitalize text
 const capitalizeText = (text: string | null | undefined): string => {
@@ -44,6 +48,9 @@ export default function HomePage() {
   const [loadingFeatured, setLoadingFeatured] = useState<boolean>(true)
   const [isClient, setIsClient] = useState(false)
   const [viewedProfileIds, setViewedProfileIds] = useState<Set<string>>(new Set())
+  
+  // Custom alert hook
+  const { isOpen, alertConfig, hideAlert, showError, showConfirm } = useCustomAlert()
 
   // Note: suppressHydrationWarning is used throughout this component to prevent
   // hydration mismatches caused by browser extensions (like Bitdefender) that
@@ -84,8 +91,14 @@ export default function HomePage() {
 
   const handleViewProfile = async (profileId: string) => {
     if (!user) {
-      // For non-authenticated users, just navigate
-      window.location.href = `/profile/${profileId}`
+      // For non-authenticated users, show login prompt
+      showConfirm(
+        'Please login to view profiles. Would you like to go to the login page?',
+        () => {
+          window.location.href = '/auth'
+        },
+        'Login Required'
+      )
       return
     }
 
@@ -99,7 +112,10 @@ export default function HomePage() {
     // Check if user can view more profiles
     const canView = await ProfileViewService.canUserViewMoreProfiles()
     if (!canView.success || !canView.canView) {
-      alert(`You have reached your view limit. ${canView.message || 'Upgrade your subscription to view more profiles.'}`)
+      showError(
+        `You have reached your view limit. ${canView.message || 'Upgrade your subscription to view more profiles.'}`,
+        'View Limit Reached'
+      )
       return
     }
 
@@ -111,7 +127,10 @@ export default function HomePage() {
       // Navigate to profile
       window.location.href = `/profile/${profileId}`
     } else {
-      alert(result.message || 'Failed to record profile view')
+      showError(
+        result.message || 'Failed to record profile view',
+        'Error'
+      )
     }
   }
 
@@ -177,7 +196,7 @@ export default function HomePage() {
       location: "Karachi",
       story:
         "We found each other through Hamsafar and couldn't be happier. The platform made it so easy to connect with like-minded people.",
-      image: "/placeholder.svg?height=300&width=400",
+      image: "https://images.unsplash.com/photo-1519741497674-611481863552?w=400&h=300&fit=crop&crop=faces",
       date: "Married in 2023",
     },
     {
@@ -185,7 +204,7 @@ export default function HomePage() {
       names: "Hassan & Ayesha",
       location: "Lahore",
       story: "After months of searching, we found our perfect match. Hamsafar's matching algorithm really works!",
-      image: "/placeholder.svg?height=300&width=400",
+      image: "https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=400&h=300&fit=crop&crop=faces",
       date: "Married in 2024",
     },
     {
@@ -193,7 +212,7 @@ export default function HomePage() {
       names: "Ali & Zara",
       location: "Islamabad",
       story: "From the first conversation to our wedding day, everything felt perfect. Thank you Hamsafar!",
-      image: "/placeholder.svg?height=300&width=400",
+      image: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=400&h=300&fit=crop&crop=faces",
       date: "Married in 2024",
     },
   ]
@@ -621,6 +640,10 @@ export default function HomePage() {
           </div>
         </section>
       </main>
+      
+      {/* Animated Counter Section */}
+      <AnimatedCounterSection />
+      
       {/* Dashboard Section - Only for authenticated users */}
       {/* {user && (
         <section className="py-12 bg-gradient-to-r from-humsafar-50 to-humsafar-50" suppressHydrationWarning>
@@ -789,7 +812,7 @@ export default function HomePage() {
                 >
                   <div className="relative">
                     {profile.mainImage && profile.mainImage !== '/placeholder.jpg' ? (
-                    <Image
+                    <ProtectedImage
                       src={profile.mainImage}
                       alt={name}
                       width={400}
@@ -889,38 +912,42 @@ export default function HomePage() {
         </div>
       </section>
       {/* Stats Section */}
-      <section className="py-16 bg-gray-50" suppressHydrationWarning>
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-humsafar-100 rounded-full mb-4">
-                  <stat.icon className="h-8 w-8 text-humsafar-600" />
-                </div>
-                <div className="text-3xl font-bold text-gray-900 mb-2">{stat.value}</div>
-                <div className="text-gray-600">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+     
       {/* Features Section */}
-      <section className="py-16 bg-white" suppressHydrationWarning>
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Why Choose Hamsafar?</h2>
-            <p className="text-xl text-gray-600">Pakistan's most trusted matrimonial platform</p>
+      <section className="py-20 bg-gradient-to-b from-white via-humsafar-25 to-white relative" suppressHydrationWarning>
+        {/* Decorative Background Elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-humsafar-100 to-humsafar-200 rounded-full opacity-20 animate-pulse"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-humsafar-100 to-humsafar-200 rounded-full opacity-20 animate-pulse" style={{animationDelay: '1s'}}></div>
+        </div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 animate-fade-in-up">Why Choose Hamsafar?</h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto animate-fade-in-up" style={{animationDelay: '0.2s'}}>Pakistan's most trusted matrimonial platform with cutting-edge features</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
-              <Card key={index} className="text-center hover:shadow-lg transition-shadow">
-                <CardContent className="p-6">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-humsafar-100 rounded-full mb-4">
-                    <feature.icon className="h-8 w-8 text-humsafar-600" />
+              <Card 
+                key={index} 
+                className="text-center group hover:shadow-2xl transition-all duration-500 border-0 bg-white/80 backdrop-blur-sm hover:bg-white hover:transform hover:scale-105 animate-fade-in-up overflow-hidden relative"
+                style={{animationDelay: `${0.4 + index * 0.15}s`}}
+              >
+                {/* Card Glow Effect */}
+                <div className="absolute inset-0 bg-gradient-to-br from-humsafar-100/20 to-humsafar-200/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <CardContent className="p-8 relative z-10">
+                  <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-humsafar-100 to-humsafar-200 rounded-2xl mb-6 group-hover:from-humsafar-200 group-hover:to-humsafar-300 transition-all duration-500 group-hover:rotate-6 group-hover:scale-110">
+                    <feature.icon className="h-10 w-10 text-humsafar-600 group-hover:text-humsafar-700 transition-colors duration-300" />
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">{feature.title}</h3>
-                  <p className="text-gray-600">{feature.description}</p>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-humsafar-700 transition-colors duration-300">{feature.title}</h3>
+                  <p className="text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">{feature.description}</p>
+                  
+                  {/* Hover Arrow */}
+                  <div className="mt-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+                    <div className="w-8 h-0.5 bg-humsafar-400 mx-auto rounded-full"></div>
+                  </div>
                 </CardContent>
               </Card>
             ))}
@@ -928,80 +955,118 @@ export default function HomePage() {
         </div>
       </section>
       {/* Success Stories */}
-      <section className="py-16 bg-gray-50" suppressHydrationWarning>
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Success Stories</h2>
-            <p className="text-xl text-gray-600">Real couples, real love stories</p>
+      <section className="py-20 bg-gradient-to-br from-humsafar-50 via-white to-humsafar-100 relative overflow-hidden" suppressHydrationWarning>
+        {/* Floating Hearts Animation */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-20 left-10 text-humsafar-200 animate-bounce" style={{animationDelay: '0s', animationDuration: '3s'}}>
+            <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <div className="absolute top-40 right-20 text-humsafar-300 animate-bounce" style={{animationDelay: '1s', animationDuration: '4s'}}>
+            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <div className="absolute bottom-32 left-1/4 text-humsafar-200 animate-bounce" style={{animationDelay: '2s', animationDuration: '3.5s'}}>
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
+            </svg>
+          </div>
+        </div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 animate-fade-in-up">Success Stories</h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto animate-fade-in-up" style={{animationDelay: '0.2s'}}>Real couples, real love stories that inspire millions</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {successStories.map((story) => (
-              <Card key={story.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                <div className="aspect-video bg-gray-200">
+            {successStories.map((story, index) => (
+              <Card 
+                key={story.id} 
+                className="overflow-hidden group hover:shadow-2xl transition-all duration-500 border-0 bg-white/90 backdrop-blur-sm hover:transform hover:scale-105 animate-fade-in-up relative"
+                style={{animationDelay: `${0.4 + index * 0.2}s`}}
+              >
+                {/* Card Shimmer Effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out"></div>
+                
+                <div className="aspect-video bg-gradient-to-br from-humsafar-100 to-humsafar-200 relative overflow-hidden">
                   <Image
                     src={story.image || "/placeholder.svg"}
                     alt={story.names}
                     width={400}
                     height={225}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
+                  {/* Image Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-xl font-semibold text-gray-900">{story.names}</h3>
-                    <Badge variant="outline" className="text-humsafar-600 border-humsafar-600">
+                
+                <CardContent className="p-8 relative">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-bold text-gray-900 group-hover:text-humsafar-700 transition-colors duration-300">{story.names}</h3>
+                    <Badge 
+                      variant="outline" 
+                      className="text-humsafar-600 border-humsafar-600 bg-humsafar-50 group-hover:bg-humsafar-100 group-hover:border-humsafar-700 transition-all duration-300"
+                    >
                       {story.location}
                     </Badge>
                   </div>
-                  <p className="text-gray-600 mb-4 italic">"{story.story}"</p>
-                  <div className="flex items-center text-sm text-gray-500">
-                    <Calendar className="h-4 w-4 mr-1" />
+                  
+                  <div className="relative mb-6">
+                    <div className="absolute -left-2 -top-2 text-humsafar-300 text-4xl font-serif">"</div>
+                    <p className="text-gray-600 italic leading-relaxed pl-6 group-hover:text-gray-700 transition-colors duration-300">
+                      {story.story}
+                    </p>
+                    <div className="absolute -right-2 -bottom-2 text-humsafar-300 text-4xl font-serif rotate-180">"</div>
+                  </div>
+                  
+                  <div className="flex items-center text-sm text-gray-500 group-hover:text-gray-600 transition-colors duration-300">
+                    <Calendar className="h-4 w-4 mr-2 text-humsafar-500" />
                     {story.date}
                   </div>
+                  
+                  {/* Bottom Accent Line */}
+                  <div className="absolute bottom-0 left-0 w-0 h-1 bg-gradient-to-r from-humsafar-400 to-humsafar-600 group-hover:w-full transition-all duration-500 ease-out"></div>
                 </CardContent>
               </Card>
             ))}
           </div>
 
-          <div className="text-center mt-12">
+          <div className="text-center mt-16">
             <Link href="/success-stories" legacyBehavior>
               <Button
-                variant="outline"
                 size="lg"
-                className="border-humsafar-600 text-humsafar-600 hover:bg-humsafar-50 bg-transparent"
+                className="bg-gradient-to-r from-humsafar-600 to-humsafar-700 hover:from-humsafar-700 hover:to-humsafar-800 text-white px-10 py-4 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 group animate-fade-in-up"
+                style={{animationDelay: '1s'}}
               >
-                View All Success Stories
-                <ArrowRight className="h-4 w-4 ml-2" />
+                <span className="mr-3">View All Success Stories</span>
+                <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
               </Button>
             </Link>
           </div>
         </div>
       </section>
       {/* CTA Section */}
-      <section className="py-16 bg-white" suppressHydrationWarning>
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-black mb-4">Ready to Find Your Life Partner?</h2>
-          <p className="text-xl text-humsafar-500/90 mb-8">Join millions of people who found love on Hamsafar</p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/signup" legacyBehavior>
-              <Button size="lg" className="bg-humsafar-600 text-white hover:bg-gray-100 px-8 py-3">
-                Create Free Profile
-              </Button>
-            </Link>
-            <Link href="/profiles" legacyBehavior>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-humsafar-600 text-humsafar-600 hover:bg-humsafar/10 px-8 py-3 bg-transparent"
-              >
-                Browse Profiles
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
+    
       <Footer />
+      
+      {/* Custom Alert Component */}
+      <CustomAlert
+        isOpen={isOpen}
+        onClose={hideAlert}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        type={alertConfig.type}
+        showConfirm={alertConfig.showConfirm}
+        confirmText={alertConfig.confirmText}
+        cancelText={alertConfig.cancelText}
+        onConfirm={alertConfig.onConfirm}
+        onCancel={alertConfig.onCancel}
+        autoClose={alertConfig.autoClose}
+        autoCloseDelay={alertConfig.autoCloseDelay}
+      />
     </div>
   );
 }

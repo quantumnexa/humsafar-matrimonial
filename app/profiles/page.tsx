@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -31,6 +32,9 @@ import { ProfileVisibilityService } from "@/lib/profileVisibilityService"
 import { ProfileFilterService } from "@/lib/profileFilterService"
 import { ProfileViewService } from "@/lib/profileViewService"
 import { ViewedProfilesCart } from "@/components/viewed-profiles-cart"
+import CustomAlert from "@/components/ui/custom-alert"
+import { useCustomAlert } from "@/hooks/use-custom-alert"
+import ProtectedImage from "@/components/ui/protected-image"
 
 const capitalizeText = (text: string | null | undefined): string => {
   if (!text) return ""
@@ -38,6 +42,7 @@ const capitalizeText = (text: string | null | undefined): string => {
 }
 
 export default function ProfilesListingPage() {
+  const router = useRouter()
   const [profiles, setProfiles] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
@@ -54,6 +59,9 @@ export default function ProfilesListingPage() {
   const [selectedAgeTo, setSelectedAgeTo] = useState('To')
   const [searchTerm, setSearchTerm] = useState('')
   const profilesPerPage = 12
+  
+  // Custom alert hook
+  const { isOpen, alertConfig, hideAlert, showError, showConfirm } = useCustomAlert()
 
   useEffect(() => {
     fetchProfiles()
@@ -71,6 +79,20 @@ export default function ProfilesListingPage() {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       setCurrentUser(user)
+      
+      // Check if user's profile is terminated
+      if (user) {
+        const { data: subscriptionData } = await supabase
+          .from("user_subscriptions")
+          .select("profile_status")
+          .eq("user_id", user.id)
+          .single()
+        
+        if (subscriptionData?.profile_status === 'terminated') {
+          router.push('/profile-terminated')
+          return
+        }
+      }
     } catch (error) {
       // Error getting current user
     }
@@ -102,10 +124,13 @@ export default function ProfilesListingPage() {
   const handleViewProfile = async (profileId: string) => {
     if (!currentUser) {
       // For non-authenticated users, show login prompt
-      const shouldLogin = confirm('Please login to view profiles. Would you like to go to the login page?')
-      if (shouldLogin) {
-        window.location.href = '/auth'
-      }
+      showConfirm(
+        'Please login to view profiles. Would you like to go to the login page?',
+        () => {
+          window.location.href = '/auth'
+        },
+        'Login Required'
+      )
       return
     }
 
@@ -119,7 +144,10 @@ export default function ProfilesListingPage() {
     // Check if user can view more profiles
     const canView = await ProfileViewService.canUserViewMoreProfiles()
     if (!canView.success || !canView.canView) {
-      alert(`You have reached your view limit. ${canView.message || 'Upgrade your subscription to view more profiles.'}`)
+      showError(
+        `You have reached your view limit. ${canView.message || 'Upgrade your subscription to view more profiles.'}`,
+        'View Limit Reached'
+      )
       return
     }
 
@@ -133,7 +161,10 @@ export default function ProfilesListingPage() {
       // Navigate to profile
       window.location.href = `/profile/${profileId}`
     } else {
-      alert(result.message || 'Failed to record profile view')
+      showError(
+        result.message || 'Failed to record profile view',
+        'Error'
+      )
     }
   }
 
@@ -287,7 +318,7 @@ export default function ProfilesListingPage() {
       <Card className="overflow-hidden hover:shadow-lg transition-shadow border-humsafar-100 group flex flex-col h-full">
         <div className="relative">
           {profile.mainImage && profile.mainImage !== '/placeholder.jpg' ? (
-            <Image
+            <ProtectedImage
               src={profile.mainImage}
               alt={name}
               width={400}
@@ -813,6 +844,22 @@ export default function ProfilesListingPage() {
       </div>
       
       <Footer />
+      
+      {/* Custom Alert Component */}
+      <CustomAlert
+        isOpen={isOpen}
+        onClose={hideAlert}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        type={alertConfig.type}
+        showConfirm={alertConfig.showConfirm}
+        confirmText={alertConfig.confirmText}
+        cancelText={alertConfig.cancelText}
+        onConfirm={alertConfig.onConfirm}
+        onCancel={alertConfig.onCancel}
+        autoClose={alertConfig.autoClose}
+        autoCloseDelay={alertConfig.autoCloseDelay}
+      />
     </div>
   )
 }

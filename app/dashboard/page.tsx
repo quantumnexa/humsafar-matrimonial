@@ -12,9 +12,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Upload, X, Eye, User, Heart, GraduationCap, Users, Settings, ImageIcon, Check } from "lucide-react"
+import { Upload, X, Eye, User, Heart, GraduationCap, Users, Settings, ImageIcon, Check, Trash2 } from "lucide-react"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
+import { ProfileDeletionDialog } from "@/components/profile-deletion-dialog"
 import { supabase } from "@/lib/supabaseClient"
 import { useRouter } from "next/navigation"
 import { calculateAge } from "@/lib/utils"
@@ -151,7 +152,17 @@ export default function DashboardPage() {
         return
       }
 
-
+      // Check if user's profile is terminated
+      const { data: subscriptionData } = await supabase
+        .from("user_subscriptions")
+        .select("profile_status")
+        .eq("user_id", session.user.id)
+        .single()
+      
+      if (subscriptionData?.profile_status === 'terminated') {
+        router.push('/profile-terminated')
+        return
+      }
 
       setIsAuthenticated(true)
       setIsLoading(false)
@@ -1335,7 +1346,7 @@ export default function DashboardPage() {
               </div>
 
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full ">
-                <TabsList className="flex w-full overflow-x-auto overflow-y-hidden scrollbar-hide mb-6 md:mb-8 bg-humsafar-500 text-white md:grid md:grid-cols-6 gap-1 p-1 md:p-2 shadow-lg rounded-lg h-fit">
+                <TabsList className="flex w-full overflow-x-auto overflow-y-hidden scrollbar-hide mb-6 md:mb-8 bg-humsafar-500 text-white md:grid md:grid-cols-7 gap-1 p-1 md:p-2 shadow-lg rounded-lg h-fit">
                   <TabsTrigger
                     value="photos"
                     className={`flex items-center gap-2 transition-all duration-300 flex-shrink-0 px-4 py-3 md:px-3 md:py-2 rounded-lg text-sm font-medium whitespace-nowrap min-w-[80px] md:min-w-0 ${activeTab === "photos" ? "bg-white text-humsafar-500 font-semibold shadow-lg" : "hover:bg-humsafar-400 active:scale-95"}`}
@@ -1383,6 +1394,14 @@ export default function DashboardPage() {
                     <Settings className="w-4 h-4 flex-shrink-0" />
                     <span className="hidden sm:inline">Partner</span>
                     <span className="sm:hidden text-xs">Partner</span>
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="settings"
+                    className={`flex items-center gap-2 transition-all duration-300 flex-shrink-0 px-4 py-3 md:px-3 md:py-2 rounded-lg text-sm font-medium whitespace-nowrap min-w-[80px] md:min-w-0 ${activeTab === "settings" ? "bg-white text-humsafar-500 font-semibold shadow-lg scale-105" : "hover:bg-humsafar-400 hover:scale-102 active:scale-95"}`}
+                  >
+                    <Trash2 className="w-4 h-4 flex-shrink-0" />
+                    <span className="hidden sm:inline">Settings</span>
+                    <span className="sm:hidden text-xs">Settings</span>
                   </TabsTrigger>
                 </TabsList>
 
@@ -2465,6 +2484,79 @@ export default function DashboardPage() {
                         )}
                       </div>
                     </div>
+                    </div>
+                  </div>
+                </TabsContent>
+
+                {/* Settings Tab - Profile Deletion */}
+                <TabsContent value="settings" className="space-y-6">
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-800 mb-6">Account Settings</h3>
+                    
+                    <div className="space-y-6">
+                      {/* Profile Deletion Section */}
+                      <div className="border border-red-200 rounded-lg p-6 bg-red-50">
+                        <div className="flex items-start gap-4">
+                          <div className="flex-shrink-0">
+                            <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                              <Trash2 className="w-5 h-5 text-red-600" />
+                            </div>
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="text-lg font-semibold text-red-800 mb-2">Delete Profile</h4>
+                            <p className="text-red-700 mb-4">
+                              Permanently delete your profile and all associated data. This action cannot be undone.
+                            </p>
+                            <div className="bg-red-100 border border-red-200 rounded-lg p-4 mb-4">
+                              <h5 className="font-medium text-red-800 mb-2">What will be deleted:</h5>
+                              <ul className="text-sm text-red-700 space-y-1">
+                                <li>• Your profile information and photos</li>
+                                <li>• All subscription data</li>
+                                <li>• Profile views and interactions</li>
+                                <li>• Account authentication data</li>
+                                <li>• All uploaded images from storage</li>
+                              </ul>
+                            </div>
+                            <ProfileDeletionDialog 
+                              onSuccess={() => {
+                                // Handle successful deletion - user will be redirected
+                                console.log('Profile deleted successfully')
+                              }}
+                              onError={(error) => {
+                                // Handle deletion error
+                                console.error('Profile deletion error:', error)
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Additional Settings can be added here in the future */}
+                      <div className="border border-gray-200 rounded-lg p-6">
+                        <h4 className="text-lg font-semibold text-gray-700 mb-2">More Settings</h4>
+                        <p className="text-gray-600">
+                          Additional account settings and preferences will be available here in future updates.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Navigation Buttons - Always Visible */}
+                    <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-0 mt-6 p-4 border-t border-gray-200 rounded-lg">
+                      <Button
+                        onClick={handlePrev}
+                        disabled={isFirstTab(activeTab as TabKey)}
+                        variant="outline"
+                        className="w-full sm:w-auto px-4 sm:px-6 bg-white hover:bg-gray-50 border-humsafar-500 text-humsafar-500"
+                      >
+                        Previous
+                      </Button>
+                      <div className="flex gap-3">
+                        {!isLastTab(activeTab as TabKey) && (
+                          <Button onClick={handleNext} className="w-full sm:w-auto bg-humsafar-600 hover:bg-humsafar-700 text-white px-4 sm:px-6">
+                            Next
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </TabsContent>

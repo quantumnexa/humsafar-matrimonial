@@ -22,6 +22,7 @@ import {
 import Image from "next/image"
 import { supabase } from "@/lib/supabaseClient"
 import { ProfileViewService } from "@/lib/profileViewService"
+import ProtectedImage from "@/components/ui/protected-image"
 
 const capitalizeText = (text: string | null | undefined): string => {
   if (!text) return ""
@@ -223,7 +224,7 @@ export default function ViewedProfilesCart() {
           {/* Profile Image */}
           <div className="relative w-24 h-24 flex-shrink-0">
             {profile.mainImage && profile.mainImage !== '/placeholder.jpg' ? (
-              <Image
+              <ProtectedImage
                 src={profile.mainImage}
                 alt={name}
                 width={96}
