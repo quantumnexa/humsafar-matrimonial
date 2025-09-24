@@ -36,11 +36,24 @@ function formatValue(value: unknown): string {
 }
 
 // Format profile data for WhatsApp sharing
-function formatProfileForWhatsApp(profile: any) {
+function formatProfileForWhatsApp(profile: any, images: any[]) {
   if (!profile) return "";
   
+  // Get main image URL if available
+  const mainImage = Array.isArray(images) && images.length > 0 
+    ? images.find(img => img.is_main)?.image_url || images[0]?.image_url 
+    : null;
+  
+  // Start with image if available - format for WhatsApp preview
+  let message = "";
+  if (mainImage) {
+    // Ensure URL is absolute for WhatsApp preview
+    const imageUrl = mainImage.startsWith('http') ? mainImage : `${window.location.origin}${mainImage.startsWith('/') ? '' : '/'}${mainImage}`;
+    message += `${imageUrl}\n\n`;
+  }
+  
   // Personal Info Section
-  let message = "*Personal Information*\n";
+  message += "*Personal Information*\n";
   const name = profile.full_name || 
     [profile.first_name, profile.middle_name, profile.last_name].filter(Boolean).join(" ") || 
     profile.display_name || 
@@ -105,8 +118,8 @@ function formatProfileForWhatsApp(profile: any) {
 }
 
 // Handle WhatsApp sharing
-function handleWhatsAppShare(profile: any) {
-  const formattedText = formatProfileForWhatsApp(profile);
+function handleWhatsAppShare(profile: any, images: any[]) {
+  const formattedText = formatProfileForWhatsApp(profile, images);
   const encodedText = encodeURIComponent(formattedText);
   const whatsappUrl = `https://wa.me/?text=${encodedText}`;
   window.open(whatsappUrl, '_blank');
@@ -966,7 +979,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
                   
                   <div className="mb-6">
                     <Button 
-                      onClick={() => handleWhatsAppShare(profile)}
+                      onClick={() => handleWhatsAppShare(profile, images as any[])}
                       className="bg-green-500 hover:bg-green-600 text-white flex items-center gap-2"
                     >
                       <Share2 className="w-4 h-4" />

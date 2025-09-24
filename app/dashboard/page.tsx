@@ -158,9 +158,9 @@ export default function DashboardPage() {
         .select("profile_status")
         .eq("user_id", session.user.id)
         .single()
-      
-      if (subscriptionData?.profile_status === 'terminated') {
-        router.push('/profile-terminated')
+
+      if (subscriptionData?.profile_status === "terminated") {
+        router.push("/profile-terminated")
         return
       }
 
@@ -209,7 +209,7 @@ export default function DashboardPage() {
   const saveDraftToStorage = (data = profileData) => {
     try {
       localStorage.setItem(DRAFT_KEY, JSON.stringify(data))
-    } catch (_) { }
+    } catch (_) {}
   }
   const loadDraftFromStorage = () => {
     try {
@@ -218,13 +218,13 @@ export default function DashboardPage() {
         const parsed = JSON.parse(raw)
         return parsed
       }
-    } catch (_) { }
+    } catch (_) {}
     return null
   }
   const clearDraft = () => {
     try {
       localStorage.removeItem(DRAFT_KEY)
-    } catch (_) { }
+    } catch (_) {}
   }
 
   // Auto-save to local storage whenever profileData changes
@@ -243,10 +243,10 @@ export default function DashboardPage() {
     const init = async () => {
       const { data: sessionData } = await supabase.auth.getSession()
       const uid = sessionData.session?.user?.id ?? null
-      
+
       if (uid) {
         // Set userId for profile view tracking
-         setUserId(uid)
+        setUserId(uid)
       }
 
       if (!uid) return
@@ -354,54 +354,50 @@ export default function DashboardPage() {
 
       // If no profile exists, create one for Google OAuth users
       if (profileError && profileError.code === "PGRST116") {
-        
         // Get user data from Supabase Auth
-        const { data: { user } } = await supabase.auth.getUser()
-        
+        const {
+          data: { user },
+        } = await supabase.auth.getUser()
+
         if (user) {
           // Extract available data from Google OAuth
-          const firstName = user.user_metadata?.full_name?.split(' ')[0] || user.user_metadata?.first_name || ''
-          const lastName = user.user_metadata?.full_name?.split(' ').slice(1).join(' ') || user.user_metadata?.last_name || ''
-          const email = user.email || ''
-          
+          const firstName = user.user_metadata?.full_name?.split(" ")[0] || user.user_metadata?.first_name || ""
+          const lastName =
+            user.user_metadata?.full_name?.split(" ").slice(1).join(" ") || user.user_metadata?.last_name || ""
+          const email = user.email || ""
+
           // Create basic profile entry
-          const { error: createError } = await supabase
-            .from("user_profiles")
-            .insert([
-              {
-                user_id: uid,
-                email: email,
-                first_name: firstName,
-                last_name: lastName,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-              },
-            ])
-          
+          const { error: createError } = await supabase.from("user_profiles").insert([
+            {
+              user_id: uid,
+              email: email,
+              first_name: firstName,
+              last_name: lastName,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            },
+          ])
+
           if (createError) {
-             // Error creating profile
-           } else {
-             // Try to create default subscription
-             try {
-               const { UserSubscriptionService } = await import('@/lib/userSubscriptionService')
-               await UserSubscriptionService.createDefaultSubscription(uid)
-             } catch (subscriptionError) {
-               // Error creating default subscription
-             }
-             
-             // Reload profile data after creation
-             const { data: newProfile } = await supabase
-               .from("user_profiles")
-               .select("*")
-               .eq("user_id", uid)
-               .single()
-             
-             if (newProfile) {
-               const profile = newProfile
-             }
-           }
-         }
-       }
+            // Error creating profile
+          } else {
+            // Try to create default subscription
+            try {
+              const { UserSubscriptionService } = await import("@/lib/userSubscriptionService")
+              await UserSubscriptionService.createDefaultSubscription(uid)
+            } catch (subscriptionError) {
+              // Error creating default subscription
+            }
+
+            // Reload profile data after creation
+            const { data: newProfile } = await supabase.from("user_profiles").select("*").eq("user_id", uid).single()
+
+            if (newProfile) {
+              const profile = newProfile
+            }
+          }
+        }
+      }
 
       // 3. Use profile data directly
       let finalProfileState = { ...initialProfileState }
@@ -536,7 +532,6 @@ export default function DashboardPage() {
       }
 
       if (existingPhotos && existingPhotos.length > 0) {
-
         try {
           const withDisplay = await Promise.all(
             (existingPhotos as UserImage[]).map(async (p) => {
@@ -553,12 +548,12 @@ export default function DashboardPage() {
                   display_url: p.image_url,
                 }
               }
-            })
+            }),
           )
           setPhotos(withDisplay)
         } catch (photoError) {
           // Fallback: set photos with original URLs
-          setPhotos(existingPhotos.map(p => ({ ...p, display_url: p.image_url })))
+          setPhotos(existingPhotos.map((p) => ({ ...p, display_url: p.image_url })))
         }
       } else {
         setPhotos([])
@@ -568,7 +563,7 @@ export default function DashboardPage() {
   }, [])
 
   // Tab order and navigation
-  const tabOrder = ["photos", "basic", "lifestyle", "education", "family", "partner"] as const
+  const tabOrder = ["photos", "basic", "lifestyle", "education", "family", "partner", "settings"] as const
   type TabKey = (typeof tabOrder)[number]
   const getNextTab = (tab: TabKey): TabKey | null => {
     const idx = tabOrder.indexOf(tab)
@@ -589,7 +584,7 @@ export default function DashboardPage() {
     if (next) {
       setActiveTab(next)
       // Scroll to top of page when navigating to next tab
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+      window.scrollTo({ top: 0, behavior: "smooth" })
     }
   }
   const handlePrev = () => {
@@ -598,17 +593,14 @@ export default function DashboardPage() {
     if (prev) {
       setActiveTab(prev)
       // Scroll to top of page when navigating to previous tab
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+      window.scrollTo({ top: 0, behavior: "smooth" })
     }
   }
 
   // Function to check table structure
   const checkTableStructure = async () => {
     try {
-      const { data, error } = await supabase
-        .from("user_profiles")
-        .select("*")
-        .limit(1)
+      const { data, error } = await supabase.from("user_profiles").select("*").limit(1)
 
       if (error) {
         return null
@@ -648,10 +640,10 @@ export default function DashboardPage() {
       }
 
       // Save profile data directly to user_profiles table
-      
+
       // Show saving message to user
       setPhotoSuccessMessage("💾 Saving profile... Please wait.")
-      
+
       // Prepare profile payload with all fields
       const profilePayload = {
         user_id: uid, // Use user_id as primary key
@@ -671,7 +663,7 @@ export default function DashboardPage() {
         marital_status: profileData.maritalStatus || null,
         nationality: profileData.nationality || null,
         ethnicity: profileData.ethnicity || null,
-        
+
         // Physical Appearance
         height: profileData.height || null,
         weight: profileData.weight || null,
@@ -748,7 +740,6 @@ export default function DashboardPage() {
           .upsert(profilePayload, { onConflict: "user_id" })
 
         if (profileSaveError) {
-          
           // Show more specific error messages
           let errorMessage = "Failed to save profile"
           if (profileSaveError.message.includes("timeout")) {
@@ -760,11 +751,10 @@ export default function DashboardPage() {
           } else {
             errorMessage = `Save error: ${profileSaveError.message}`
           }
-          
+
           alert(errorMessage)
           return
         }
-
       } catch (upsertError) {
         alert(`Database operation failed: ${upsertError}`)
         return
@@ -772,15 +762,14 @@ export default function DashboardPage() {
 
       // Insert user subscription record only if it doesn't exist
       try {
-        
         // Check if subscription record already exists
         const { data: existingSubscription, error: subscriptionCheckError } = await supabase
           .from("user_subscriptions")
           .select("user_id")
           .eq("user_id", uid)
           .single()
-        
-        if (subscriptionCheckError && subscriptionCheckError.code !== 'PGRST116') {
+
+        if (subscriptionCheckError && subscriptionCheckError.code !== "PGRST116") {
           // Profile saved but subscription check failed
         } else if (existingSubscription) {
           // User subscription data already exists, skipping subscription update
@@ -794,7 +783,7 @@ export default function DashboardPage() {
             profile_status: "pending",
             views_limit: 0,
             created_at: currentTime,
-            updated_at: currentTime
+            updated_at: currentTime,
           }
 
           const { data: subscriptionData, error: subscriptionError } = await supabase
@@ -818,7 +807,6 @@ export default function DashboardPage() {
       setTimeout(() => {
         window.location.reload()
       }, 1000)
-
     } catch (error) {
       alert(`An unexpected error occurred: ${error}`)
     } finally {
@@ -873,7 +861,7 @@ export default function DashboardPage() {
 
       // Get current photos count to determine if this is the first photo
       const currentPhotosCount = photos.length
-      let uploadedPhotos: UserImage[] = []
+      const uploadedPhotos: UserImage[] = []
 
       // Process files sequentially to ensure proper order
       for (let i = 0; i < validFiles.length; i++) {
@@ -902,7 +890,7 @@ export default function DashboardPage() {
           .insert({
             user_id: uid,
             image_url: publicUrl,
-            is_main: isFirstPhoto
+            is_main: isFirstPhoto,
           })
           .select("id,image_url,is_main")
           .single()
@@ -921,7 +909,7 @@ export default function DashboardPage() {
         // Ensure only the first photo is marked as main
         const updatedPhotos = uploadedPhotos.map((photo, index) => ({
           ...photo,
-          is_main: index === 0
+          is_main: index === 0,
         }))
 
         // Update photos state with the new photos
@@ -933,18 +921,12 @@ export default function DashboardPage() {
 
           // Set all other photos to not main
           if (uploadedPhotos.length > 1) {
-            const otherPhotoIds = uploadedPhotos.slice(1).map(p => p.id)
-            await supabase
-              .from("user_images")
-              .update({ is_main: false })
-              .in("id", otherPhotoIds)
+            const otherPhotoIds = uploadedPhotos.slice(1).map((p) => p.id)
+            await supabase.from("user_images").update({ is_main: false }).in("id", otherPhotoIds)
           }
 
           // Ensure the first photo is main
-          await supabase
-            .from("user_images")
-            .update({ is_main: true })
-            .eq("id", firstPhoto.id)
+          await supabase.from("user_images").update({ is_main: true }).eq("id", firstPhoto.id)
         }
 
         // Refresh photos from database to ensure consistency
@@ -974,10 +956,7 @@ export default function DashboardPage() {
   const testSupabaseConnection = async () => {
     try {
       // Use a simpler, faster connection test
-      const { data, error } = await supabase
-        .from("user_profiles")
-        .select("user_id")
-        .limit(1)
+      const { data, error } = await supabase.from("user_profiles").select("user_id").limit(1)
 
       if (error) {
         return false
@@ -994,7 +973,9 @@ export default function DashboardPage() {
     try {
       setIsRefreshingPhotos(true)
 
-      const { data: { user } } = await supabase.auth.getUser()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
       if (!user?.id) {
         setIsRefreshingPhotos(false)
         return
@@ -1012,7 +993,6 @@ export default function DashboardPage() {
       }
 
       if (existingPhotos && existingPhotos.length > 0) {
-
         try {
           const withDisplay = await Promise.all(
             existingPhotos.map(async (p) => {
@@ -1028,7 +1008,7 @@ export default function DashboardPage() {
                   display_url: p.image_url,
                 }
               }
-            })
+            }),
           )
           setPhotos(withDisplay)
 
@@ -1036,7 +1016,7 @@ export default function DashboardPage() {
           setPhotoSuccessMessage("Photos refreshed successfully!")
           setTimeout(() => setPhotoSuccessMessage(null), 3000)
         } catch (photoError) {
-          setPhotos(existingPhotos.map(p => ({ ...p, display_url: p.image_url })))
+          setPhotos(existingPhotos.map((p) => ({ ...p, display_url: p.image_url })))
         }
       } else {
         setPhotos([])
@@ -1059,23 +1039,23 @@ export default function DashboardPage() {
   // Build a display URL that works for public/private buckets
   const getDisplayUrlFromImageUrl = async (imageUrl: string): Promise<string> => {
     // If the image URL is already a public URL, return it directly
-    if (imageUrl.includes('/storage/v1/object/public/')) {
+    if (imageUrl.includes("/storage/v1/object/public/")) {
       return imageUrl
     }
-    
+
     const path = getPathFromPublicUrl(imageUrl)
     if (!path) {
       // If not a public-URL format, return as-is
       return imageUrl
     }
-    
+
     // For public buckets, construct the public URL directly
     const { data: bucketData } = await supabase.storage.getBucket(PROFILE_PHOTOS_BUCKET)
     if (bucketData?.public) {
       const { data } = supabase.storage.from(PROFILE_PHOTOS_BUCKET).getPublicUrl(path)
       return data.publicUrl
     }
-    
+
     // Fallback to signed URL for private buckets
     const { data } = await supabase.storage.from(PROFILE_PHOTOS_BUCKET).createSignedUrl(path, 60 * 60 * 24 * 365)
     return data?.signedUrl ?? imageUrl
@@ -1227,29 +1207,23 @@ export default function DashboardPage() {
         .order("uploaded_at", { ascending: true })
 
       if (userPhotos && userPhotos.length > 0) {
-        const mainPhotos = userPhotos.filter(p => p.is_main)
+        const mainPhotos = userPhotos.filter((p) => p.is_main)
 
         // If multiple photos are marked as main, fix it
         if (mainPhotos.length > 1) {
           // Keep only the first one as main
           const firstMainPhoto = mainPhotos[0]
-          const otherMainPhotoIds = mainPhotos.slice(1).map(p => p.id)
+          const otherMainPhotoIds = mainPhotos.slice(1).map((p) => p.id)
 
           // Set all other main photos to false
           if (otherMainPhotoIds.length > 0) {
-            await supabase
-              .from("user_images")
-              .update({ is_main: false })
-              .in("id", otherMainPhotoIds)
+            await supabase.from("user_images").update({ is_main: false }).in("id", otherMainPhotoIds)
           }
         }
         // If no photos are marked as main, mark the first one
         else if (mainPhotos.length === 0) {
           const firstPhoto = userPhotos[0]
-          await supabase
-            .from("user_images")
-            .update({ is_main: true })
-            .eq("id", firstPhoto.id)
+          await supabase.from("user_images").update({ is_main: true }).eq("id", firstPhoto.id)
         }
       }
     } catch (error) {
@@ -1274,7 +1248,9 @@ export default function DashboardPage() {
             <div className="flex flex-col space-y-4 md:flex-row md:justify-between md:items-center md:space-y-0 mb-4">
               <div className="text-center md:text-left">
                 <h1 className="text-2xl md:text-3xl font-bold text-gray-800">My Profile Dashboard</h1>
-                <p className="text-sm md:text-base text-gray-600 mt-1">Manage your profile information and preferences</p>
+                <p className="text-sm md:text-base text-gray-600 mt-1">
+                  Manage your profile information and preferences
+                </p>
               </div>
               <div className="flex justify-center md:justify-end">
                 {/* Preview using current user id */}
@@ -1291,19 +1267,23 @@ export default function DashboardPage() {
             </div>
 
             {/* Package Success Message */}
-            {typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('package') === 'success' && (
-              <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                    <Check className="w-5 h-5 text-green-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-green-800">Package Activated Successfully!</h3>
-                    <p className="text-green-700">Your package has been activated successfully. You now have access to premium features and additional profile views.</p>
+            {typeof window !== "undefined" &&
+              new URLSearchParams(window.location.search).get("package") === "success" && (
+                <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                      <Check className="w-5 h-5 text-green-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-green-800">Package Activated Successfully!</h3>
+                      <p className="text-green-700">
+                        Your package has been activated successfully. You now have access to premium features and
+                        additional profile views.
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
             {/* Profile Completion */}
             <Card className="border-humsafar-100">
@@ -1315,7 +1295,10 @@ export default function DashboardPage() {
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="w-32 bg-gray-200 rounded-full h-2">
-                      <div className="bg-humsafar-600 h-2 rounded-full" style={{ width: `${completionPercentage}%` }}></div>
+                      <div
+                        className="bg-humsafar-600 h-2 rounded-full"
+                        style={{ width: `${completionPercentage}%` }}
+                      ></div>
                     </div>
                     <span className="text-sm font-semibold text-humsafar-600">{completionPercentage}%</span>
                   </div>
@@ -1407,59 +1390,82 @@ export default function DashboardPage() {
 
                 {/* Photos Tab - SECTION 1 */}
                 <TabsContent value="photos" className="space-y-6">
-                  
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-xl font-semibold text-gray-800">Profile Photos</h3>
-                      <Button
-                        onClick={refreshPhotos}
-                        variant="outline"
-                        size="sm"
-                        disabled={isRefreshingPhotos}
-                        className="border-humsafar-500 text-humsafar-500 hover:bg-humsafar-50 disabled:opacity-50"
-                      >
-                        {isRefreshingPhotos ? (
-                          <>
-                            <div className="flex items-center space-x-2">
-                              <div className="relative">
-                                <svg className="w-4 h-4 animate-spin text-humsafar-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                </svg>
-                              </div>
-                              <span className="text-humsafar-500">Refreshing...</span>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-semibold text-gray-800">Profile Photos</h3>
+                    <Button
+                      onClick={refreshPhotos}
+                      variant="outline"
+                      size="sm"
+                      disabled={isRefreshingPhotos}
+                      className="border-humsafar-500 text-humsafar-500 hover:bg-humsafar-50 disabled:opacity-50 bg-transparent"
+                    >
+                      {isRefreshingPhotos ? (
+                        <>
+                          <div className="flex items-center space-x-2">
+                            <div className="relative">
+                              <svg
+                                className="w-4 h-4 animate-spin text-humsafar-500"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                                />
+                              </svg>
                             </div>
-                          </>
-                        ) : (
-                          <>
-                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                            </svg>
-                            Refresh Photos
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                    <p className="text-gray-600 mb-6">
-                      Upload up to 4 photos. Your first photo will be your main profile picture.
-                    </p>
+                            <span className="text-humsafar-500">Refreshing...</span>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                            />
+                          </svg>
+                          Refresh Photos
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  <p className="text-gray-600 mb-6">
+                    Upload up to 4 photos. Your first photo will be your main profile picture.
+                  </p>
 
-                    {/* Photo Grid */}
-                    <div className="relative">
-                      {/* Loading Overlay for Photo Operations */}
-                      {isPhotoOperation && (
-                        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-lg z-10 flex items-center justify-center">
-                          <div className="flex flex-col items-center space-y-3">
-                            <div className="w-8 h-8 border-2 border-humsafar-300 border-t-humsafar-500 rounded-full animate-spin"></div>
-                            <div className="text-humsafar-600 font-medium">Processing Photos...</div>
-                            <div className="flex items-center space-x-1">
-                              <div className="w-2 h-2 bg-humsafar-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                              <div className="w-2 h-2 bg-humsafar-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                              <div className="w-2 h-2 bg-humsafar-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                            </div>
+                  {/* Photo Grid */}
+                  <div className="relative">
+                    {/* Loading Overlay for Photo Operations */}
+                    {isPhotoOperation && (
+                      <div className="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-lg z-10 flex items-center justify-center">
+                        <div className="flex flex-col items-center space-y-3">
+                          <div className="w-8 h-8 border-2 border-humsafar-300 border-t-humsafar-500 rounded-full animate-spin"></div>
+                          <div className="text-humsafar-600 font-medium">Processing Photos...</div>
+                          <div className="flex items-center space-x-1">
+                            <div
+                              className="w-2 h-2 bg-humsafar-500 rounded-full animate-bounce"
+                              style={{ animationDelay: "0ms" }}
+                            ></div>
+                            <div
+                              className="w-2 h-2 bg-humsafar-500 rounded-full animate-bounce"
+                              style={{ animationDelay: "150ms" }}
+                            ></div>
+                            <div
+                              className="w-2 h-2 bg-humsafar-500 rounded-full animate-bounce"
+                              style={{ animationDelay: "300ms" }}
+                            ></div>
                           </div>
                         </div>
-                      )}
-                      
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 mb-3">
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 mb-3">
                       {photos.map((photo, index) => (
                         <div key={photo.id} className="relative group">
                           {/* Use display_url if present (signed/private), else image_url */}
@@ -1468,9 +1474,7 @@ export default function DashboardPage() {
                             alt={`Profile ${index + 1}`}
                             className="w-full aspect-square object-cover rounded-lg border border-humsafar-100"
                           />
-                          {photo.is_main && (
-                            <Badge className="absolute top-2 left-2 bg-humsafar-600">Main Photo</Badge>
-                          )}
+                          {photo.is_main && <Badge className="absolute top-2 left-2 bg-humsafar-600">Main Photo</Badge>}
                           <button
                             onClick={() => void removeImage(photo)}
                             disabled={isPhotoOperation}
@@ -1504,10 +1508,12 @@ export default function DashboardPage() {
 
                       {/* Upload Button */}
                       {photos.length < 4 && (
-                        <label className={`w-full aspect-square border-2 border-dashed border-humsafar-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-humsafar-500 transition-colors ${isPhotoOperation ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                        <label
+                          className={`w-full aspect-square border-2 border-dashed border-humsafar-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-humsafar-500 transition-colors ${isPhotoOperation ? "opacity-50 cursor-not-allowed" : ""}`}
+                        >
                           {isUploading ? (
                             // Enhanced Uploading Loader
-                            (<div className="flex flex-col items-center justify-center space-y-3">
+                            <div className="flex flex-col items-center justify-center space-y-3">
                               {/* Animated Upload Icon */}
                               <div className="relative">
                                 <Upload className="w-8 h-8 text-humsafar-500 animate-bounce" />
@@ -1517,26 +1523,38 @@ export default function DashboardPage() {
                               <div className="text-center">
                                 <div className="text-humsafar-600 font-medium mb-1">Uploading...</div>
                                 <div className="flex items-center justify-center space-x-1">
-                                  <div className="w-2 h-2 bg-humsafar-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                                  <div className="w-2 h-2 bg-humsafar-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                                  <div className="w-2 h-2 bg-humsafar-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                                  <div
+                                    className="w-2 h-2 bg-humsafar-500 rounded-full animate-bounce"
+                                    style={{ animationDelay: "0ms" }}
+                                  ></div>
+                                  <div
+                                    className="w-2 h-2 bg-humsafar-500 rounded-full animate-bounce"
+                                    style={{ animationDelay: "150ms" }}
+                                  ></div>
+                                  <div
+                                    className="w-2 h-2 bg-humsafar-500 rounded-full animate-bounce"
+                                    style={{ animationDelay: "300ms" }}
+                                  ></div>
                                 </div>
                               </div>
                               {/* Progress Bar */}
                               <div className="w-20 h-1 bg-humsafar-100 rounded-full overflow-hidden">
-                                <div className="h-full bg-humsafar-500 rounded-full animate-pulse" style={{ width: '60%' }}></div>
+                                <div
+                                  className="h-full bg-humsafar-500 rounded-full animate-pulse"
+                                  style={{ width: "60%" }}
+                                ></div>
                               </div>
                               <span className="text-xs text-gray-500">JPG/PNG up to {MAX_FILE_MB}MB</span>
-                            </div>)
+                            </div>
                           ) : (
                             // Normal Upload State
-                            (<>
+                            <>
                               <Upload className="w-8 h-8 text-humsafar-500 mb-2" />
                               <span className="text-humsafar-600 font-medium">Upload Photo</span>
                               <span className="text-xs text-gray-500">JPG/PNG up to {MAX_FILE_MB}MB</span>
-                            </>)
+                            </>
                           )}
-                          
+
                           <input
                             type="file"
                             multiple
@@ -1573,11 +1591,13 @@ export default function DashboardPage() {
                       </Button>
                       <div className="flex gap-3">
                         {!isLastTab(activeTab as TabKey) && (
-                          <Button onClick={handleNext} className="w-full sm:w-auto bg-humsafar-600 hover:bg-humsafar-700 text-white px-4 sm:px-6">
+                          <Button
+                            onClick={handleNext}
+                            className="w-full sm:w-auto bg-humsafar-600 hover:bg-humsafar-700 text-white px-4 sm:px-6"
+                          >
                             Next
                           </Button>
                         )}
-
                       </div>
                     </div>
                   </div>
@@ -1587,15 +1607,25 @@ export default function DashboardPage() {
                 <TabsContent value="basic" className="space-y-6">
                   <div>
                     <h3 className="text-xl font-semibold text-gray-800 mb-6">Basic Information</h3>
-                    
+
                     {/* Personal Details */}
                     <div className="space-y-6">
                       {/* Essential Profile Information */}
                       <div className="bg-humsafar-100 border border-humsafar-200 rounded-lg p-6">
                         <div className="flex items-center mb-4">
                           <div className="w-8 h-8 bg-humsafar-100 rounded-full flex items-center justify-center mr-3">
-                            <svg className="w-5 h-5 text-humsafar-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            <svg
+                              className="w-5 h-5 text-humsafar-600"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                              />
                             </svg>
                           </div>
                           <h4 className="text-lg font-semibold text-humsafar-800">Essential Profile Information</h4>
@@ -1666,7 +1696,6 @@ export default function DashboardPage() {
                             </div>
                           </div>
                         </div>
-
                       </div>
 
                       <div>
@@ -1734,7 +1763,6 @@ export default function DashboardPage() {
                               </SelectContent>
                             </Select>
                           </div>
-
                         </div>
                       </div>
 
@@ -1785,7 +1813,6 @@ export default function DashboardPage() {
                               />
                             </div>
                           )}
-
                         </div>
                       </div>
 
@@ -1845,22 +1872,33 @@ export default function DashboardPage() {
                       </div>
                       {/* Navigation Buttons - Always Visible */}
                       <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-0 mt-6 p-4 border-t border-gray-200 rounded-lg">
-                      <Button
-                        onClick={handlePrev}
-                        disabled={isFirstTab(activeTab as TabKey)}
-                        variant="outline"
-                        className="w-full sm:w-auto px-4 sm:px-6 bg-white hover:bg-gray-50 border-humsafar-500 text-humsafar-500"
-                      >
-                        Previous
-                      </Button>
-                      <div className="flex gap-3">
-                        {!isLastTab(activeTab as TabKey) && (
-                          <Button onClick={handleNext} className="w-full sm:w-auto bg-humsafar-600 hover:bg-humsafar-700 text-white px-4 sm:px-6">
-                            Next
-                          </Button>
-                        )}
+                        <Button
+                          onClick={handlePrev}
+                          disabled={isFirstTab(activeTab as TabKey)}
+                          variant="outline"
+                          className="w-full sm:w-auto px-4 sm:px-6 bg-white hover:bg-gray-50 border-humsafar-500 text-humsafar-500"
+                        >
+                          Previous
+                        </Button>
+                        <div className="flex gap-3">
+                          {isLastTab(activeTab as TabKey) && (
+                            <Button
+                              onClick={handleSaveAll}
+                              className="w-full sm:w-auto bg-humsafar-600 hover:bg-humsafar-700 text-white px-4 sm:px-6"
+                            >
+                              Save Changes
+                            </Button>
+                          )}
+                          {!isLastTab(activeTab as TabKey) && (
+                            <Button
+                              onClick={handleNext}
+                              className="w-full sm:w-auto bg-humsafar-600 hover:bg-humsafar-700 text-white px-4 sm:px-6"
+                            >
+                              Next
+                            </Button>
+                          )}
+                        </div>
                       </div>
-                    </div>
                     </div>
                   </div>
                 </TabsContent>
@@ -1945,7 +1983,6 @@ export default function DashboardPage() {
                               </SelectContent>
                             </Select>
                           </div>
-
                         </div>
                       </div>
 
@@ -1982,22 +2019,25 @@ export default function DashboardPage() {
                       </div>
                       {/* Navigation Buttons - SECTION 3 */}
                       <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-0 mt-6 p-4 border-t border-gray-200 rounded-lg">
-                      <Button
-                        onClick={handlePrev}
-                        disabled={isFirstTab(activeTab as TabKey)}
-                        variant="outline"
-                        className="w-full sm:w-auto px-4 sm:px-6 bg-white hover:bg-gray-50 border-humsafar-500 text-humsafar-500"
-                      >
-                        Previous
-                      </Button>
-                      <div className="flex gap-3">
-                        {!isLastTab(activeTab as TabKey) && (
-                          <Button onClick={handleNext} className="w-full sm:w-auto bg-humsafar-600 hover:bg-humsafar-700 text-white px-4 sm:px-6">
-                            Next
-                          </Button>
-                        )}
+                        <Button
+                          onClick={handlePrev}
+                          disabled={isFirstTab(activeTab as TabKey)}
+                          variant="outline"
+                          className="w-full sm:w-auto px-4 sm:px-6 bg-white hover:bg-gray-50 border-humsafar-500 text-humsafar-500"
+                        >
+                          Previous
+                        </Button>
+                        <div className="flex gap-3">
+                          {!isLastTab(activeTab as TabKey) && (
+                            <Button
+                              onClick={handleNext}
+                              className="w-full sm:w-auto bg-humsafar-600 hover:bg-humsafar-700 text-white px-4 sm:px-6"
+                            >
+                              Next
+                            </Button>
+                          )}
+                        </div>
                       </div>
-                    </div>
                     </div>
                   </div>
                 </TabsContent>
@@ -2076,22 +2116,25 @@ export default function DashboardPage() {
                       </div>
                       {/* Navigation Buttons - Always Visible */}
                       <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-0 mt-6 p-4 border-t border-gray-200 rounded-lg">
-                      <Button
-                        onClick={handlePrev}
-                        disabled={isFirstTab(activeTab as TabKey)}
-                        variant="outline"
-                        className="w-full sm:w-auto px-4 sm:px-6 bg-white hover:bg-gray-50 border-humsafar-500 text-humsafar-500"
-                      >
-                        Previous
-                      </Button>
-                      <div className="flex gap-3">
-                        {!isLastTab(activeTab as TabKey) && (
-                          <Button onClick={handleNext} className="w-full sm:w-auto bg-humsafar-600 hover:bg-humsafar-700 text-white px-4 sm:px-6">
-                            Next
-                          </Button>
-                        )}
+                        <Button
+                          onClick={handlePrev}
+                          disabled={isFirstTab(activeTab as TabKey)}
+                          variant="outline"
+                          className="w-full sm:w-auto px-4 sm:px-6 bg-white hover:bg-gray-50 border-humsafar-500 text-humsafar-500"
+                        >
+                          Previous
+                        </Button>
+                        <div className="flex gap-3">
+                          {!isLastTab(activeTab as TabKey) && (
+                            <Button
+                              onClick={handleNext}
+                              className="w-full sm:w-auto bg-humsafar-600 hover:bg-humsafar-700 text-white px-4 sm:px-6"
+                            >
+                              Next
+                            </Button>
+                          )}
+                        </div>
                       </div>
-                    </div>
                     </div>
                   </div>
                 </TabsContent>
@@ -2217,25 +2260,27 @@ export default function DashboardPage() {
                         </div>
                       </div>
 
-
                       {/* Navigation Buttons - Always Visible */}
                       <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-0 mt-6 p-4 border-t border-gray-200 rounded-lg">
-                      <Button
-                        onClick={handlePrev}
-                        disabled={isFirstTab(activeTab as TabKey)}
-                        variant="outline"
-                        className="w-full sm:w-auto px-4 sm:px-6 bg-white hover:bg-gray-50 border-humsafar-500 text-humsafar-500"
-                      >
-                        Previous
-                      </Button>
-                      <div className="flex gap-3">
-                        {!isLastTab(activeTab as TabKey) && (
-                          <Button onClick={handleNext} className="w-full sm:w-auto bg-humsafar-600 hover:bg-humsafar-700 text-white px-4 sm:px-6">
-                            Next
-                          </Button>
-                        )}
+                        <Button
+                          onClick={handlePrev}
+                          disabled={isFirstTab(activeTab as TabKey)}
+                          variant="outline"
+                          className="w-full sm:w-auto px-4 sm:px-6 bg-white hover:bg-gray-50 border-humsafar-500 text-humsafar-500"
+                        >
+                          Previous
+                        </Button>
+                        <div className="flex gap-3">
+                          {!isLastTab(activeTab as TabKey) && (
+                            <Button
+                              onClick={handleNext}
+                              className="w-full sm:w-auto bg-humsafar-600 hover:bg-humsafar-700 text-white px-4 sm:px-6"
+                            >
+                              Next
+                            </Button>
+                          )}
+                        </div>
                       </div>
-                    </div>
                     </div>
                   </div>
                 </TabsContent>
@@ -2360,7 +2405,9 @@ export default function DashboardPage() {
                           </div>
                           {profileData.gender === "male" && (
                             <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">Partner should wear Hijab?</label>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Partner should wear Hijab?
+                              </label>
                               <Select
                                 value={profileData.partnerWearHijab}
                                 onValueChange={(value) => handleInputChange("partnerWearHijab", value)}
@@ -2378,7 +2425,9 @@ export default function DashboardPage() {
                           )}
                           {profileData.gender === "female" && (
                             <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">Do you support partner's polygamy?</label>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Do you support partner's polygamy?
+                              </label>
                               <Select
                                 value={profileData.partnerPolygamy}
                                 onValueChange={(value) => handleInputChange("partnerPolygamy", value)}
@@ -2396,7 +2445,9 @@ export default function DashboardPage() {
                           )}
                           {profileData.gender === "male" && (
                             <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">Do you support polygamy?</label>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Do you support polygamy?
+                              </label>
                               <Select
                                 value={profileData.polygamy}
                                 onValueChange={(value) => handleInputChange("polygamy", value)}
@@ -2450,7 +2501,9 @@ export default function DashboardPage() {
                             rows={4}
                             className="resize-none"
                           />
-                          <p className="text-sm text-gray-500 mt-2">{(profileData.additionalInfo || "").length}/500 characters</p>
+                          <p className="text-sm text-gray-500 mt-2">
+                            {(profileData.additionalInfo || "").length}/500 characters
+                          </p>
                         </div>
                       </div>
 
@@ -2468,22 +2521,24 @@ export default function DashboardPage() {
                       </div>
                       {/* Navigation Buttons - Always Visible */}
                       <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-0 mt-6 p-4 border-t border-gray-200 rounded-lg">
-                      <Button
-                        onClick={handlePrev}
-                        disabled={isFirstTab(activeTab as TabKey)}
-                        variant="outline"
-                        className="w-full sm:w-auto px-4 sm:px-6 bg-white hover:bg-gray-50 border-humsafar-500 text-humsafar-500"
-                      >
-                        Previous
-                      </Button>
-                      <div className="flex gap-3">
-                        {!isLastTab(activeTab as TabKey) && (
-                          <Button onClick={handleNext} className="w-full sm:w-auto bg-humsafar-600 hover:bg-humsafar-700 text-white px-4 sm:px-6">
-                            Next
+                        <Button
+                          onClick={handlePrev}
+                          disabled={isFirstTab(activeTab as TabKey)}
+                          variant="outline"
+                          className="w-full sm:w-auto px-4 sm:px-6 bg-white hover:bg-gray-50 border-humsafar-500 text-humsafar-500"
+                        >
+                          Previous
+                        </Button>
+                        <div className="flex gap-3">
+                          {/* replaced partner tab next navigation with a save button using existing save logic */}
+                          <Button
+                            onClick={handleSaveAll}
+                            className="w-full sm:w-auto bg-humsafar-600 hover:bg-humsafar-700 text-white px-4 sm:px-6"
+                          >
+                            Save
                           </Button>
-                        )}
+                        </div>
                       </div>
-                    </div>
                     </div>
                   </div>
                 </TabsContent>
@@ -2492,7 +2547,7 @@ export default function DashboardPage() {
                 <TabsContent value="settings" className="space-y-6">
                   <div>
                     <h3 className="text-xl font-semibold text-gray-800 mb-6">Account Settings</h3>
-                    
+
                     <div className="space-y-6">
                       {/* Profile Deletion Section */}
                       <div className="border border-red-200 rounded-lg p-6 bg-red-50">
@@ -2517,14 +2572,14 @@ export default function DashboardPage() {
                                 <li>• All uploaded images from storage</li>
                               </ul>
                             </div>
-                            <ProfileDeletionDialog 
+                            <ProfileDeletionDialog
                               onSuccess={() => {
                                 // Handle successful deletion - user will be redirected
-                                console.log('Profile deleted successfully')
+                                console.log("Profile deleted successfully")
                               }}
                               onError={(error) => {
                                 // Handle deletion error
-                                console.error('Profile deletion error:', error)
+                                console.error("Profile deletion error:", error)
                               }}
                             />
                           </div>
@@ -2552,7 +2607,10 @@ export default function DashboardPage() {
                       </Button>
                       <div className="flex gap-3">
                         {!isLastTab(activeTab as TabKey) && (
-                          <Button onClick={handleNext} className="w-full sm:w-auto bg-humsafar-600 hover:bg-humsafar-700 text-white px-4 sm:px-6">
+                          <Button
+                            onClick={handleNext}
+                            className="w-full sm:w-auto bg-humsafar-600 hover:bg-humsafar-700 text-white px-4 sm:px-6"
+                          >
                             Next
                           </Button>
                         )}
@@ -2567,5 +2625,5 @@ export default function DashboardPage() {
       )}
       <Footer />
     </div>
-  );
+  )
 }

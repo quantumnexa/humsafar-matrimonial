@@ -188,7 +188,7 @@ export default function AuthPage() {
           // Double-check that we still have a valid session before redirecting
           const { data: { session } } = await supabase.auth.getSession()
           if (session?.user) {
-            router.push("/")
+            router.push("/dashboard")
           } else {
             console.log("⚠️ Session not found after login, staying on auth page")
             setIsRedirecting(false)
