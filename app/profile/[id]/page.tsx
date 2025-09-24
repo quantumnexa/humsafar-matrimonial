@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { MapPin, GraduationCap, Briefcase, ArrowLeft, User, Heart, Users, Settings, CheckCircle, Lock } from "lucide-react"
+import { MapPin, GraduationCap, Briefcase, ArrowLeft, User, Heart, Users, Settings, CheckCircle, Lock, Share2 } from "lucide-react"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
 import { ImageWithFallback } from "@/components/ui/image-with-fallback"
@@ -33,6 +33,83 @@ function formatValue(value: unknown): string {
   const str = String(value).trim()
   if (!str) return ""
   return capitalizeWords(str)
+}
+
+// Format profile data for WhatsApp sharing
+function formatProfileForWhatsApp(profile: any) {
+  if (!profile) return "";
+  
+  // Personal Info Section
+  let message = "*Personal Information*\n";
+  const name = profile.full_name || 
+    [profile.first_name, profile.middle_name, profile.last_name].filter(Boolean).join(" ") || 
+    profile.display_name || 
+    profile.username || 
+    "Unnamed";
+  
+  message += `*Name:* ${name}\n`;
+  if (profile.age) message += `*Age:* ${profile.age}\n`;
+  if (profile.gender) message += `*Gender:* ${profile.gender}\n`;
+  if (profile.phone) message += `*Phone:* ${profile.phone}\n`;
+  if (profile.email) message += `*Email:* ${profile.email}\n`;
+  if (profile.date_of_birth) message += `*Date of Birth:* ${profile.date_of_birth}\n`;
+  if (profile.marital_status) message += `*Marital Status:* ${profile.marital_status}\n`;
+  if (profile.height) message += `*Height:* ${profile.height}\n`;
+  if (profile.religion) message += `*Religion:* ${profile.religion}\n`;
+  if (profile.sect) message += `*Sect:* ${profile.sect}\n`;
+  if (profile.caste) message += `*Caste:* ${profile.caste}\n`;
+  if (profile.mother_tongue) message += `*Mother Tongue:* ${profile.mother_tongue}\n`;
+  if (profile.nationality) message += `*Nationality:* ${profile.nationality}\n`;
+  if (profile.ethnicity) message += `*Ethnicity:* ${profile.ethnicity}\n`;
+  
+  // Location & Career
+  message += "\n*Location & Career*\n";
+  if (profile.city) message += `*City:* ${profile.city}\n`;
+  if (profile.country) message += `*Country:* ${profile.country}\n`;
+  if (profile.education) message += `*Education:* ${profile.education}\n`;
+  if (profile.field_of_study) message += `*Field of Study:* ${profile.field_of_study}\n`;
+  if (profile.profession || profile.working_as) message += `*Profession:* ${profile.profession || profile.working_as}\n`;
+  if (profile.occupation) message += `*Occupation:* ${profile.occupation}\n`;
+  if (profile.employment_status) message += `*Employment Status:* ${profile.employment_status}\n`;
+  if (profile.annual_income) message += `*Annual Income:* ${profile.annual_income}\n`;
+  
+  // Family Information
+  message += "\n*Family Information*\n";
+  if (profile.brothers) message += `*Brothers:* ${profile.brothers}\n`;
+  if (profile.brothers_married) message += `*Brothers Married:* ${profile.brothers_married}\n`;
+  if (profile.sisters) message += `*Sisters:* ${profile.sisters}\n`;
+  if (profile.sisters_married) message += `*Sisters Married:* ${profile.sisters_married}\n`;
+  if (profile.family_type) message += `*Family Type:* ${profile.family_type}\n`;
+  if (profile.family_values) message += `*Family Values:* ${profile.family_values}\n`;
+  
+  // Partner Preferences
+  message += "\n*Partner Preferences*\n";
+  if (profile.partner_age_from) message += `*Partner Age From:* ${profile.partner_age_from}\n`;
+  if (profile.partner_age_to) message += `*Partner Age To:* ${profile.partner_age_to}\n`;
+  if (profile.partner_education) message += `*Partner Education:* ${profile.partner_education}\n`;
+  if (profile.partner_religion) message += `*Partner Religion:* ${profile.partner_religion}\n`;
+  if (profile.partner_location) message += `*Partner Location:* ${profile.partner_location}\n`;
+  if (profile.partner_marital_status) message += `*Partner Marital Status:* ${profile.partner_marital_status}\n`;
+  
+  // Bio/About & Interests
+  message += "\n*About & Interests*\n";
+  if (profile.bio || profile.about) message += `*About:* ${profile.bio || profile.about}\n`;
+  if (profile.looking_for) message += `*Looking For:* ${profile.looking_for}\n`;
+  if (profile.hobbies) message += `*Hobbies:* ${profile.hobbies}\n`;
+  if (profile.additional_info) message += `*Additional Info:* ${profile.additional_info}\n`;
+  
+  // Profile ID
+  message += "\n*Profile ID:* " + (profile.user_id || profile.id || "").toString().substring(0, 8).toUpperCase();
+  
+  return message;
+}
+
+// Handle WhatsApp sharing
+function handleWhatsAppShare(profile: any) {
+  const formattedText = formatProfileForWhatsApp(profile);
+  const encodedText = encodeURIComponent(formattedText);
+  const whatsappUrl = `https://wa.me/?text=${encodedText}`;
+  window.open(whatsappUrl, '_blank');
 }
 
 function DetailsGrid({ data, fields }: { data: any; fields: Array<{ label: string; key: string }> }) {
@@ -886,6 +963,16 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
                       <p className="text-gray-700 leading-relaxed">{formatValue(d?.about || profile.bio)}</p>
                     </div>
                   ) : null}
+                  
+                  <div className="mb-6">
+                    <Button 
+                      onClick={() => handleWhatsAppShare(profile)}
+                      className="bg-green-500 hover:bg-green-600 text-white flex items-center gap-2"
+                    >
+                      <Share2 className="w-4 h-4" />
+                      Share on WhatsApp
+                    </Button>
+                  </div>
 
                                      <Tabs defaultValue="basic" className="w-full">
                                            <TabsList className="grid w-full grid-cols-5 mb-6 bg-humsafar-500 p-1 rounded-lg">

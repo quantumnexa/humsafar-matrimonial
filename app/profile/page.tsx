@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeft, User, Edit, Loader2 } from "lucide-react"
+import { ArrowLeft, User, Edit, Loader2, Share2 } from "lucide-react"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
 import { supabase } from "@/lib/supabaseClient"
@@ -15,6 +15,34 @@ export default function ViewProfilePage() {
   const [error, setError] = useState("")
   const [profile, setProfile] = useState<any>(null)
   const router = useRouter()
+  
+  // Function to format profile data for WhatsApp sharing
+  const formatProfileForWhatsApp = (profile: any) => {
+    if (!profile) return ""
+    
+    const profileData = [
+      `*Profile Details*`,
+      `-------------------`,
+      `*Name:* ${[profile.first_name, profile.middle_name, profile.last_name].filter(Boolean).join(' ')}`,
+      `*Age:* ${profile.age} years`,
+      `*Gender:* ${profile.gender}`,
+      `*Phone:* ${profile.phone}`,
+      `*Email:* ${profile.email}`,
+      `*City:* ${profile.city}`,
+      `*Education:* ${profile.education}`,
+      `*Profession:* ${profile.profession}`,
+      profile.bio ? `*About:* ${profile.bio}` : '',
+    ].filter(Boolean).join('\n')
+    
+    return encodeURIComponent(profileData)
+  }
+  
+  // Function to handle WhatsApp sharing
+  const handleWhatsAppShare = () => {
+    const formattedProfile = formatProfileForWhatsApp(profile)
+    const whatsappUrl = `https://wa.me/?text=${formattedProfile}`
+    window.open(whatsappUrl, '_blank')
+  }
 
   useEffect(() => {
     fetchProfile()
@@ -160,4 +188,4 @@ export default function ViewProfilePage() {
       <Footer />
     </div>
   );
-} 
+}
