@@ -1,18 +1,54 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Slider } from "@/components/ui/slider"
-import { Check, Star, Crown, Zap, Sparkles, Eye, Shield, Rocket, CheckCircle, ArrowRight, Gift, MessageCircle, Clock, Users, TrendingUp, Target } from "lucide-react"
+import { Check, Star, Crown, Zap, Sparkles, Eye, Shield, Rocket, CheckCircle, ArrowRight, Gift, MessageCircle, Clock, Users, TrendingUp, Target, AlertCircle } from "lucide-react"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
 
 export default function PackagesPage() {
   const [selectedProfileViews, setSelectedProfileViews] = useState(0)
-  
+  const [hasPaymentUnderReview, setHasPaymentUnderReview] = useState(false)
+  const [isCheckingPayment, setIsCheckingPayment] = useState(true)
+  const router = useRouter()
+  const supabase = createClientComponentClient()
+
+  // Check for payments under review
+  useEffect(() => {
+    const checkPaymentStatus = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        
+        if (user) {
+          const { data: payments, error } = await supabase
+            .from('payments')
+            .select('payment_status')
+            .eq('user_id', user.id)
+            .eq('payment_status', 'under_review')
+            .limit(1)
+
+          if (error) {
+            console.error('Error checking payment status:', error)
+          } else {
+            setHasPaymentUnderReview(payments && payments.length > 0)
+          }
+        }
+      } catch (error) {
+        console.error('Error in checkPaymentStatus:', error)
+      } finally {
+        setIsCheckingPayment(false)
+      }
+    }
+
+    checkPaymentStatus()
+  }, [supabase])
+
   // Dynamic pricing calculation based on profile views - Lifetime access
   // Custom packages are priced higher to encourage standard package selection
   const calculatePrice = (views: number) => {
@@ -203,8 +239,14 @@ export default function PackagesPage() {
   }
 
   const handleChoosePlan = (packageId: string) => {
-    // Redirect to dummy payment page
-    window.location.href = `/packages/payment?package=${packageId}`
+    // Check if there's a payment under review
+    if (hasPaymentUnderReview) {
+      alert('Your previous payment is under review. Please wait before purchasing a new package.')
+      return
+    }
+    
+    // Use Next.js router for better navigation
+    router.push(`/packages/payment?package=${packageId}`)
   }
 
   return (
@@ -212,6 +254,20 @@ export default function PackagesPage() {
       <Header />
 
       <main className="container mx-auto px-4 py-8">
+        {/* Payment Under Review Warning */}
+        {hasPaymentUnderReview && (
+          <div className="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-orange-600 flex-shrink-0" />
+              <div>
+                <p className="text-orange-800 font-medium">
+                  Your previous payment is under review. Please wait before purchasing a new package.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Hero Section */}
         <div className="relative overflow-hidden bg-humsafar-500 rounded-3xl mb-16 py-20 px-8">
           <div className="absolute inset-0 bg-black/10"></div>
@@ -581,15 +637,22 @@ export default function PackagesPage() {
                         <Button
                           onClick={() => handleChoosePlan(pkg.id)}
                           className={`w-full font-medium py-2 rounded-lg transition-colors ${
-                            pkg.popular 
+                            hasPaymentUnderReview
+                              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                              : pkg.popular 
                               ? 'bg-humsafar-600 hover:bg-humsafar-700 text-white'
                               : pkg.id === 'free'
                               ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
                               : 'bg-humsafar-600 hover:bg-humsafar-700 text-white'
                           }`}
-                          disabled={pkg.id === "free"}
+                          disabled={pkg.id === "free" || hasPaymentUnderReview}
                         >
-                          {pkg.id === "free" ? "Current Plan" : "Choose Plan"}
+                          {hasPaymentUnderReview 
+                            ? "Payment Under Review" 
+                            : pkg.id === "free" 
+                            ? "Current Plan" 
+                            : "Choose Plan"
+                          }
                         </Button>
                       </CardContent>
                     </Card>

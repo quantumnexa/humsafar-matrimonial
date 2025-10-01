@@ -3,23 +3,16 @@ import { supabase } from './supabaseClient'
 export interface UserSubscription {
   id: string
   user_id: string
-  subscription_status: 'free' | 'premium_lite' | 'premium_classic' | 'premium_plus' | 'humsafar_select'
-  profile_status: 'pending' | 'approved' | 'rejected' | 'flagged' | 'suspended'
-  package_name: string
-  package_price: number
-  package_duration_months: number
-  package_start_date: string
-  package_end_date?: string
-  active_addons: any[]
-  addon_history: any[]
-  features: any
-  contacts_limit: number
-  contacts_used: number
-
-  rejection_reason?: string
+  subscription_status: string
+  profile_status: string
+  views_limit?: number
   created_at: string
   updated_at: string
-  last_activity: string
+  verified_badge?: boolean
+  boost_profile?: boolean
+  ss_url?: string
+  payment_status?: string
+  rejection_reason?: string
 }
 
 export interface PackageDetails {
@@ -151,7 +144,7 @@ export const ADDON_SERVICES: AddonService[] = [
     id: 'verified_badge',
     name: 'Verified Badge',
     description: 'Blue checkmark for profile authenticity',
-    price: 200,
+    price: 1000,
     duration: 'Lifetime',
     icon: '✅'
   },
@@ -211,8 +204,7 @@ export class UserSubscriptionService {
         user_id: userId,
         subscription_status: 'free',
         profile_status: 'pending',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        views_limit: 0
       }
       
       // Using minimal subscription data
@@ -330,18 +322,7 @@ export class UserSubscriptionService {
         .upsert({
           user_id: user.id,
           subscription_status: packageType,
-          package_name: packageDetails.name,
-          package_price: totalPrice,
-          package_duration_months: packageDetails.duration_months,
-          package_start_date: new Date().toISOString(),
-          features: packageDetails.features,
-          contacts_limit: packageDetails.limits.contacts,
-          active_addons: addons,
-          addon_history: addons.map(addonId => ({
-            addon_id: addonId,
-            added_at: new Date().toISOString(),
-            price: ADDON_SERVICES.find(a => a.id === addonId)?.price || 0
-          }))
+          views_limit: 0
         })
 
       if (error) throw error
@@ -361,32 +342,22 @@ export class UserSubscriptionService {
       const addon = ADDON_SERVICES.find(a => a.id === addonId)
       if (!addon) return false
 
+      // Get current subscription
       const { data: subscription } = await supabase
         .from('user_subscriptions')
-        .select('active_addons, addon_history')
+        .select('subscription_status')
         .eq('user_id', user.id)
         .single()
 
       if (!subscription) return false
 
-      const currentAddons = subscription.active_addons || []
-      const currentHistory = subscription.addon_history || []
-
-      // Add to active addons
-      const newActiveAddons = [...currentAddons, addonId]
-      
-      // Add to history
-      const newHistory = [...currentHistory, {
-        addon_id: addonId,
-        added_at: new Date().toISOString(),
-        price: addon.price
-      }]
-
+      // For now, just update the subscription status to indicate addon was added
+      // In the future, you might want to create a separate addons table
       const { error } = await supabase
         .from('user_subscriptions')
         .update({
-          active_addons: newActiveAddons,
-          addon_history: newHistory
+          subscription_status: `${subscription.subscription_status}_with_${addonId}`,
+          updated_at: new Date().toISOString()
         })
         .eq('user_id', user.id)
 
@@ -433,9 +404,9 @@ export class UserSubscriptionService {
 
       return {
         status: subscription.subscription_status,
-        package: subscription.package_name,
+        package: subscription.subscription_status,
         canViewContacts: subscription.subscription_status !== 'free',
-        remainingContacts: subscription.contacts_limit - subscription.contacts_used
+        remainingContacts: subscription.views_limit || 0
       }
     } catch (error) {
       // Error getting subscription status

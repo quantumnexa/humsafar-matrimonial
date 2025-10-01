@@ -698,7 +698,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
         const [imagesResult, profileResult, subscriptionResult] = await Promise.all([
           supabase.from("user_images").select("id,image_url,is_main").eq("user_id", userIdForImages).order("uploaded_at", { ascending: true }),
           supabase.from("user_profiles").select("*").eq("user_id", userIdForImages).maybeSingle(),
-          supabase.from("user_subscriptions").select("active_addons").eq("user_id", userIdForImages).maybeSingle(),
+          supabase.from("user_subscriptions").select("verified_badge").eq("user_id", userIdForImages).maybeSingle(),
         ])
         
         // Process images to construct proper public URLs
@@ -720,8 +720,8 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
         const subscription = subscriptionResult.data
         
         // Add verified badge status to profile data
-         if (subscription && subscription.active_addons) {
-           setProfile((prev: any) => ({ ...prev, verified: subscription.active_addons.includes('verified_badge') }))
+         if (subscription && subscription.verified_badge) {
+           setProfile((prev: any) => ({ ...prev, verified: subscription.verified_badge }))
          }
          
          setError(imagesResult.error || profileResult.error || subscriptionResult.error)

@@ -6,15 +6,11 @@ import { supabase } from '@/lib/supabaseClient';
 import { Button } from '@/components/ui/button';
 import {
   Users,
-  Settings,
-  UserCheck,
-  BarChart3,
-  Gift,
   Menu,
   Home,
   LogOut,
-  Banknote,
-  Shield
+  FileCheck,
+  Gift
 } from 'lucide-react';
 
 interface SidebarItem {
@@ -25,10 +21,10 @@ interface SidebarItem {
 }
 
 interface AdminSidebarProps {
-  currentPath: string;
+  currentPath?: string;
 }
 
-export default function AdminSidebar({ currentPath }: AdminSidebarProps) {
+export default function AdminSidebar({ currentPath = '' }: AdminSidebarProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const router = useRouter();
 
@@ -47,12 +43,8 @@ export default function AdminSidebar({ currentPath }: AdminSidebarProps) {
   const sidebarItems: SidebarItem[] = [
     { icon: Home, label: 'Dashboard', href: '/admin/dashboard', active: currentPath === '/admin/dashboard' },
     { icon: Users, label: 'Profiles', href: '/admin/profiles', active: currentPath === '/admin/profiles' },
-    { icon: UserCheck, label: 'Users', href: '/admin/users', active: currentPath === '/admin/users' },
-    { icon: Banknote, label: 'Payments', href: '/admin/payments', active: currentPath === '/admin/payments' },
-    { icon: Shield, label: 'Content', href: '/admin/content', active: currentPath === '/admin/content' },
-    { icon: BarChart3, label: 'Analytics', href: '/admin/analytics', active: currentPath === '/admin/analytics' },
-    { icon: Gift, label: 'Promo Codes', href: '/admin/promo-codes', active: currentPath === '/admin/promo-codes' },
-    { icon: Settings, label: 'Settings', href: '/admin/settings', active: currentPath === '/admin/settings' },
+    { icon: FileCheck, label: 'Payment Reviews', href: '/admin/payment-reviews', active: currentPath === '/admin/payment-reviews' },
+    { icon: Gift, label: 'Packages', href: '/admin/packages', active: currentPath === '/admin/packages' },
   ];
 
   return (

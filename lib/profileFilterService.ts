@@ -167,12 +167,12 @@ export class ProfileFilterService {
           // Check for verified badge
           const { data: subscription } = await supabase
             .from('user_subscriptions')
-            .select('active_addons')
+            .select('verified_badge')
             .eq('user_id', profile.user_id)
             .single()
 
-          if (subscription && subscription.active_addons) {
-            verified_badge = subscription.active_addons.includes('verified_badge')
+          if (subscription && subscription.verified_badge) {
+            verified_badge = subscription.verified_badge
           }
         } catch (error) {
           // Error enhancing profile

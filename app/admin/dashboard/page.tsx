@@ -234,7 +234,10 @@ export default function AdminDashboard() {
 
           {/* Admin Actions */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Card className="cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105 bg-gradient-to-br from-white to-humsafar-50/30 border-0">
+            <Card 
+              className="cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105 bg-gradient-to-br from-white to-humsafar-50/30 border-0"
+              onClick={() => router.push('/admin/profiles')}
+            >
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2 text-gray-800">
                   <Users className="h-5 w-5 text-blue-500" />
@@ -242,6 +245,21 @@ export default function AdminDashboard() {
                 </CardTitle>
                 <CardDescription className="text-gray-600">
                   View and manage user profiles, verify accounts, and handle profile issues.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card 
+              className="cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105 bg-gradient-to-br from-white to-green-50/30 border-0"
+              onClick={() => router.push('/admin/profiles/create')}
+            >
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2 text-gray-800">
+                  <UserCheck className="h-5 w-5 text-green-500" />
+                  <span>Create Profile</span>
+                </CardTitle>
+                <CardDescription className="text-gray-600">
+                  Create new user profiles manually with complete profile information.
                 </CardDescription>
               </CardHeader>
             </Card>

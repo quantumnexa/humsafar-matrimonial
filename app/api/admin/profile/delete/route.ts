@@ -58,22 +58,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Log admin deletion action
-    const { error: logError } = await supabase
-      .from('admin_actions')
-      .insert({
-        admin_email: adminSession.email,
-        action_type: 'profile_deletion',
-        target_user_id: userId,
-        target_user_email: userProfile.email,
-        reason: reason,
-        timestamp: new Date().toISOString()
-      });
-
-    if (logError) {
-      console.error('Failed to log admin action:', logError);
-      // Continue with deletion even if logging fails
-    }
+    // Admin action logging removed as per user request
 
     // Start deletion process
     const deletionResults = {

@@ -459,7 +459,7 @@ export default function ProfilesListingPage() {
                 </div>
               </div>
               <Button className="bg-red-600 hover:bg-red-700 text-white">
-                Get Verified - Rs 200
+                Get Verified - Rs 1000
               </Button>
             </div>
           </div>
@@ -695,7 +695,8 @@ export default function ProfilesListingPage() {
           <div className="bg-humsafar-600 rounded-lg p-4 mb-6 shadow-sm border border-humsafar-100">
             <div className="flex items-center justify-between">
               <div className="flex-1">
-                <p className="text-sm text-white flex items-center gap-1">
+                <h3 className="font-semibold text-lg mb-1 text-white">Your Subscription: {userViewStats.subscription_status}</h3>
+                <p className="text-sm text-humsafar-100 flex items-center gap-1">
                   <Eye className="w-4 h-4" />
                   Views used: <span className="font-bold">{userViewStats.views_this_month}/{userViewStats.views_limit}</span> this month
                 </p>
@@ -704,6 +705,24 @@ export default function ProfilesListingPage() {
                 {userViewStats.remaining_views} views remaining
               </span>
             </div>
+            
+            {/* Payment Pending Message */}
+            {userViewStats.subscription_status.includes('Payment Pending') && (
+              <div className="mt-4 p-3 bg-yellow-500/20 border border-yellow-400/30 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5 text-yellow-300" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  <div>
+                    <p className="text-yellow-100 font-medium text-sm">Payment Approval Required</p>
+                    <p className="text-yellow-200 text-xs mt-1">
+                      Your payment is pending admin approval. You cannot view profiles until your payment is approved. 
+                      Your {userViewStats.views_limit} views will be available once approved.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

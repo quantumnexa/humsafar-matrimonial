@@ -45,6 +45,16 @@ export default function DashboardPage() {
   const [isPhotoOperation, setIsPhotoOperation] = useState(false)
   const [isRefreshingPhotos, setIsRefreshingPhotos] = useState(false)
   const [photoSuccessMessage, setPhotoSuccessMessage] = useState<string | null>(null)
+  
+  // Add payment status state
+  const [paymentStatus, setPaymentStatus] = useState<{
+    status: 'pending' | 'under_review' | 'accepted' | 'rejected' | null;
+    package_type?: string;
+    views_limit?: number;
+    created_at?: string;
+    rejection_reason?: string;
+  } | null>(null)
+  
   const [profileData, setProfileData] = useState({
     // Basic Information
     firstName: "",
@@ -185,8 +195,41 @@ export default function DashboardPage() {
   useEffect(() => {
     if (userId) {
       ensureSingleMainPhoto()
+      fetchPaymentStatus()
     }
   }, [userId])
+
+  // Fetch payment status for current user
+  const fetchPaymentStatus = async () => {
+    if (!userId) return
+
+    try {
+      const { data, error } = await supabase
+        .from('payments')
+        .select('payment_status, package_type, views_limit, created_at, rejection_reason')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching payment status:', error)
+        return
+      }
+
+      if (data) {
+        setPaymentStatus({
+          status: data.payment_status,
+          package_type: data.package_type,
+          views_limit: data.views_limit,
+          created_at: data.created_at,
+          rejection_reason: data.rejection_reason
+        })
+      }
+    } catch (error) {
+      console.error('Error fetching payment status:', error)
+    }
+  }
 
   // Do NOT early-return before hooks; UI is gated inside JSX at the top of the return
 
@@ -778,10 +821,11 @@ export default function DashboardPage() {
           const currentTime = new Date().toISOString()
           const subscriptionPayload = {
             user_id: uid,
-            package_id: "722d2637-86fb-4acb-80e1-ce5724aa844e",
             subscription_status: "free",
             profile_status: "pending",
             views_limit: 0,
+            verified_badge: false,
+            boost_profile: false,
             created_at: currentTime,
             updated_at: currentTime,
           }
@@ -1284,6 +1328,83 @@ export default function DashboardPage() {
                   </div>
                 </div>
               )}
+
+            {/* Payment Status Alert */}
+            {paymentStatus && paymentStatus.status === 'under_review' && (
+              <div className="mb-6 bg-orange-50 border border-orange-200 rounded-lg p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                    <svg className="w-5 h-5 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-orange-800">Payment Under Review</h3>
+                    <p className="text-orange-700">
+                      Your payment screenshot is under admin review. You will receive {paymentStatus.views_limit} profile views once your payment is approved.
+                    </p>
+                    <p className="text-sm text-orange-600 mt-1">
+                      Package: {paymentStatus.package_type?.toUpperCase()} • Submitted: {new Date(paymentStatus.created_at || '').toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Payment Rejected Alert */}
+            {paymentStatus && paymentStatus.status === 'rejected' && (
+              <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                    <X className="w-5 h-5 text-red-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-red-800">Payment Rejected</h3>
+                    <p className="text-red-700">
+                      Your payment has been rejected. Please try again with the correct payment screenshot.
+                    </p>
+                    {paymentStatus.rejection_reason && (
+                      <p className="text-sm text-red-600 mt-1">
+                        Reason: {paymentStatus.rejection_reason}
+                      </p>
+                    )}
+                    <div className="mt-3">
+                      <Link href="/packages">
+                        <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white">
+                          Try Again
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Payment Pending Alert */}
+            {paymentStatus && paymentStatus.status === 'pending' && (
+              <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-blue-800">Payment Pending</h3>
+                    <p className="text-blue-700">
+                      Your payment is pending. Please upload payment screenshot so admin can review it.
+                    </p>
+                    <div className="mt-3">
+                      <Link href="/packages">
+                        <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
+                          Upload Screenshot
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Profile Completion */}
             <Card className="border-humsafar-100">

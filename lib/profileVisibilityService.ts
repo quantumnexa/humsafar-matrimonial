@@ -76,12 +76,12 @@ export class ProfileVisibilityService {
         // Get user's subscription information
         const { data: subscription } = await supabase
           .from('user_subscriptions')
-          .select('package_name')
+          .select('subscription_status')
           .eq('user_id', userId)
           .single()
         
         if (subscription) {
-          userPackage = subscription.package_name
+          userPackage = subscription.subscription_status
         }
       }
 

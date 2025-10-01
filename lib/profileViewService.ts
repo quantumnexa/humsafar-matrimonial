@@ -127,11 +127,51 @@ export class ProfileViewService {
         targetUserId = user.id;
       }
 
-      // Temporary fix: Manual calculation until database function is fixed
+      // First check if user has any pending payment reviews
+      const { data: paymentReviewData, error: reviewError } = await supabase
+        .from('payments')
+        .select('payment_status, views_limit, rejection_reason')
+        .eq('user_id', targetUserId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      // If there's a payment review, check its status
+      if (paymentReviewData && !reviewError) {
+        if (paymentReviewData.payment_status === 'pending') {
+          return {
+            success: false,
+            canView: false,
+            remainingViews: 0,
+            message: 'Payment is pending. Please wait for admin review.'
+          };
+        }
+        
+        if (paymentReviewData.payment_status === 'under_review') {
+          return {
+            success: false,
+            canView: false,
+            remainingViews: 0,
+            message: 'Payment is under review by admin. Please wait for approval.'
+          };
+        }
+        
+        if (paymentReviewData.payment_status === 'rejected') {
+          return {
+            success: false,
+            canView: false,
+            remainingViews: 0,
+            message: `Payment was rejected. Reason: ${paymentReviewData.rejection_reason || 'No reason provided'}`
+          };
+        }
+        
+        // If payment is accepted, continue to check user_subscriptions
+      }
+
       // Get user's subscription info
       const { data: subscriptionData, error: subError } = await supabase
         .from('user_subscriptions')
-        .select('views_limit')
+        .select('views_limit, payment_status')
         .eq('user_id', targetUserId)
         .single();
 
@@ -142,6 +182,16 @@ export class ProfileViewService {
           canView: false,
           remainingViews: 0,
           message: 'No subscription found'
+        };
+      }
+
+      // Check if payment is pending approval
+      if (subscriptionData.payment_status === 'pending') {
+        return {
+          success: false,
+          canView: false,
+          remainingViews: subscriptionData.views_limit || 0,
+          message: 'Payment approval required to view profiles.'
         };
       }
 
@@ -161,7 +211,7 @@ export class ProfileViewService {
         };
       }
 
-      const remainingViews = Math.max(0, subscriptionData.views_limit - (totalViews || 0));
+      const remainingViews = Math.max(0, (subscriptionData.views_limit || 0) - (totalViews || 0));
       
       return {
         success: true,
@@ -204,15 +254,45 @@ export class ProfileViewService {
         targetUserId = user.id;
       }
 
+      // First check payment reviews for current status
+      const { data: paymentReview, error: reviewError } = await supabase
+        .from('payments')
+        .select('payment_status, views_limit, rejection_reason')
+        .eq('user_id', targetUserId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
       // Get user subscription info
       const { data: subscription, error: subError } = await supabase
         .from('user_subscriptions')
-        .select('subscription_status, views_limit')
+        .select('subscription_status, views_limit, payment_status')
         .eq('user_id', targetUserId)
         .single();
 
       if (subError || !subscription) {
-        // Error fetching user subscription
+        // If no subscription but there's a payment review, show review status
+        if (paymentReview && !reviewError) {
+          let displayStatus = 'Package Purchase';
+          if (paymentReview.payment_status === 'pending') {
+            displayStatus += ' (Payment Pending)';
+          } else if (paymentReview.payment_status === 'under_review') {
+            displayStatus += ' (Under Review)';
+          } else if (paymentReview.payment_status === 'rejected') {
+            displayStatus += ' (Payment Rejected)';
+          }
+
+          return {
+            success: true,
+            data: {
+              subscription_status: displayStatus,
+              views_limit: paymentReview.views_limit || 0,
+              views_this_month: 0,
+              remaining_views: 0
+            }
+          };
+        }
+
         return {
           success: false,
           message: 'No subscription found for user'
@@ -245,10 +325,18 @@ export class ProfileViewService {
       const currentViews = totalViews || 0;
       const remainingViews = Math.max(0, viewsLimit - currentViews);
 
+      // Add payment status info to subscription status display
+      let displayStatus = subscription.subscription_status;
+      if (subscription.payment_status === 'pending') {
+        displayStatus += ' (Payment Pending)';
+      } else if (subscription.payment_status === 'approved') {
+        displayStatus += ' (Active)';
+      }
+
       return {
         success: true,
         data: {
-          subscription_status: subscription.subscription_status,
+          subscription_status: displayStatus,
           views_limit: viewsLimit,
           views_this_month: currentViews,
           remaining_views: remainingViews

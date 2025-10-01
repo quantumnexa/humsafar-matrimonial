@@ -36,7 +36,7 @@ export default function VerifiedBadgePaymentPage() {
       const subscription = await UserSubscriptionService.getCurrentUserSubscription()
       setUserSubscription(subscription)
       
-      if (subscription?.active_addons?.includes('verified_badge')) {
+      if (subscription?.verified_badge) {
         setPaymentSuccess(true)
       }
     } catch (error) {
@@ -223,7 +223,7 @@ export default function VerifiedBadgePaymentPage() {
                   </CardHeader>
                   <CardContent className="text-center">
                     <div className="mb-6">
-                      <div className="text-4xl font-bold text-humsafar-600 mb-2">Rs. 200</div>
+                      <div className="text-4xl font-bold text-humsafar-600 mb-2">Rs. 1000</div>
                       <div className="text-gray-600">One-time payment</div>
                       <div className="text-sm text-gray-500">Lifetime validity</div>
                     </div>
@@ -266,7 +266,7 @@ export default function VerifiedBadgePaymentPage() {
                       <div className="space-y-2 text-sm">
                         <div className="flex justify-between">
                           <span className="text-gray-600">Package:</span>
-                          <span className="font-medium">{userSubscription.package_name}</span>
+                          <span className="font-medium">{userSubscription.subscription_status}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">Profile Status:</span>
@@ -277,11 +277,11 @@ export default function VerifiedBadgePaymentPage() {
                             {userSubscription.profile_status}
                           </Badge>
                         </div>
-                        {userSubscription.active_addons && userSubscription.active_addons.length > 0 && (
+                        {userSubscription.verified_badge && (
                           <div className="flex justify-between">
-                            <span className="text-gray-600">Active Add-ons:</span>
-                            <span className="font-medium">
-                              {userSubscription.active_addons.join(', ')}
+                            <span className="text-gray-600">Verified Badge:</span>
+                            <span className="font-medium text-green-600">
+                              Active
                             </span>
                           </div>
                         )}

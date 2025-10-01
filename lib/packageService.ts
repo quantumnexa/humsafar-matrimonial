@@ -2,14 +2,12 @@ import { supabase } from './supabaseClient'
 
 export interface Package {
   id: string
-  package_key: string
   name: string
   description?: string
   price: number
   duration_months: number
   is_popular: boolean
   features: string[]
-  contacts_limit: number
   color_scheme: string
   priority: number
   created_at: string
@@ -58,7 +56,7 @@ export class PackageService {
       const { data, error } = await supabase
         .from('packages')
         .select('*')
-        .eq('package_key', packageKey)
+        .eq('id', packageKey)
         .eq('is_active', true)
         .single()
 
@@ -220,11 +218,6 @@ export class PackageService {
         .from('packages')
         .select('*')
         .eq('is_active', true)
-
-      // Filter by contacts access
-      if (needsContacts) {
-        query = query.gt('contacts_limit', 0)
-      }
 
       // Filter by budget
       if (budget > 0) {

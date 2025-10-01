@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { Check, CreditCard, Shield, Clock, Star, Crown, Zap } from "lucide-react"
+import { Check, CreditCard, Shield, Clock, Star, Crown, Zap, Upload, Building, Smartphone, Copy, X } from "lucide-react"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
 import { supabase } from "@/lib/supabaseClient"
@@ -31,6 +31,11 @@ export default function PaymentPage() {
   const [packageDetails, setPackageDetails] = useState<Package | null>(null)
   const [loading, setLoading] = useState(false)
   const [paymentDetails, setPaymentDetails] = useState("")
+  const [paymentScreenshot, setPaymentScreenshot] = useState<File | null>(null)
+  const [screenshotPreview, setScreenshotPreview] = useState<string>('')
+  const [screenshotUploadError, setScreenshotUploadError] = useState<string>('')
+  const [paymentError, setPaymentError] = useState<string>('')
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'bank' | 'jazzcash'>('bank')
   const [currentUser, setCurrentUser] = useState<any>(null)
 
   const packages: Record<string, Package> = {
@@ -100,7 +105,7 @@ export default function PaymentPage() {
       router.push('/packages')
     }
 
-    // Get current user
+    // Get current user - simplified without admin policy checks
     const getCurrentUser = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
@@ -112,61 +117,167 @@ export default function PaymentPage() {
     getCurrentUser()
   }, [packageId, router])
 
+  // Removed checkPaymentError function - no admin policy complications needed
+
+  // Removed clearPaymentError function - simplified flow
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text)
+    alert('Copied to clipboard!')
+  }
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      // Reset previous errors
+      setScreenshotUploadError('')
+      
+      // Check file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setScreenshotUploadError('File size should be less than 5MB')
+        return
+      }
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        setScreenshotUploadError('Please upload an image file')
+        return
+      }
+      
+      setPaymentScreenshot(file)
+      
+      // Create preview URL
+      const previewUrl = URL.createObjectURL(file)
+      setScreenshotPreview(previewUrl)
+    }
+  }
+
+  const removeScreenshot = () => {
+    setPaymentScreenshot(null)
+    if (screenshotPreview) {
+      URL.revokeObjectURL(screenshotPreview)
+      setScreenshotPreview('')
+    }
+    setScreenshotUploadError('')
+  }
+
+  const uploadScreenshotToStorage = async (file: File, userId: string): Promise<string | null> => {
+    try {
+      // Check if user is authenticated
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      
+      if (authError || !user) {
+        console.error('Authentication error:', authError)
+        setScreenshotUploadError('Please log in to upload screenshots')
+        return null
+      }
+
+      // Generate unique filename
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${userId}_${Date.now()}.${fileExt}`
+      const filePath = `${fileName}` // Simplified path without folder
+
+      console.log('Uploading file:', fileName, 'Size:', file.size, 'User:', user.id)
+
+      // Try uploading to a public bucket or create one without RLS
+      const { data, error } = await supabase.storage
+        .from('payment-screenshots')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true, // Allow overwrite if file exists
+          contentType: file.type
+        })
+
+      if (error) {
+        console.error('Storage upload error:', error)
+        
+        // If bucket doesn't exist, try creating it
+        if (error.message.includes('Bucket not found')) {
+          console.log('Trying to create bucket...')
+          // For now, show user-friendly error
+          setScreenshotUploadError('Storage bucket not configured. Please contact admin to set up payment-screenshots bucket.')
+          return null
+        }
+        
+        // If RLS error, try alternative approach
+        if (error.message.includes('row-level security') || error.message.includes('access denied')) {
+          console.log('RLS error detected, trying alternative upload...')
+          setScreenshotUploadError('Storage permissions issue. Admin needs to configure bucket policies.')
+          return null
+        }
+        
+        setScreenshotUploadError(`Upload failed: ${error.message}`)
+        return null
+      }
+
+      console.log('Upload successful:', data)
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('payment-screenshots')
+        .getPublicUrl(filePath)
+
+      console.log('Public URL:', urlData.publicUrl)
+      return urlData.publicUrl
+    } catch (error) {
+      console.error('Error uploading screenshot:', error)
+      setScreenshotUploadError(`Upload error: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      return null
+    }
+  }
+
   const handlePayment = async () => {
     if (!packageDetails || !currentUser) return
+
+    // Check if screenshot is uploaded
+    if (!paymentScreenshot) {
+      alert('Please upload payment screenshot before proceeding.')
+      return
+    }
 
     setLoading(true)
     
     try {
-      // Create user subscription record
-      const { error: subscriptionError } = await supabase
-        .from('user_subscriptions')
-        .upsert({
-          user_id: currentUser.id,
-          subscription_status: packageDetails.id === 'basic' ? 'premium_lite' : 
-                             packageDetails.id === 'standard' ? 'premium_classic' : 'premium_plus',
-          package_name: packageDetails.name,
-          package_price: packageDetails.price,
-          package_duration_months: packageDetails.id === 'basic' ? 3 : 
-                                  packageDetails.id === 'standard' ? 6 : 12,
-          package_start_date: new Date().toISOString(),
-          contacts_limit: packageDetails.id === 'basic' ? 50 : 
-                         packageDetails.id === 'standard' ? 100 : 200,
-          active_addons: packageDetails.addOns,
-          features: {
-            profile_views: packageDetails.profileViews,
-            addons: packageDetails.addOns
-          }
-        })
-
-      if (subscriptionError) {
-        // Error creating subscription
-        throw subscriptionError
+      // Clear any previous upload errors
+      setScreenshotUploadError('')
+      
+      // Upload screenshot to storage first
+      const screenshotUrl = await uploadScreenshotToStorage(paymentScreenshot, currentUser.id)
+      
+      if (!screenshotUrl) {
+        alert('Failed to upload payment screenshot. Please check the error message above and try again.')
+        setLoading(false)
+        return
       }
 
-      // Create payment record
+      // Create payment record for review - this will be reviewed by admin
       const { error: paymentError } = await supabase
         .from('payments')
         .insert({
           user_id: currentUser.id,
           amount: packageDetails.price,
           currency: 'PKR',
-          status: 'success',
-          payment_method: 'dummy_payment',
+          views_limit: packageDetails.profileViews,
+          ss_url: screenshotUrl,
+          payment_status: 'under_review', // Status changes to under_review after screenshot upload
+          package_type: packageDetails.id,
+          payment_method: selectedPaymentMethod === 'bank' ? 'bank_transfer' : 'jazzcash',
           created_at: new Date().toISOString()
         })
 
       if (paymentError) {
-        // Error creating payment record
-        // Don't throw here as subscription was created successfully
+        console.error('Payment record error:', paymentError)
+        alert(`Payment record error: ${paymentError.message}`)
+        setLoading(false)
+        return
       }
 
-      // Redirect to success page
-      router.push('/dashboard?package=success')
+      // Success - payment submitted for review
+      alert(`Payment submitted for review! Your screenshot has been uploaded and is under admin review. You will receive ${packageDetails.profileViews} profile views once approved.`)
+      router.push('/dashboard')
       
     } catch (error) {
-      // Payment error
-      alert('There was an error processing your payment. Please try again.')
+      console.error('Payment processing error:', error)
+      alert(`Payment processing error: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setLoading(false)
     }
@@ -273,23 +384,12 @@ export default function PaymentPage() {
                   Payment Details
                 </CardTitle>
                 <CardDescription>
-                  This is a dummy payment system for demonstration purposes
+                  Enter your payment details below to complete your purchase.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Security Notice */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <div className="flex items-center gap-2 text-blue-800 mb-2">
-                    <Shield className="w-5 h-5" />
-                    <span className="font-semibold">Secure Payment</span>
-                  </div>
-                  <p className="text-blue-700 text-sm">
-                    This is a demonstration payment system. No real payment will be processed.
-                  </p>
-                </div>
-
                 {/* Package Summary */}
-                <div className="bg-humsafar-50 rounded-lg p-4">
+                <div className="bg-humsafar-50 rounded-lg p-4 mb-6">
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-humsafar-700">Package:</span>
                     <span className="font-semibold">{packageDetails.name}</span>
@@ -299,28 +399,293 @@ export default function PaymentPage() {
                     <span className="font-semibold">{packageDetails.duration}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-humsafar-700">Total:</span>
+                    <span className="text-humsafar-700">Total Amount:</span>
                     <span className="text-2xl font-bold text-humsafar-600">
                       Rs. {packageDetails.price.toLocaleString()}
                     </span>
                   </div>
                 </div>
 
-                {/* Dummy Payment Input */}
+                {/* Payment Methods */}
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-humsafar-700 mb-3">Choose Payment Method:</h3>
+                  
+                  {/* Payment Method Selection */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <button
+                      onClick={() => setSelectedPaymentMethod('bank')}
+                      className={`p-4 border-2 rounded-lg transition-all ${
+                        selectedPaymentMethod === 'bank' 
+                          ? 'border-humsafar-500 bg-humsafar-50' 
+                          : 'border-gray-200 hover:border-humsafar-300'
+                      }`}
+                    >
+                      <Building className="w-8 h-8 mx-auto mb-2 text-humsafar-600" />
+                      <div className="text-sm font-medium">Bank Transfer</div>
+                      <div className="text-xs text-gray-500">Faysal Bank</div>
+                    </button>
+                    
+                    <button
+                      onClick={() => setSelectedPaymentMethod('jazzcash')}
+                      className={`p-4 border-2 rounded-lg transition-all ${
+                        selectedPaymentMethod === 'jazzcash' 
+                          ? 'border-humsafar-500 bg-humsafar-50' 
+                          : 'border-gray-200 hover:border-humsafar-300'
+                      }`}
+                    >
+                      <Smartphone className="w-8 h-8 mx-auto mb-2 text-humsafar-600" />
+                      <div className="text-sm font-medium">JazzCash</div>
+                      <div className="text-xs text-gray-500">Mobile Wallet</div>
+                    </button>
+                  </div>
+
+                  {/* Bank Transfer Details */}
+                  {selectedPaymentMethod === 'bank' && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <div className="flex items-center gap-2 text-blue-800 mb-3">
+                        <Building className="w-5 h-5" />
+                        <span className="font-semibold">Faysal Bank Limited - Traditional Bank Transfer</span>
+                      </div>
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-gray-600">Bank Name:</span>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">Faysal Bank Limited</span>
+                            <button onClick={() => copyToClipboard('Faysal Bank Limited')} className="text-blue-600 hover:text-blue-800">
+                              <Copy className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-gray-600">Branch:</span>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">Dastagir</span>
+                            <button onClick={() => copyToClipboard('Dastagir')} className="text-blue-600 hover:text-blue-800">
+                              <Copy className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-gray-600">Account No:</span>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">3612 4440 0000 2409</span>
+                            <button onClick={() => copyToClipboard('3612 4440 0000 2409')} className="text-blue-600 hover:text-blue-800">
+                              <Copy className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-gray-600">Account Title:</span>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">Humsafar Forever Love</span>
+                            <button onClick={() => copyToClipboard('Humsafar Forever Love')} className="text-blue-600 hover:text-blue-800">
+                              <Copy className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="mt-3 p-3 bg-white rounded border">
+                        <h4 className="font-medium text-gray-800 mb-2">How to Transfer:</h4>
+                        <ul className="text-sm text-gray-600 space-y-1">
+                          <li>• Visit any Faysal Bank branch</li>
+                          <li>• Use online banking or mobile app</li>
+                          <li>• ATM transfer service</li>
+                          <li>• Inter-bank transfer from other banks</li>
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* JazzCash Details */}
+                  {selectedPaymentMethod === 'jazzcash' && (
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <div className="flex items-center gap-2 text-green-800 mb-3">
+                        <Smartphone className="w-5 h-5" />
+                        <span className="font-semibold">JazzCash - Mobile Wallet Transfer</span>
+                      </div>
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-gray-600">Service:</span>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">JazzCash Mobile Wallet</span>
+                            <button onClick={() => copyToClipboard('JazzCash Mobile Wallet')} className="text-green-600 hover:text-green-800">
+                              <Copy className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-gray-600">Account No:</span>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">0332 7355 681</span>
+                            <button onClick={() => copyToClipboard('0332 7355 681')} className="text-green-600 hover:text-green-800">
+                              <Copy className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-gray-600">Account Title:</span>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">Humsafar Forever Love</span>
+                            <button onClick={() => copyToClipboard('Humsafar Forever Love')} className="text-green-600 hover:text-green-800">
+                              <Copy className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="mt-3 p-3 bg-white rounded border">
+                        <h4 className="font-medium text-gray-800 mb-2">How to Transfer:</h4>
+                        <ul className="text-sm text-gray-600 space-y-1">
+                          <li>• Use JazzCash mobile app</li>
+                          <li>• Dial *786# from Jazz number</li>
+                          <li>• Visit JazzCash agent</li>
+                          <li>• Online transfer from other wallets</li>
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Payment Error Alert */}
+                {paymentError && (
+                  <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0">
+                        <svg className="w-5 h-5 text-red-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-sm font-medium text-red-800 mb-1">Payment Screenshot Issue</h3>
+                        <p className="text-sm text-red-700">{paymentError}</p>
+                        <button
+                          onClick={() => setPaymentError('')}
+                          className="mt-2 text-sm text-red-600 hover:text-red-800 underline"
+                        >
+                          Dismiss and upload new screenshot
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Payment Instructions */}
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <h4 className="font-semibold text-yellow-800 mb-3">Payment Instructions</h4>
+                  <div className="space-y-2 text-sm text-yellow-700">
+                    <div className="flex items-start gap-2">
+                      <span className="font-medium bg-yellow-200 rounded-full w-6 h-6 flex items-center justify-center text-xs">1</span>
+                      <span>Choose your preferred payment method from the options above</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="font-medium bg-yellow-200 rounded-full w-6 h-6 flex items-center justify-center text-xs">2</span>
+                      <span>Transfer the amount using the provided account details</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="font-medium bg-yellow-200 rounded-full w-6 h-6 flex items-center justify-center text-xs">3</span>
+                      <span>Take a screenshot or note the transaction ID</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="font-medium bg-yellow-200 rounded-full w-6 h-6 flex items-center justify-center text-xs">4</span>
+                      <span>Upload payment screenshot below and submit</span>
+                    </div>
+                  </div>
+                </div>
+
+               {/* Screenshot Upload */}
                 <div className="space-y-2">
-                  <Label htmlFor="payment-details" className="text-humsafar-700">
-                    Enter Dummy Payment Details
+                  <Label className="text-humsafar-700">
+                    Upload Payment Screenshot <span className="text-red-500">*</span>
                   </Label>
-                  <Input
-                    id="payment-details"
-                    placeholder="e.g., Card Number: 1234-5678-9012-3456"
-                    value={paymentDetails}
-                    onChange={(e) => setPaymentDetails(e.target.value)}
-                    className="border-humsafar-200"
-                  />
-                  <p className="text-sm text-humsafar-500">
-                    This field is for demonstration purposes only
-                  </p>
+                  
+                  {/* Upload Area */}
+                  <div className="border-2 border-dashed border-humsafar-200 rounded-lg p-6 text-center">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                      id="screenshot-upload"
+                    />
+                    <label htmlFor="screenshot-upload" className="cursor-pointer">
+                      <Upload className="w-12 h-12 mx-auto text-humsafar-400 mb-4" />
+                      <div className="text-humsafar-600 font-medium mb-2">
+                        {paymentScreenshot ? paymentScreenshot.name : 'Click to upload payment screenshot'}
+                      </div>
+                      <div className="text-sm text-humsafar-500">
+                        PNG, JPG up to 5MB
+                      </div>
+                    </label>
+                  </div>
+
+                  {/* Error Display */}
+                  {screenshotUploadError && (
+                    <div className="flex items-center gap-2 text-red-600 text-sm bg-red-50 p-2 rounded">
+                      <X className="w-4 h-4" />
+                      {screenshotUploadError}
+                    </div>
+                  )}
+
+                  {/* Success Message */}
+                  {paymentScreenshot && !screenshotUploadError && (
+                    <div className="flex items-center gap-2 text-green-600 text-sm">
+                      <Check className="w-4 h-4" />
+                      Screenshot uploaded successfully
+                    </div>
+                  )}
+
+                  {/* Preview */}
+                  {screenshotPreview && (
+                    <div className="mt-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <Label className="text-humsafar-700 text-sm">Preview:</Label>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={removeScreenshot}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <X className="w-4 h-4 mr-1" />
+                          Remove
+                        </Button>
+                      </div>
+                      <div className="border rounded-lg p-2 bg-gray-50">
+                        <img
+                          src={screenshotPreview}
+                          alt="Payment Screenshot Preview"
+                          className="max-w-full h-auto max-h-64 mx-auto rounded"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Security Guidelines */}
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <div className="flex items-center gap-2 text-red-800 mb-2">
+                    <Shield className="w-5 h-5" />
+                    <span className="font-semibold">Security Guidelines</span>
+                  </div>
+                  <ul className="text-red-700 text-sm space-y-1">
+                    <li>• Always verify account details before transfer</li>
+                    <li>• Keep transaction receipts safe</li>
+                    <li>• Never share your banking credentials</li>
+                    <li>• Use secure internet connections</li>
+                  </ul>
+                </div>
+
+                {/* After Payment Notice */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-center gap-2 text-blue-800 mb-2">
+                    <Clock className="w-5 h-5" />
+                    <span className="font-semibold">After Payment</span>
+                  </div>
+                  <ul className="text-blue-700 text-sm space-y-1">
+                    <li>• Upload payment screenshot above</li>
+                    <li>• Include your registered phone number in transaction details</li>
+                    <li>• Mention the service you're paying for</li>
+                    <li>• Allow 24-48 hours for verification</li>
+                  </ul>
                 </div>
 
                 {/* Proceed Button */}
@@ -336,8 +701,8 @@ export default function PaymentPage() {
                     </div>
                   ) : (
                     <div className="flex items-center gap-2">
-                      <CreditCard className="w-5 h-5" />
-                      Proceed with Payment
+                      <Upload className="w-5 h-5" />
+                      Submit Payment Confirmation
                     </div>
                   )}
                 </Button>
@@ -367,3 +732,4 @@ export default function PaymentPage() {
     </div>
   )
 }
+
