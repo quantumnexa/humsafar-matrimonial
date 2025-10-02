@@ -164,7 +164,7 @@ export default function PackagesManagement() {
 
       if (error) {
         console.error('❌ Error fetching users:', error);
-        alert(`Query Error: ${error.message}`);
+        alert(`Query Error: ${String(error) || 'Unknown error occurred'}`);
         setLoading(false);
         return;
       }
