@@ -50,8 +50,6 @@ interface ProfileFormData {
   weight: string;
   body_type: string;
   complexion: string;
-  eye_color: string;
-  hair_color: string;
   wear_hijab: string;
   
   // Lifestyle
@@ -162,8 +160,6 @@ export default function CreateProfile() {
     weight: '',
     body_type: '',
     complexion: '',
-    eye_color: '',
-    hair_color: '',
     wear_hijab: '',
     
     // Lifestyle
@@ -749,22 +745,6 @@ export default function CreateProfile() {
                           <SelectItem value="dark">Dark</SelectItem>
                         </SelectContent>
                       </Select>
-                    </div>
-                    <div>
-                      <Label htmlFor="eye_color">Eye Color</Label>
-                      <Input
-                        id="eye_color"
-                        value={formData.eye_color}
-                        onChange={(e) => handleInputChange('eye_color', e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="hair_color">Hair Color</Label>
-                      <Input
-                        id="hair_color"
-                        value={formData.hair_color}
-                        onChange={(e) => handleInputChange('hair_color', e.target.value)}
-                      />
                     </div>
                     <div>
                       <Label htmlFor="wear_hijab">Wear Hijab</Label>
