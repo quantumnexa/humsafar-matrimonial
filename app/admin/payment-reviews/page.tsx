@@ -73,7 +73,7 @@ export default function PaymentReviewsPage() {
 
   const checkAdminAuth = () => {
     try {
-      const session = localStorage.getItem('admin_session');
+      const session = sessionStorage.getItem('admin_session');
       if (session) {
         const parsedSession = JSON.parse(session);
         setAdminSession(parsedSession);

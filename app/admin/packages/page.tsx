@@ -61,7 +61,7 @@ export default function PackagesManagement() {
   }, []);
 
   const checkAdminAuth = () => {
-    const session = localStorage.getItem('admin_session');
+    const session = sessionStorage.getItem('admin_session');
     if (!session) {
       router.push('/admin/login');
       return;
@@ -72,7 +72,7 @@ export default function PackagesManagement() {
       setAdminSession(parsedSession);
     } catch (error) {
       console.error('Invalid admin session:', error);
-      localStorage.removeItem('admin_session');
+      sessionStorage.removeItem('admin_session');
       router.push('/admin/login');
     }
   };

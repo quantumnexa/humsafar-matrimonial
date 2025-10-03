@@ -12,7 +12,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
-import { Upload, X, Plus, Save, ArrowLeft } from 'lucide-react';
+import { Upload, X, Plus, Save, ArrowLeft, ArrowRight } from 'lucide-react';
+import { calculateAge } from '@/lib/utils';
 import AdminSidebar from '@/components/AdminSidebar';
 
 interface AdminSession {
@@ -124,11 +125,23 @@ interface UploadedImage {
   is_main: boolean;
 }
 
-export default function CreateProfile() {
+  export default function CreateProfile() {
   const [adminSession, setAdminSession] = useState<AdminSession | null>(null);
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState<UploadedImage[]>([]);
   const [activeTab, setActiveTab] = useState('photos');
+  const [pasteText, setPasteText] = useState<string>("");
+  const tabOrder = ['photos', 'basic', 'religious', 'physical', 'lifestyle', 'education', 'family', 'partner', 'paste'] as const;
+  const goPrev = () => {
+    const idx = tabOrder.indexOf(activeTab as typeof tabOrder[number]);
+    if (idx > 0) setActiveTab(tabOrder[idx - 1]);
+  };
+  const goNext = () => {
+    const idx = tabOrder.indexOf(activeTab as typeof tabOrder[number]);
+    if (idx < tabOrder.length - 1) setActiveTab(tabOrder[idx + 1]);
+  };
+  const isFirstTab = tabOrder.indexOf(activeTab as typeof tabOrder[number]) === 0;
+  const isLastTab = tabOrder.indexOf(activeTab as typeof tabOrder[number]) === tabOrder.length - 1;
   const router = useRouter();
 
   const [formData, setFormData] = useState<ProfileFormData>({
@@ -232,7 +245,7 @@ export default function CreateProfile() {
   }, []);
 
   const checkAdminAuth = () => {
-    const session = localStorage.getItem('admin_session');
+    const session = sessionStorage.getItem('admin_session');
     if (!session) {
       router.push('/admin/login');
       return;
@@ -243,32 +256,217 @@ export default function CreateProfile() {
       setAdminSession(parsedSession);
     } catch (error) {
       console.error('Invalid admin session:', error);
-      localStorage.removeItem('admin_session');
+      sessionStorage.removeItem('admin_session');
       router.push('/admin/login');
     }
   };
 
   const handleInputChange = (field: keyof ProfileFormData, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setFormData(prev => {
+      // Auto-calculate age when date_of_birth changes
+      if (field === 'date_of_birth') {
+        const dob = value as string;
+        const age = dob ? calculateAge(dob) : null;
+        return {
+          ...prev,
+          date_of_birth: dob,
+          age,
+        };
+      }
+      return {
+        ...prev,
+        [field]: value,
+      };
+    });
   };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files) return;
+    const MAX_IMAGES = 4;
+    const MAX_SIZE_BYTES = 4 * 1024 * 1024; // 4MB
 
-    Array.from(files).forEach(file => {
-      if (file.type.startsWith('image/')) {
-        const url = URL.createObjectURL(file);
-        setImages(prev => [...prev, {
-          file,
-          url,
-          is_main: prev.length === 0 // First image is main by default
-        }]);
+    setImages(prev => {
+      const remainingSlots = MAX_IMAGES - prev.length;
+      const validNewImages: UploadedImage[] = [];
+
+      if (remainingSlots <= 0) {
+        toast({
+          title: 'Limit reached',
+          description: 'You can upload up to 4 photos.',
+          variant: 'destructive',
+        });
+        return prev;
+      }
+
+      Array.from(files)
+        .slice(0, remainingSlots)
+        .forEach(file => {
+          if (!file.type.startsWith('image/')) return;
+          if (file.size > MAX_SIZE_BYTES) {
+            toast({
+              title: 'File too large',
+              description: 'Each photo must be under 4MB.',
+              variant: 'destructive',
+            });
+            return;
+          }
+          const url = URL.createObjectURL(file);
+          validNewImages.push({
+            file,
+            url,
+            is_main: prev.length === 0 && validNewImages.length === 0, // First overall image becomes main
+          });
+        });
+
+      if (validNewImages.length === 0) return prev;
+      return [...prev, ...validNewImages];
+    });
+  };
+
+  // Simple parser for the "Paste" tab to auto-fill fields from free text
+  const parsePastedText = (text: string) => {
+    const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    const map: Record<string, string> = {};
+
+    // Normalize bullets like "◼" and separators like ":", ".", ".."
+    lines.forEach(line => {
+      // Remove leading bullets and extra spaces
+      const cleaned = line.replace(/^([\u25A0\u25AA\u25CF\u25E6\-\*]+)\s*/, '').trim();
+      // Split on common separators
+      const parts = cleaned.split(/\s*[:\.]{1,2}\s*/);
+      if (parts.length >= 2) {
+        const key = parts[0].toLowerCase();
+        const value = parts.slice(1).join(' ').trim();
+        map[key] = value;
       }
     });
+
+    // Helper to get value by possible labels
+    const getVal = (labels: string[], fallback = '') => {
+      for (const label of labels) {
+        const v = map[label.toLowerCase()];
+        if (v) return v;
+      }
+      return fallback;
+    };
+
+    // Extract numeric ranges like "21-30"
+    const parseRange = (v: string) => {
+      const m = v.match(/(\d{1,2})\s*[-to]+\s*(\d{1,2})/i);
+      if (m) return { from: parseInt(m[1]), to: parseInt(m[2]) };
+      return null;
+    };
+
+    // Extract height like "6 2" or "5'3" etc.
+    const normalizeHeight = (v: string) => {
+      const s = v.toLowerCase();
+      const feetInches1 = s.match(/(\d)\s*'\s*(\d{1,2})/); // 5'3
+      const feetInches2 = s.match(/(\d)\s*(\d{1,2})/); // 6 2
+      if (feetInches1) return `${feetInches1[1]}'${feetInches1[2]}`;
+      if (feetInches2) return `${feetInches2[1]}'${feetInches2[2]}`;
+      const justFeet = s.match(/(\d)\s*'?\s*feet?/);
+      if (justFeet) return `${justFeet[1]}'0`;
+      return v;
+    };
+
+    // Build updates for formData
+    const updates: Partial<ProfileFormData> = {};
+
+    // Personal details
+    const fullName = getVal(['name']);
+    if (fullName) {
+      const parts = fullName.split(/\s+/);
+      updates.first_name = parts[0] || '';
+      updates.last_name = parts.slice(1).join(' ');
+    }
+    const gender = getVal(['gender']);
+    if (gender) updates.gender = gender.toLowerCase().includes('male') ? 'male' : gender.toLowerCase().includes('female') ? 'female' : gender;
+    const caste = getVal(['cast', 'caste']);
+    if (caste) updates.caste = caste;
+    const ageStr = getVal(['age']);
+    if (ageStr) {
+      const m = ageStr.match(/\d{1,3}/);
+      if (m) updates.age = parseInt(m[0]);
+    }
+    const edu = getVal(['edu', 'education']);
+    if (edu) updates.education = edu;
+    const job = getVal(['job', 'occupation']);
+    if (job) updates.occupation = job;
+    const post = getVal(['post']);
+    if (post) updates.field_of_study = post; // store in field_of_study as placeholder
+    const salary = getVal(['salary', 'income']);
+    if (salary) updates.annual_income = salary;
+    const belongs = getVal(['belongs', 'hometown', 'from']);
+    if (belongs) updates.nationality = belongs;
+    const height = getVal(['height']);
+    if (height) updates.height = normalizeHeight(height);
+    const maslak = getVal(['maslak', 'sect']);
+    if (maslak) updates.sect = maslak.toLowerCase();
+    const marital = getVal(['marital status']);
+    if (marital) updates.marital_status = marital.toLowerCase().includes('single') ? 'never_married' : marital.toLowerCase();
+    const complexion = getVal(['complexion']);
+    if (complexion) updates.complexion = complexion.toLowerCase();
+    const motherTongue = getVal(['mother tongue']);
+    if (motherTongue) updates.mother_tongue = motherTongue;
+    const familyStatus = getVal(['family status']);
+    if (familyStatus) updates.family_values = familyStatus;
+    const area = getVal(['area']);
+    if (area) updates.area = area;
+    const city = getVal(['city']);
+    if (city) updates.city = city;
+    const country = getVal(['country']);
+    if (country) updates.country = country;
+
+    // Family details
+    const fatherOcc = getVal(["father's", 'father occupation']);
+    if (fatherOcc) updates.father_occupation = fatherOcc;
+    const motherOcc = getVal(['mother', 'mother occupation']);
+    if (motherOcc) updates.mother_occupation = motherOcc;
+    const brothers = getVal(['brothers']);
+    if (brothers) {
+      const m = brothers.match(/\d+/);
+      if (m) updates.brothers = parseInt(m[0]);
+    }
+    const sisters = getVal(['sisters']);
+    if (sisters) {
+      const m = sisters.match(/\d+/);
+      if (m) updates.sisters = parseInt(m[0]);
+    }
+
+    // Requirements for Match (partner preferences)
+    const ageRange = getVal(['requirements for match', 'req for match']);
+    const partnerAge = getVal(['age']);
+    const rangeVal = parseRange(partnerAge || ageRange);
+    if (rangeVal) {
+      updates.partner_age_from = rangeVal.from;
+      updates.partner_age_to = rangeVal.to;
+    }
+    const ph = getVal(['hight', 'height']);
+    if (ph) updates.partner_height_from = normalizeHeight(ph);
+    const eduReq = getVal(['edu']);
+    if (eduReq) updates.partner_education = eduReq;
+    const castReq = getVal(['cast']);
+    if (castReq) updates.partner_caste = castReq;
+    const complexionReq = getVal(['complexion']);
+    if (complexionReq) updates.partner_religious_values = complexionReq; // placeholder mapping
+    const areaReq = getVal(['area']);
+    if (areaReq) updates.partner_location = areaReq;
+    const maslakReq = getVal(['maslak']);
+    if (maslakReq) updates.partner_sect = maslakReq.toLowerCase();
+    const maritalReq = getVal(['marital status']);
+    if (maritalReq) updates.partner_marital_status = maritalReq.toLowerCase().includes('single') ? 'never_married' : 'any';
+    const incomeReq = getVal(['income']);
+    if (incomeReq) updates.partner_income = incomeReq;
+    const polygamyReq = getVal(['2nd marriage acpt?']);
+    if (polygamyReq) updates.partner_polygamy = polygamyReq.toLowerCase().includes('yes') ? 'accept' : polygamyReq.toLowerCase().includes('no') ? 'reject' : 'maybe';
+
+    // Additional free text sections
+    const otherReq = getVal(['other reqment', 'other requirement']);
+    if (otherReq) updates.looking_for = otherReq;
+
+    // Apply updates
+    setFormData(prev => ({ ...prev, ...updates }));
   };
 
   const removeImage = (index: number) => {
@@ -300,6 +498,19 @@ export default function CreateProfile() {
         variant: "destructive",
       });
       return;
+    }
+
+    // Validate DOB and age range (18–100)
+    if (formData.date_of_birth) {
+      const age = calculateAge(formData.date_of_birth);
+      if (age < 18 || age > 100) {
+        toast({
+          title: "Invalid Age",
+          description: "Age must be between 18 and 100 based on DOB",
+          variant: "destructive",
+        });
+        return;
+      }
     }
 
     setLoading(true);
@@ -402,7 +613,7 @@ export default function CreateProfile() {
             </CardHeader>
             <CardContent>
               <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="grid w-full grid-cols-8">
+                <TabsList className="grid w-full grid-cols-9">
                   <TabsTrigger value="photos">Photos</TabsTrigger>
                   <TabsTrigger value="basic">Basic</TabsTrigger>
                   <TabsTrigger value="religious">Religious</TabsTrigger>
@@ -411,6 +622,7 @@ export default function CreateProfile() {
                   <TabsTrigger value="education">Education</TabsTrigger>
                   <TabsTrigger value="family">Family</TabsTrigger>
                   <TabsTrigger value="partner">Partner</TabsTrigger>
+                  <TabsTrigger value="paste">Paste</TabsTrigger>
                 </TabsList>
 
                 {/* Photos Tab */}
@@ -478,7 +690,7 @@ export default function CreateProfile() {
                           />
                         </label>
                         <p className="text-sm text-gray-600">
-                          Upload up to 10 photos. First photo will be your main photo.
+                          Max 4 photos. Each photo must be under 4MB. The first photo will be set as main.
                         </p>
                       </div>
                     </div>
@@ -491,7 +703,8 @@ export default function CreateProfile() {
                         <li>• Face should be clearly visible</li>
                         <li>• Avoid group photos or photos with other people</li>
                         <li>• Professional or casual photos work best</li>
-                        <li>• Maximum file size: 5MB per photo</li>
+                        <li>• Maximum file size: 4MB per photo</li>
+                        <li>• Maximum photos: 4</li>
                       </ul>
                     </div>
                   </div>
@@ -555,6 +768,7 @@ export default function CreateProfile() {
                         type="date"
                         value={formData.date_of_birth}
                         onChange={(e) => handleInputChange('date_of_birth', e.target.value)}
+                        max={new Date().toISOString().split('T')[0]}
                         placeholder="Select your date of birth"
                       />
                     </div>
@@ -564,9 +778,10 @@ export default function CreateProfile() {
                         id="age"
                         type="number"
                         value={formData.age || ''}
-                        onChange={(e) => handleInputChange('age', e.target.value ? parseInt(e.target.value) : null)}
-                        placeholder="Enter your age"
+                        readOnly
+                        placeholder="Auto-calculated from DOB"
                       />
+                      <p className="text-xs text-gray-500 mt-1">Age is auto-calculated from date of birth.</p>
                     </div>
                     <div>
                       <Label htmlFor="gender">Gender</Label>
@@ -1268,11 +1483,31 @@ export default function CreateProfile() {
                     </div>
                   </div>
                 </TabsContent>
+
+                {/* Paste Tab */}
+                <TabsContent value="paste" className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="paste_text">Paste the profile text here</Label>
+                    <Textarea
+                      id="paste_text"
+                      placeholder="Paste profile details here..."
+                      rows={12}
+                      value={pasteText}
+                      onChange={(e) => setPasteText(e.target.value)}
+                    />
+                    <div className="flex items-center gap-3">
+                      <Button type="button" variant="secondary" onClick={() => parsePastedText(pasteText)}>
+                        Map
+                      </Button>
+                      <span className="text-xs text-muted-foreground">Click Map to fill fields from the pasted text.</span>
+                    </div>
+                  </div>
+                </TabsContent>
               </Tabs>
 
               {/* Remove the old image upload section since it's now in Photos tab */}
 
-              {/* Submit Button */}
+              {/* Navigation / Submit */}
               <div className="flex justify-end gap-4 mt-8">
                 <Button
                   variant="outline"
@@ -1281,22 +1516,41 @@ export default function CreateProfile() {
                   Cancel
                 </Button>
                 <Button
-                  onClick={handleSubmit}
-                  disabled={loading}
+                  variant="secondary"
+                  onClick={goPrev}
+                  disabled={isFirstTab}
                   className="flex items-center gap-2"
                 >
-                  {loading ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      Creating...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="h-4 w-4" />
-                      Create Profile
-                    </>
-                  )}
+                  <ArrowLeft className="h-4 w-4" />
+                  Previous
                 </Button>
+                {isLastTab ? (
+                  <Button
+                    onClick={handleSubmit}
+                    disabled={loading}
+                    className="flex items-center gap-2"
+                  >
+                    {loading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        Creating...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="h-4 w-4" />
+                        Create Profile
+                      </>
+                    )}
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={goNext}
+                    className="flex items-center gap-2"
+                  >
+                    Next
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>

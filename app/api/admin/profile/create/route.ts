@@ -65,32 +65,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate random email and password for authentication
-    const randomId = Math.random().toString(36).substring(2, 15);
-    const randomEmail = `user_${randomId}@humsafarforeverlove.com`;
+    // Generate random password for authentication
     const randomPassword = `Pass${Math.random().toString(36).substring(2, 15)}!123`;
 
-    // Create user in Supabase Auth first with random credentials
-    const { data: authData, error: signUpError } = await supabase.auth.signUp({
-      email: randomEmail,
+    // Create and auto-confirm user via Service Role (no confirmation email sent)
+    const { data: authData, error: createError } = await supabaseAdmin.auth.admin.createUser({
+      email: profileData.email,
       password: randomPassword,
-      options: {
-        data: {
-          first_name: profileData.first_name,
-          middle_name: profileData.middle_name,
-          last_name: profileData.last_name,
-          phone: profileData.phone,
-          gender: profileData.gender,
-          date_of_birth: profileData.date_of_birth,
-          age: profileData.age,
-          city: profileData.city,
-        },
+      email_confirm: true,
+      user_metadata: {
+        first_name: profileData.first_name,
+        middle_name: profileData.middle_name,
+        last_name: profileData.last_name,
+        phone: profileData.phone,
+        gender: profileData.gender,
+        date_of_birth: profileData.date_of_birth,
+        age: profileData.age,
+        city: profileData.city,
       },
     });
 
-    if (signUpError) {
+    if (createError) {
       return NextResponse.json(
-        { error: `Failed to create user: ${signUpError.message}` },
+        { error: `Failed to create user: ${createError.message}` },
         { status: 500 }
       );
     }
@@ -248,9 +245,9 @@ export async function POST(request: NextRequest) {
         user_id: authData.user!.id, // Use the actual user ID from auth
         profile: insertedProfile,
         auth_credentials: {
-          email: randomEmail,
+          email: profileData.email,
           password: randomPassword,
-          note: 'These are the auto-generated authentication credentials for this user'
+          note: 'User auto-confirmed via admin; no email confirmation required.'
         }
       },
     });

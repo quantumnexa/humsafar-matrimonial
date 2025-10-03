@@ -59,8 +59,8 @@ export default function AdminLoginPage() {
         return
       }
       
-      // Store admin session in localStorage
-      localStorage.setItem('admin_session', JSON.stringify({
+      // Store admin session in sessionStorage (per-tab, clears on close)
+      sessionStorage.setItem('admin_session', JSON.stringify({
         id: data.user.id,
         email: data.user.email,
         loginTime: new Date().toISOString()

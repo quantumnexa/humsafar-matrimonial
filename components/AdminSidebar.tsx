@@ -31,11 +31,11 @@ export default function AdminSidebar({ currentPath = '' }: AdminSidebarProps) {
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
-      localStorage.removeItem('admin_session');
+      sessionStorage.removeItem('admin_session');
       router.push('/admin/login');
     } catch (error) {
       console.error('Logout error:', error);
-      localStorage.removeItem('admin_session');
+      sessionStorage.removeItem('admin_session');
       router.push('/admin/login');
     }
   };

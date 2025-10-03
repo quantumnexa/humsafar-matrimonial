@@ -58,7 +58,7 @@ export default function AdminProfileDeletionDialog({
   const [error, setError] = useState('');
 
   const getAdminAuth = () => {
-    const session = localStorage.getItem('admin_session');
+    const session = sessionStorage.getItem('admin_session');
     if (!session) {
       throw new Error('Admin session not found');
     }

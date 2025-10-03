@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { 
   Users, 
   Eye, 
@@ -14,7 +15,9 @@ import {
   RotateCcw,
   AlertTriangle,
   Trash2,
-  CheckCircle
+  CheckCircle,
+  Clock,
+  Pencil
 } from 'lucide-react';
 import AdminSidebar from '@/components/AdminSidebar';
 import AdminProfileDeletionDialog from '@/components/admin-profile-deletion-dialog';
@@ -55,7 +58,7 @@ export default function ProfilesManagement() {
   }, []);
 
   const checkAdminAuth = () => {
-    const session = localStorage.getItem('admin_session');
+    const session = sessionStorage.getItem('admin_session');
     if (!session) {
       router.push('/admin/login');
       return;
@@ -66,7 +69,7 @@ export default function ProfilesManagement() {
       setAdminSession(parsedSession);
     } catch (error) {
       console.error('Invalid admin session:', error);
-      localStorage.removeItem('admin_session');
+      sessionStorage.removeItem('admin_session');
       router.push('/admin/login');
     }
   };
@@ -219,6 +222,10 @@ export default function ProfilesManagement() {
     window.open(`/profile/${userId}`, '_blank');
   };
 
+  const editProfile = (userId: string) => {
+    router.push(`/admin/profiles/${userId}/edit`);
+  };
+
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
       case 'approved': return 'default';
@@ -245,6 +252,16 @@ export default function ProfilesManagement() {
             >
               <Eye className="h-4 w-4 mr-1" />
               View Profile
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => editProfile(user_id)}
+              disabled={isLoading}
+              className="w-8 h-8 p-0"
+              title="Edit Profile"
+            >
+              <Pencil className="h-4 w-4" />
             </Button>
             <div className="flex gap-2">
               <Button
@@ -295,6 +312,16 @@ export default function ProfilesManagement() {
             </Button>
             <Button
               size="sm"
+              variant="outline"
+              onClick={() => editProfile(user_id)}
+              disabled={actionLoading === user_id}
+              className="w-8 h-8 p-0 rounded-md flex-shrink-0"
+              title="Edit Profile"
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button
+              size="sm"
               variant="destructive"
               onClick={() => updateProfileStatus(user_id, 'terminated')}
               disabled={actionLoading === user_id}
@@ -327,12 +354,42 @@ export default function ProfilesManagement() {
             <Button
               size="sm"
               variant="outline"
+              onClick={() => editProfile(user_id)}
+              disabled={actionLoading === user_id}
+              className="w-8 h-8 p-0"
+              title="Edit Profile"
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
               onClick={() => updateProfileStatus(user_id, 'terminated')}
               disabled={actionLoading === user_id}
               className="w-8 h-8 p-0 border-orange-500 text-orange-500 hover:bg-orange-50"
               title="Terminate Profile (Temporary)"
             >
               <AlertTriangle className="h-4 w-4" />
+            </Button>
+            <Button
+              size="sm"
+              variant="default"
+              onClick={() => updateProfileStatus(user_id, 'approved')}
+              disabled={actionLoading === user_id}
+              className="bg-green-600 hover:bg-green-700 w-8 h-8 p-0"
+              title="Approve Profile"
+            >
+              <Check className="h-4 w-4" />
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => updateProfileStatus(user_id, 'pending')}
+              disabled={actionLoading === user_id}
+              className="w-8 h-8 p-0"
+              title="Mark as Pending"
+            >
+              <Clock className="h-4 w-4" />
             </Button>
           </div>
         );
@@ -351,6 +408,16 @@ export default function ProfilesManagement() {
             </Button>
             <Button
               size="sm"
+              variant="outline"
+              onClick={() => editProfile(user_id)}
+              disabled={isLoading}
+              className="w-8 h-8 p-0"
+              title="Edit Profile"
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button
+              size="sm"
               variant="default"
               onClick={() => updateProfileStatus(user_id, 'approved')}
               disabled={isLoading}
@@ -358,6 +425,26 @@ export default function ProfilesManagement() {
             >
               <RotateCcw className="h-4 w-4 mr-1" />
               Reinstate
+            </Button>
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={() => updateProfileStatus(user_id, 'rejected')}
+              disabled={actionLoading === user_id}
+              className="w-8 h-8 p-0"
+              title="Reject Profile"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => updateProfileStatus(user_id, 'pending')}
+              disabled={actionLoading === user_id}
+              className="w-8 h-8 p-0"
+              title="Mark as Pending"
+            >
+              <Clock className="h-4 w-4" />
             </Button>
             <AdminProfileDeletionDialog
               userId={user_id}
@@ -598,19 +685,36 @@ export default function ProfilesManagement() {
                               <h3 className="font-semibold text-lg text-gray-900 truncate">
                                 {profile.first_name} {profile.last_name}
                               </h3>
-                              <Badge 
-                                variant={getStatusBadgeVariant(profile.profile_status)}
-                                className={`ml-2 flex-shrink-0 ${
-                                  profile.profile_status === 'approved' 
-                                    ? 'bg-green-100 text-green-800 hover:bg-green-200' 
-                                    : ''
-                                }`}
-                              >
-                                {profile.profile_status === 'approved' && (
-                                  <CheckCircle className="w-3 h-3 mr-1" />
-                                )}
-                                {profile.profile_status.charAt(0).toUpperCase() + profile.profile_status.slice(1)}
-                              </Badge>
+                              {profile.profile_status === 'approved' ? (
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Badge 
+                                      variant={getStatusBadgeVariant(profile.profile_status)}
+                                      className="ml-2 flex-shrink-0 bg-green-100 text-green-800 hover:bg-green-200 cursor-pointer"
+                                    >
+                                      <CheckCircle className="w-3 h-3 mr-1" />
+                                      Approved
+                                    </Badge>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => updateProfileStatus(profile.user_id, 'pending')}>
+                                      <Clock className="w-4 h-4" />
+                                      <span>Pending</span>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => updateProfileStatus(profile.user_id, 'rejected')}>
+                                      <X className="w-4 h-4" />
+                                      <span>Rejected</span>
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              ) : (
+                                <Badge 
+                                  variant={getStatusBadgeVariant(profile.profile_status)}
+                                  className={"ml-2 flex-shrink-0"}
+                                >
+                                  {profile.profile_status.charAt(0).toUpperCase() + profile.profile_status.slice(1)}
+                                </Badge>
+                              )}
                             </div>
                             <p className="text-sm text-gray-500">ID: {shortId}...</p>
                           </div>

@@ -85,7 +85,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     const checkAdminAuth = () => {
       try {
-        const session = localStorage.getItem('admin_session');
+        const session = sessionStorage.getItem('admin_session');
         if (session) {
           const parsedSession = JSON.parse(session);
           setAdminSession(parsedSession);
@@ -108,11 +108,11 @@ export default function AdminDashboard() {
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
-      localStorage.removeItem('admin_session');
+      sessionStorage.removeItem('admin_session');
       router.push('/admin/login');
     } catch (error) {
       console.error('Logout error:', error);
-      localStorage.removeItem('admin_session');
+      sessionStorage.removeItem('admin_session');
       router.push('/admin/login');
     }
   };
