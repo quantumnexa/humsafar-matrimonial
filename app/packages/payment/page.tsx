@@ -37,6 +37,7 @@ export default function PaymentPage() {
   const [paymentError, setPaymentError] = useState<string>('')
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'bank' | 'jazzcash'>('bank')
   const [currentUser, setCurrentUser] = useState<any>(null)
+  const [checkingGuard, setCheckingGuard] = useState(true)
 
   const packages: Record<string, Package> = {
     basic: {
@@ -110,6 +111,31 @@ export default function PaymentPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         setCurrentUser(user)
+        // Guard: if there is any under_review payment, block payment page
+        try {
+          const { data: payments, error } = await supabase
+            .from('payments')
+            .select('payment_status')
+            .eq('user_id', user.id)
+            .in('payment_status', ['pending', 'under_review'])
+            .order('created_at', { ascending: false })
+            .limit(1)
+          if (error) {
+            console.error('Guard check error:', error)
+            router.push('/packages')
+            return
+          }
+          if (payments && payments.length > 0) {
+            router.push('/packages')
+            return
+          }
+        } catch (e) {
+          console.error('Guard check failed:', e)
+          router.push('/packages')
+          return
+        } finally {
+          setCheckingGuard(false)
+        }
       } else {
         router.push('/auth')
       }
