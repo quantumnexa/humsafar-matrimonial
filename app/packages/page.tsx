@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { supabase } from "@/lib/supabaseClient"
 import { Button } from "@/components/ui/button"
+import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Slider } from "@/components/ui/slider"
@@ -16,8 +17,9 @@ export default function PackagesPage() {
   const [selectedProfileViews, setSelectedProfileViews] = useState(0)
   const [hasPaymentUnderReview, setHasPaymentUnderReview] = useState(false)
   const [isCheckingPayment, setIsCheckingPayment] = useState(true)
+  const [showUnderReviewDialog, setShowUnderReviewDialog] = useState(false)
   const router = useRouter()
-  const supabase = createClientComponentClient()
+  // Use app-wide Supabase client for consistent auth/session
 
   // Check for payments under review
   useEffect(() => {
@@ -30,17 +32,28 @@ export default function PackagesPage() {
             .from('payments')
             .select('payment_status')
             .eq('user_id', user.id)
-            .eq('payment_status', 'under_review')
+            .in('payment_status', ['pending', 'under_review'])
+            .order('created_at', { ascending: false })
             .limit(1)
 
           if (error) {
             console.error('Error checking payment status:', error)
+            // Fail-safe: if we cannot verify, block purchasing to prevent bypass
+            setHasPaymentUnderReview(true)
+            setShowUnderReviewDialog(true)
           } else {
-            setHasPaymentUnderReview(payments && payments.length > 0)
+            const underReview = payments && payments.length > 0
+            setHasPaymentUnderReview(underReview)
+            if (underReview) {
+              setShowUnderReviewDialog(true)
+            }
           }
         }
       } catch (error) {
         console.error('Error in checkPaymentStatus:', error)
+        // Fail-safe: block purchasing on unexpected errors
+        setHasPaymentUnderReview(true)
+        setShowUnderReviewDialog(true)
       } finally {
         setIsCheckingPayment(false)
       }
@@ -48,6 +61,7 @@ export default function PackagesPage() {
 
     checkPaymentStatus()
   }, [supabase])
+
 
   // Dynamic pricing calculation based on profile views - Lifetime access
   // Custom packages are priced higher to encourage standard package selection
@@ -238,13 +252,16 @@ export default function PackagesPage() {
     return colors[color as keyof typeof colors] || colors.gray
   }
 
-  const handleChoosePlan = (packageId: string) => {
-    // Check if there's a payment under review
-    if (hasPaymentUnderReview) {
-      alert('Your previous payment is under review. Please wait before purchasing a new package.')
+  const handleChoosePlan = async (packageId: string) => {
+    // Block actions during payment status check
+    if (isCheckingPayment) {
       return
     }
-    
+    // Check if there's a payment under review
+    if (hasPaymentUnderReview) {
+      setShowUnderReviewDialog(true)
+      return
+    }
     // Use Next.js router for better navigation
     router.push(`/packages/payment?package=${packageId}`)
   }
@@ -254,6 +271,20 @@ export default function PackagesPage() {
       <Header />
 
       <main className="container mx-auto px-4 py-8">
+        {/* Under Review Modal */}
+        <AlertDialog open={showUnderReviewDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Payment Under Review</AlertDialogTitle>
+              <AlertDialogDescription>
+                Your previous payment is under review. Please wait until the review is complete before purchasing a new package.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogAction onClick={() => setShowUnderReviewDialog(false)}>Okay</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
         {/* Payment Under Review Warning */}
         {hasPaymentUnderReview && (
           <div className="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-lg">
@@ -637,7 +668,7 @@ export default function PackagesPage() {
                         <Button
                           onClick={() => handleChoosePlan(pkg.id)}
                           className={`w-full font-medium py-2 rounded-lg transition-colors ${
-                            hasPaymentUnderReview
+                            (isCheckingPayment || hasPaymentUnderReview)
                               ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                               : pkg.popular 
                               ? 'bg-humsafar-600 hover:bg-humsafar-700 text-white'
@@ -645,9 +676,11 @@ export default function PackagesPage() {
                               ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
                               : 'bg-humsafar-600 hover:bg-humsafar-700 text-white'
                           }`}
-                          disabled={pkg.id === "free" || hasPaymentUnderReview}
+                          disabled={pkg.id === "free" || isCheckingPayment || hasPaymentUnderReview}
                         >
-                          {hasPaymentUnderReview 
+                          {isCheckingPayment
+                            ? "Checking status..."
+                            : hasPaymentUnderReview 
                             ? "Payment Under Review" 
                             : pkg.id === "free" 
                             ? "Current Plan" 
