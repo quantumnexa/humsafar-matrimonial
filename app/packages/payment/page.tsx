@@ -35,7 +35,7 @@ export default function PaymentPage() {
   const [screenshotPreview, setScreenshotPreview] = useState<string>('')
   const [screenshotUploadError, setScreenshotUploadError] = useState<string>('')
   const [paymentError, setPaymentError] = useState<string>('')
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'bank' | 'jazzcash'>('bank')
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'bank' | 'jazzcash' | 'payfast'>('payfast')
   const [currentUser, setCurrentUser] = useState<any>(null)
   const [checkingGuard, setCheckingGuard] = useState(true)
 
@@ -437,7 +437,22 @@ export default function PaymentPage() {
                   <h3 className="font-semibold text-humsafar-700 mb-3">Choose Payment Method:</h3>
                   
                   {/* Payment Method Selection */}
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-3 gap-4">
+                    {/* PayFast first */}
+                    <button
+                      onClick={() => setSelectedPaymentMethod('payfast')}
+                      className={`p-4 border-2 rounded-lg transition-all ${
+                        selectedPaymentMethod === 'payfast' 
+                          ? 'border-humsafar-500 bg-humsafar-50' 
+                          : 'border-gray-200 hover:border-humsafar-300'
+                      }`}
+                    >
+                      <CreditCard className="w-8 h-8 mx-auto mb-2 text-humsafar-600" />
+                      <div className="text-sm font-medium">PayFast</div>
+                      <div className="text-xs text-gray-500">Gateway Checkout</div>
+                    </button>
+
+                    {/* Bank second */}
                     <button
                       onClick={() => setSelectedPaymentMethod('bank')}
                       className={`p-4 border-2 rounded-lg transition-all ${
@@ -450,7 +465,8 @@ export default function PaymentPage() {
                       <div className="text-sm font-medium">Bank Transfer</div>
                       <div className="text-xs text-gray-500">Faysal Bank</div>
                     </button>
-                    
+
+                    {/* JazzCash third */}
                     <button
                       onClick={() => setSelectedPaymentMethod('jazzcash')}
                       className={`p-4 border-2 rounded-lg transition-all ${
@@ -522,6 +538,62 @@ export default function PaymentPage() {
                     </div>
                   )}
 
+                  {/* PayFast Details */}
+                  {selectedPaymentMethod === 'payfast' && (
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <div className="flex items-center gap-2 text-green-800 mb-3">
+                        <CreditCard className="w-5 h-5" />
+                        <span className="font-semibold">PayFast - Secure Online Payment</span>
+                      </div>
+                      <div className="space-y-3 text-sm text-green-800">
+                        <p>Proceed with secure online payment via PayFast gateway. No screenshot needed.</p>
+                        <p>Supports cards, wallets, and bank accounts.</p>
+                      </div>
+                      <div className="mt-3">
+                        <Button
+                          type="button"
+                          onClick={async () => {
+                            // Guard checks already performed; initiate checkout
+                            try {
+                              setLoading(true)
+                              setPaymentError('')
+                              if (!currentUser?.id) {
+                                throw new Error('Please log in to continue')
+                              }
+                              const res = await fetch('/api/payfast/initiate', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                  packageId: packageDetails.id,
+                                  amount: packageDetails.price,
+                                  views_limit: packageDetails.profileViews,
+                                  user_id: currentUser.id
+                                })
+                              })
+                              const data = await res.json()
+                              if (!res.ok) {
+                                throw new Error(data.error || 'Failed to initiate PayFast')
+                              }
+                              // Redirect to PayFast payment page
+                              if (data?.redirect_url) {
+                                window.location.href = data.redirect_url
+                              } else {
+                                throw new Error('Missing redirect_url from server')
+                              }
+                            } catch (e: any) {
+                              console.error('PayFast initiate error:', e)
+                              setPaymentError(e.message || 'Unable to start PayFast checkout')
+                            } finally {
+                              setLoading(false)
+                            }
+                          }}
+                          className="bg-green-600 hover:bg-green-700 text-white"
+                        >
+                          Proceed to PayFast Checkout
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                   {/* JazzCash Details */}
                   {selectedPaymentMethod === 'jazzcash' && (
                     <div className="bg-green-50 border border-green-200 rounded-lg p-4">
@@ -594,144 +666,154 @@ export default function PaymentPage() {
                   </div>
                 )}
 
-                {/* Payment Instructions */}
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                  <h4 className="font-semibold text-yellow-800 mb-3">Payment Instructions</h4>
-                  <div className="space-y-2 text-sm text-yellow-700">
-                    <div className="flex items-start gap-2">
-                      <span className="font-medium bg-yellow-200 rounded-full w-6 h-6 flex items-center justify-center text-xs">1</span>
-                      <span>Choose your preferred payment method from the options above</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <span className="font-medium bg-yellow-200 rounded-full w-6 h-6 flex items-center justify-center text-xs">2</span>
-                      <span>Transfer the amount using the provided account details</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <span className="font-medium bg-yellow-200 rounded-full w-6 h-6 flex items-center justify-center text-xs">3</span>
-                      <span>Take a screenshot or note the transaction ID</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <span className="font-medium bg-yellow-200 rounded-full w-6 h-6 flex items-center justify-center text-xs">4</span>
-                      <span>Upload payment screenshot below and submit</span>
-                    </div>
-                  </div>
-                </div>
-
-               {/* Screenshot Upload */}
-                <div className="space-y-2">
-                  <Label className="text-humsafar-700">
-                    Upload Payment Screenshot <span className="text-red-500">*</span>
-                  </Label>
-                  
-                  {/* Upload Area */}
-                  <div className="border-2 border-dashed border-humsafar-200 rounded-lg p-6 text-center">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileUpload}
-                      className="hidden"
-                      id="screenshot-upload"
-                    />
-                    <label htmlFor="screenshot-upload" className="cursor-pointer">
-                      <Upload className="w-12 h-12 mx-auto text-humsafar-400 mb-4" />
-                      <div className="text-humsafar-600 font-medium mb-2">
-                        {paymentScreenshot ? paymentScreenshot.name : 'Click to upload payment screenshot'}
+                {/* Payment Instructions (hidden for PayFast) */}
+                {selectedPaymentMethod !== 'payfast' && (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <h4 className="font-semibold text-yellow-800 mb-3">Payment Instructions</h4>
+                    <div className="space-y-2 text-sm text-yellow-700">
+                      <div className="flex items-start gap-2">
+                        <span className="font-medium bg-yellow-200 rounded-full w-6 h-6 flex items-center justify-center text-xs">1</span>
+                        <span>Choose your preferred payment method from the options above</span>
                       </div>
-                      <div className="text-sm text-humsafar-500">
-                        PNG, JPG up to 5MB
+                      <div className="flex items-start gap-2">
+                        <span className="font-medium bg-yellow-200 rounded-full w-6 h-6 flex items-center justify-center text-xs">2</span>
+                        <span>Transfer the amount using the provided account details</span>
                       </div>
-                    </label>
-                  </div>
-
-                  {/* Error Display */}
-                  {screenshotUploadError && (
-                    <div className="flex items-center gap-2 text-red-600 text-sm bg-red-50 p-2 rounded">
-                      <X className="w-4 h-4" />
-                      {screenshotUploadError}
-                    </div>
-                  )}
-
-                  {/* Success Message */}
-                  {paymentScreenshot && !screenshotUploadError && (
-                    <div className="flex items-center gap-2 text-green-600 text-sm">
-                      <Check className="w-4 h-4" />
-                      Screenshot uploaded successfully
-                    </div>
-                  )}
-
-                  {/* Preview */}
-                  {screenshotPreview && (
-                    <div className="mt-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <Label className="text-humsafar-700 text-sm">Preview:</Label>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={removeScreenshot}
-                          className="text-red-600 hover:text-red-700"
-                        >
-                          <X className="w-4 h-4 mr-1" />
-                          Remove
-                        </Button>
+                      <div className="flex items-start gap-2">
+                        <span className="font-medium bg-yellow-200 rounded-full w-6 h-6 flex items-center justify-center text-xs">3</span>
+                        <span>Take a screenshot or note the transaction ID</span>
                       </div>
-                      <div className="border rounded-lg p-2 bg-gray-50">
-                        <img
-                          src={screenshotPreview}
-                          alt="Payment Screenshot Preview"
-                          className="max-w-full h-auto max-h-64 mx-auto rounded"
-                        />
+                      <div className="flex items-start gap-2">
+                        <span className="font-medium bg-yellow-200 rounded-full w-6 h-6 flex items-center justify-center text-xs">4</span>
+                        <span>Upload payment screenshot below and submit</span>
                       </div>
                     </div>
-                  )}
-                </div>
-
-                {/* Security Guidelines */}
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                  <div className="flex items-center gap-2 text-red-800 mb-2">
-                    <Shield className="w-5 h-5" />
-                    <span className="font-semibold">Security Guidelines</span>
                   </div>
-                  <ul className="text-red-700 text-sm space-y-1">
-                    <li>• Always verify account details before transfer</li>
-                    <li>• Keep transaction receipts safe</li>
-                    <li>• Never share your banking credentials</li>
-                    <li>• Use secure internet connections</li>
-                  </ul>
-                </div>
+                )}
 
-                {/* After Payment Notice */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <div className="flex items-center gap-2 text-blue-800 mb-2">
-                    <Clock className="w-5 h-5" />
-                    <span className="font-semibold">After Payment</span>
+               {/* Screenshot Upload (hidden for PayFast) */}
+                {selectedPaymentMethod !== 'payfast' && (
+                  <div className="space-y-2">
+                    <Label className="text-humsafar-700">
+                      Upload Payment Screenshot <span className="text-red-500">*</span>
+                    </Label>
+                    
+                    {/* Upload Area */}
+                    <div className="border-2 border-dashed border-humsafar-200 rounded-lg p-6 text-center">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                        id="screenshot-upload"
+                      />
+                      <label htmlFor="screenshot-upload" className="cursor-pointer">
+                        <Upload className="w-12 h-12 mx-auto text-humsafar-400 mb-4" />
+                        <div className="text-humsafar-600 font-medium mb-2">
+                          {paymentScreenshot ? paymentScreenshot.name : 'Click to upload payment screenshot'}
+                        </div>
+                        <div className="text-sm text-humsafar-500">
+                          PNG, JPG up to 5MB
+                        </div>
+                      </label>
+                    </div>
+
+                    {/* Error Display */}
+                    {screenshotUploadError && (
+                      <div className="flex items-center gap-2 text-red-600 text-sm bg-red-50 p-2 rounded">
+                        <X className="w-4 h-4" />
+                        {screenshotUploadError}
+                      </div>
+                    )}
+
+                    {/* Success Message */}
+                    {paymentScreenshot && !screenshotUploadError && (
+                      <div className="flex items-center gap-2 text-green-600 text-sm">
+                        <Check className="w-4 h-4" />
+                        Screenshot uploaded successfully
+                      </div>
+                    )}
+
+                    {/* Preview */}
+                    {screenshotPreview && (
+                      <div className="mt-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <Label className="text-humsafar-700 text-sm">Preview:</Label>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={removeScreenshot}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <X className="w-4 h-4 mr-1" />
+                            Remove
+                          </Button>
+                        </div>
+                        <div className="border rounded-lg p-2 bg-gray-50">
+                          <img
+                            src={screenshotPreview}
+                            alt="Payment Screenshot Preview"
+                            className="max-w-full h-auto max-h-64 mx-auto rounded"
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <ul className="text-blue-700 text-sm space-y-1">
-                    <li>• Upload payment screenshot above</li>
-                    <li>• Include your registered phone number in transaction details</li>
-                    <li>• Mention the service you're paying for</li>
-                    <li>• Allow 24-48 hours for verification</li>
-                  </ul>
-                </div>
+                )}
 
-                {/* Proceed Button */}
-                <Button
-                  onClick={handlePayment}
-                  disabled={loading}
-                  className="w-full bg-humsafar-600 hover:bg-humsafar-700 text-white font-semibold py-3 text-lg"
-                >
-                  {loading ? (
-                    <div className="flex items-center gap-2">
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                      Processing...
+                {/* Security Guidelines (hidden for PayFast) */}
+                {selectedPaymentMethod !== 'payfast' && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div className="flex items-center gap-2 text-red-800 mb-2">
+                      <Shield className="w-5 h-5" />
+                      <span className="font-semibold">Security Guidelines</span>
                     </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <Upload className="w-5 h-5" />
-                      Submit Payment Confirmation
+                    <ul className="text-red-700 text-sm space-y-1">
+                      <li>• Always verify account details before transfer</li>
+                      <li>• Keep transaction receipts safe</li>
+                      <li>• Never share your banking credentials</li>
+                      <li>• Use secure internet connections</li>
+                    </ul>
+                  </div>
+                )}
+
+                {/* After Payment Notice (hidden for PayFast) */}
+                {selectedPaymentMethod !== 'payfast' && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-center gap-2 text-blue-800 mb-2">
+                      <Clock className="w-5 h-5" />
+                      <span className="font-semibold">After Payment</span>
                     </div>
-                  )}
-                </Button>
+                    <ul className="text-blue-700 text-sm space-y-1">
+                      <li>• Upload payment screenshot above</li>
+                      <li>• Include your registered phone number in transaction details</li>
+                      <li>• Mention the service you're paying for</li>
+                      <li>• Allow 24-48 hours for verification</li>
+                    </ul>
+                  </div>
+                )}
+
+                {/* Proceed Button (hidden for PayFast) */}
+                {selectedPaymentMethod !== 'payfast' && (
+                  <Button
+                    onClick={handlePayment}
+                    disabled={loading}
+                    className="w-full bg-humsafar-600 hover:bg-humsafar-700 text-white font-semibold py-3 text-lg"
+                  >
+                    {loading ? (
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                        Processing...
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <Upload className="w-5 h-5" />
+                        Submit Payment Confirmation
+                      </div>
+                    )}
+                  </Button>
+                )}
 
                 {/* Terms */}
                 <div className="text-center text-sm text-humsafar-500">
